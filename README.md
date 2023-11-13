@@ -4,7 +4,7 @@
 
 These scan GlueX/HallD monitoring histograms and make root graphs to show on halldweb
 
-###Directory structure
+### Directory structure
 
 * make_new_module contains a template module and a script to test it.
 
@@ -12,5 +12,5 @@ These scan GlueX/HallD monitoring histograms and make root graphs to show on hal
 
 * web will contain the files for halldweb.
 
-###Caveat
-This is fledgling code, under development by Naomi Jarvis, nsj@cmu.edu
+### Caveat
+This is fledgling code, under development by Naomi Jarvis.
