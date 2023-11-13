@@ -1,6 +1,6 @@
 # gluex_demon
 
-##GlueX/Hall D detector monitoring scripts.
+## GlueX/Hall D detector monitoring scripts.
 
 These scan GlueX/HallD monitoring histograms and make root graphs to show on halldweb
 
