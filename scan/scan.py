@@ -1,8 +1,8 @@
 # Detector monitoring histogram scanning script - calls contributed modules to inspect histograms
 #
 # To add a new module, 
-#   add it to the list of imports
-#   add it to the list modules = []
+#   import it
+#   add it to the list of modules
 #   switch it to True in run_module 
 #
 # Run this script with one argument, the monitoring histogram directory
@@ -25,10 +25,11 @@ from ROOT import TFile, TGraph
 from ROOT import gROOT
 gROOT.SetBatch(True)
 
-import cdc        # import new module 
+import cdc    
+import timing
 
-modules = [cdc]   # list of function names
-run_module = [True]      # call the function if true
+modules = [cdc,timing]      # list of modules
+run_module = [True,True]    # run the module if set true
 
 testing = 1  # stop after <runlimit> files, print diagnostics
 runlimit = 2 # process this number of runs if testing=1
@@ -95,7 +96,7 @@ badruns = []    # list of problem runs
 
 defaults = []
 
-
+print('Initalising')
 
 for imod in range(len(modules)) : 
 
@@ -143,6 +144,7 @@ gtitles.append('Run readiness')
 
 # loop through the runs, running the module check functions to gather status and other metrics
 
+print('Processing histograms')
 
 for filename in histofilelist:
 

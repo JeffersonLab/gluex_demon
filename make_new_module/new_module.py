@@ -92,6 +92,8 @@ def new_module_occupancy(rootfile, occmin=0.99) :
 
   # Example custom function to check the occupancy histogram
 
+  print('in new_module_occupancy()...')
+
   # Provide unique graph names, starting with 'new_module_'. The first must be the status code from this function.
 
   names = ['new_module_occ_status','new_module_occ_percent']            
@@ -161,7 +163,6 @@ def new_module_occupancy(rootfile, occmin=0.99) :
 
 
 
-
   new_module_occupancy = 100*(3522-Ndead)/3522.0
 
   status=1
@@ -177,7 +178,9 @@ def new_module_occupancy(rootfile, occmin=0.99) :
 
 def new_module_e(rootfile, emin=1.8, emax=2.3) :
 
-  # Example custom function to check the occupancy histogram
+  # Example custom function to check another histogram
+
+  print('in new_module_e()...')
 
   # Provide unique graph names, starting with 'new_module_'. The first must be the status code from this function.
 
