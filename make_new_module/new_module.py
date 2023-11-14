@@ -1,6 +1,6 @@
 import csv
 
-from ROOT import gROOT,TF1
+from ROOT import gROOT
 
 #
 # This module contains two control functions, 'init' and 'check', and the custom functions which inspect the histograms (one custom function for each histogram).
@@ -22,10 +22,12 @@ from ROOT import gROOT,TF1
 
 def init() : 
 
-  # These arrays are the headers for the overall status summary for this module
-  # Do not add any more array elements here
+  pagename = 'New Module'          # Title for the page of graphs
 
-  names = ['new_module_status']    # Graph name, new_module_status
+  # These lists are the headers for the overall status summary for this module
+  # Do not add any more list elements here
+
+  names = ['new_module_status']    # Graph name, new_module_status 
   titles = ['new_module status']   # Graph title
   values = [-1]                 # Default status, keep it at -1
   
@@ -41,7 +43,7 @@ def init() :
     titles.extend(thing[1])
     values.extend(thing[2])
 
-  return [names,titles,values]
+  return [pagename,names,titles,values]
 
 
 

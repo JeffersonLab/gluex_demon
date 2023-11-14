@@ -6,10 +6,11 @@
 #
 # Run this script with one argument, the monitoring histogram directory
 #
-# It should create 3 files:
+# It should create 4 files:
 #   filename_graphs = 'test_new_module_graphs.root'   # root file of graphs
 #   filename_csv = 'test_new_module_data.csv'         # csv file of metrics
 #   filename_badruns = 'test_new_module_badruns.txt'  # list of runs with overall status not good
+#   filename_pagenames = 'test_new_module_pagenames.txt' # list of module page titles and graphs
 #
 # To test over more runs, adjust the variable runlimit
 
@@ -27,7 +28,7 @@ gROOT.SetBatch(True)
 import new_module        # import new module 
 
 modules = [new_module]   # list of function names
-run_module = [True]  # call the function if true
+run_module = [True]      # call the function if true
 
 testing = 1  # stop after <runlimit> files, print diagnostics
 runlimit = 2 # process this number of runs if testing=1
@@ -49,6 +50,7 @@ nargs -= 1
 filename_graphs = 'test_new_module_graphs.root'
 filename_csv = 'test_new_module_data.csv'
 filename_badruns = 'test_new_module_badruns.txt'
+filename_pagenames = 'test_new_module_pagenames.txt' # list of module page titles and graphs
 
 # remove old output files
 
@@ -72,7 +74,8 @@ if len(histofilelist) == 0:
   exit("No monitoring files found")
 
 
-
+pagenames = []       # title for each module's set of graphs, eg "CDC","FDC", etc
+gcount = []          # number of graphs for each module
 gnames = ['run']            # graph names eg cdc_dedx.  Start the list with run.
 gtitles = ['Run number']    # graph titles 
 
@@ -111,22 +114,26 @@ for imod in range(len(modules)) :
 
         else:
 
-          if len(arrays[0]) != len(arrays[1]) or len(arrays[0]) != len(arrays[2]):
+          if len(arrays[1]) != len(arrays[2]) or len(arrays[1]) != len(arrays[3]):
               print('ERROR Init %s array length mismatch ' % (str(modules[imod])) )  # don't suppress
               run_module[imod] = False
           else : 
-              gnames.extend(arrays[0])  # 1D list
-              gtitles.extend(arrays[1])
-              defaults.append(arrays[2]) # list of lists
+              pagenames.append(arrays[0])   # page title
+              gcount.append(len(arrays[1]))  # number of graphs for this page
+              gnames.extend(arrays[1])  # 1D list
+              gtitles.extend(arrays[2])
+              defaults.append(arrays[3]) # list of lists
 
               if testing:
                   print('\nInitialisation for %s' % str(modules[imod]) )
-                  print('Graph names:')
+                  print('Page name:')
                   print('%s'%(arrays[0]))
-                  print('Graph titles:')
+                  print('Graph names:')
                   print('%s'%(arrays[1]))
-                  print('Defaults (array of -1) :')
+                  print('Graph titles:')
                   print('%s'%(arrays[2]))
+                  print('Defaults (array of -1) :')
+                  print('%s'%(arrays[3]))
 
 
 # add overall readiness to the end of the names & titles 
@@ -327,6 +334,32 @@ f.close()
 
 if testing:
     print('Results saved to %s' % (filename_csv) )
+
+
+# write out list of page titles and their graphs 
+ 
+f = open(filename_pagenames,"w")
+writer = csv.writer(f)
+
+gstart=1
+
+for i in range(len(pagenames)):
+  newlist = []
+  newlist.append(pagenames[i])
+  newlist.append(gcount[i])
+
+  for j in range(gstart,gstart+gcount[i]) : # use gcount to find the page titles to save
+    newlist.append(gnames[j])
+  
+  writer.writerow(newlist)
+
+  gstart = gstart + gcount[i]
+
+f.close()
+
+if testing:
+    print('List of page titles and graph names saved to %s' % (filename_pagenames) )
+
 
 
 # list of bad runs
