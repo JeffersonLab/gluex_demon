@@ -235,7 +235,7 @@ for filename in histofilelist:
                 
 
             thisrun_values.extend(newdata)        # extend the 2D list adding columns
-            thisrun_status.append(newdata[1])     # append the 1D list adding a row
+            thisrun_status.append(newdata[0])     # append the 1D list adding a row
 
             if testing: 
                 print('\nData from %s:' % (str(modules[imod])) )
