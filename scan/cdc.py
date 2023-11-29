@@ -194,7 +194,7 @@ def cdc_efficiency(rootfile, e0min=0.97, e5min=0.96, e6min=0.89) :
     if e0 < e0min or e5 < e5min or e6 < e6min:
       status = 0
 
-    values = [status, e0, e5, e6]
+    values = [status, float('%.2f'%(e0)), float('%.2f'%(e5)), float('%.2f'%(e6))]
 
     return values
 

@@ -141,6 +141,15 @@ gnames.append('readiness')
 gtitles.append('Run readiness')
 
 
+# make a list of the active modules, then run over these from now on
+active_modules=[]
+
+for imod in range(len(modules)) : 
+    if run_module[imod] :  
+       active_modules.append(modules[imod])
+
+
+
 # loop through the runs, running the module check functions to gather status and other metrics
 
 
@@ -179,24 +188,24 @@ for filename in histofilelist:
         thisrun_status = []      # collect the returned status values, use them later to create a combined status
 
 
-        for imod in range(len(modules)) :
+        for imod in range(len(active_modules)) :
 
             if not run_module[imod] :  
                continue
 
             if testing:
-                print('Calling %s' % (str(modules[imod])) )
+                print('Calling %s' % (str(active_modules[imod])) )
 
             try: 
 
-                newdata = modules[imod].check(run, rootfile)  # run, root file ptr
+                newdata = active_modules[imod].check(run, rootfile)  # run, root file ptr
 
             except:
                 if errcount < max_errcount:
-                    print('ERROR run %i %s ' % (run, str(modules[imod])) )  
+                    print('ERROR run %i %s ' % (run, str(active_modules[imod])) )  
 
                 print('Calling the module again, to show the error')
-                newdata = modules[imod].check(run, rootfile)  # run, root file ptr
+                newdata = active_modules[imod].check(run, rootfile)  # run, root file ptr
 
                 errcount = errcount + 1
 
@@ -210,7 +219,7 @@ for filename in histofilelist:
 
                 if not isinstance(newdata,list) :
                     if errcount < max_errcount+5 :  # make sure some get printed
-                        print('ERROR run %i values array length mismatch from %s module ' % (run, str(modules[imod])) ) 
+                        print('ERROR run %i values array length mismatch from %s module ' % (run, str(active_modules[imod])) ) 
                     err_mismatches = True
                     errcount = errcount + 1
 
@@ -220,7 +229,7 @@ for filename in histofilelist:
                 elif len(newdata) != len(defaults[imod]) :
 
                     if errcount < max_errcount+5 :  # make sure some get printed
-                        print('ERROR run %i values array length mismatch from %s module ' % (run, str(modules[imod])) ) 
+                        print('ERROR run %i values array length mismatch from %s module ' % (run, str(active_modules[imod])) ) 
                     err_mismatches = True
                     errcount = errcount + 1
 
@@ -236,7 +245,7 @@ for filename in histofilelist:
             thisrun_status.append(newdata[1])     # append the 1D list adding a row
 
             if testing: 
-                print('\nData from %s:' % (str(modules[imod])) )
+                print('\nData from %s:' % (str(active_modules[imod])) )
                 print('%s'%(newdata))
 
 
