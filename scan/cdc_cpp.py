@@ -7,7 +7,7 @@ def init() :
 
 # call each function to get the names, titles and array of defaults set to -1
 
-  pagename = 'CDC - CPP'
+  pagename = 'CDC_CPP'
   titles = ['CDC status']   # add column at the start for overall CDC status
   names = ['cdc_status']
   values = [-1]
