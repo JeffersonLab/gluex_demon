@@ -26,17 +26,20 @@
 
 
 <body>
-        <div id="titles" style="margin: 5em;">
-            <h1 class="red">Under development!</h1> <h3 class="red"> Contact Naomi (njarvis) with any questions</h3>
+        <div id="titles" style="margin: 1em 5em 1em;">
+            <h1 class="red">Under development! &nbsp; <span style="font-size:0.7em;"> Contact Naomi (njarvis) with any questions<span></h1>
             <br/>
-            <h1><span id="RunPeriod"></span>&nbsp;&nbsp;<span id="Version"></span>&nbsp;&nbsp;<span id="Detector"></span></h1></h1><br/>
-            <span id="graphs_or_return"></span><br/>
-            <span id="csv"></span>
-            <br/>
+            <h1><span id="RunPeriod">Loading...</span>&nbsp;&nbsp;<span id="Version"></span>&nbsp;&nbsp;<span id="Detector"></span></h1></h1><br/>
         </div>
-
+        <div id="titles2" style="margin: 1em 5em 2em">
+            Status codes are 1 (good), 0 (bad) or -1 (don't know/file problem/not enough data/some other error)
+            <br/>
+            <a href="https://github.com/JeffersonLab/gluex_demon">Github repo</a><br/><br/>
+            <span id="graphs_or_return"></span><br/>
+            <span id="csv"></span><br/>
+        </div>
         <div id="graphs">
-            <h1 id="loading" style="margin-left:10em;"></h1>
+            <h1 id="loading" style="margin-left:10em;">Loading...</h1>
         </div>
 
 

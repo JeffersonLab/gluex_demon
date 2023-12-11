@@ -16,12 +16,19 @@ $(document).ready(function () {
 
     get_url_args();
 
-    if ( RunPeriod == "" || Version == "") {
+    if ( RunPeriod === "" || Version === "") {
 
-        let example_url = document.URL.split("?")[0] + '?RunPeriod=RunPeriod-2023-01&Version=06';
-        let errortext = `Incomplete url? Try <a href="${example_url}">${example_url}</a>`;
+        let example_url1 = document.URL.split("?")[0] + '?RunPeriod=RunPeriod-2022-05&Version=24';
+        let example_url2 = document.URL.split("?")[0] + '?RunPeriod=RunPeriod-2023-01&Version=06';
+        let errortext = '<span style="text-size:0.8em;">';
+        errortext = errortext + `Incomplete url? <br/><br/> Try <a href="${example_url1}">${example_url1}</a><br/><br/>`;
+        errortext = errortext + `or <a href="${example_url2}">${example_url2}</a>`;
+        errortext = errortext + '</span>';
 
         document.getElementById("RunPeriod").innerHTML = errortext;
+        document.getElementById("loading").innerHTML = "";
+        document.getElementById("titles2").innerHTML = "";
+
 
     } else {
 
@@ -37,7 +44,7 @@ $(document).ready(function () {
         pagenames = `./${RunPeriod}/${Version}/monitoring_pagenames_${year_month}_ver${Version}.txt`
         let csv_filename = `./${RunPeriod}/${Version}/monitoring_data_${year_month}_ver${Version}.csv`
 
-        if (Detector == "") {
+        if (Detector === "") {
             subtitle = "Overview";
             link_1 = `<a href="${graphs_filename}">Download ROOT file of graphs</a>`;
             link_2 = `<a href="${csv_filename}">Download CSV file of metrics</a>`;
@@ -76,7 +83,7 @@ function get_url_args() {
     let par_from_url = { RunPeriod: "", Version: "", Detector: ""};
 
     let currentURL_split = document.URL.split("?");
-    if (currentURL_split.length == 2) {
+    if (currentURL_split.length === 2) {
         let URL_AND_split = currentURL_split[1].split("&");
         for (let i = 0; i < URL_AND_split.length; i++) {
           let opt = URL_AND_split[i].split("=");
@@ -121,7 +128,7 @@ async function getgraphnames() {
             statusgraphs.push(group[i][2]);   // overall readiness is first
         }
 
-        if (Detector == "") {  // overview page
+        if (Detector === "") {  // overview page
 
             for (let i = 0; i < statusgraphs.length; i++) {
                 divtext += '<div id=' + statusgraphs[i] + styletext + '>';
@@ -143,7 +150,7 @@ async function getgraphnames() {
         } else { // detector page
 
             for (let j = 0; j < detectors.length; j++) {
-                if (Detector == detectors[j]) {
+                if (Detector === detectors[j]) {
                     let ngraphs = group[j][1];
                     console.log('ngraphs:'+ngraphs);
                     for (let i = 2; i < ngraphs; i++) {
