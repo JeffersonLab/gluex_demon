@@ -15,9 +15,10 @@ def init() :
   occ = cdc_occupancy_cpp(False)  # return names, titles, values
   eff = cdc_efficiency_cpp(False)
   dedx = cdc_dedx_cpp(False)
+  dedxmean = cdc_dedx_mean_cpp(False)
   ttod = cdc_ttod(False)
 
-  for thing in [ occ, eff, dedx, ttod ] : 
+  for thing in [ occ, eff, dedx, dedxmean, ttod ] : 
 
     names.extend(thing[0])
     titles.extend(thing[1])
@@ -64,6 +65,12 @@ def check(run, rootfile) :
 #  ttodmeanmax = 15.0
 #  ttodsigmamax = 150.0
 
+  dedxmeanmin = 2.5  # for overall dedx, 0 to 10 GeV
+  dedxmeanmax = 4.5
+  dedxsigmin = 1.0
+  dedxsigmax = 4.0
+   
+
   ttodmeanmax = 20.0
   ttodsigmamax = 200.0
 
@@ -72,12 +79,13 @@ def check(run, rootfile) :
   occ = cdc_occupancy_cpp(rootfile, occmax)
   eff = cdc_efficiency_cpp(rootfile, e0min, e5min, e75min)
   dedx = cdc_dedx_cpp(rootfile, dedxmin, dedxmax, dedxresmin, dedxresmax)
+  dedxmean = cdc_dedx_mean_cpp(rootfile, dedxmeanmin, dedxmeanmax, dedxsigmin, dedxsigmax)
   ttod = cdc_ttod(rootfile, ttodmeanmax, ttodsigmamax)
 
   # set the overall status to the min value of each histogram status
 
   statuslist = []
-  for thing in [occ, eff, dedx, ttod] : 
+  for thing in [occ, eff, dedx, dedxmean, ttod] : 
     statuslist.append(thing[0])   # status is the first value in the array
 
   cdc_status = min(statuslist)
@@ -85,7 +93,7 @@ def check(run, rootfile) :
   # add overall status to the start of the lists before concatenating & returning.
 
   allvals = [cdc_status]
-  for thing in [occ, eff, dedx, ttod] : 
+  for thing in [occ, eff, dedx, dedxmean, ttod] : 
     allvals.extend(thing) 
 
   return allvals
@@ -211,7 +219,6 @@ def cdc_efficiency_cpp(rootfile, e0min=0.97, e5min=0.96, e75min=0.89) :
     return values
 
   if h.GetEntries()<100 :
-    values[0] = -2
     return values
 
   else :
@@ -377,6 +384,51 @@ def cdc_dedx_cpp(rootfile, dedxmin=1.9998, dedxmax=2.0402, dedxresmin=0.25, dedx
   values = [status, float('%.5f'%(mean)), float('%.5f'%(res)) ]
   
   return values
+
+
+def cdc_dedx_mean_cpp(rootfile, dedxmeanmin=1.5, dedxmeanmax=2.5, dedxsigmin=0.2, dedxsigmax=3.0) :
+
+  titles = ['dE/dx (overall mean, 0-10 GeV/c) status','dE/dx mean (keV/cm)','dE/dx RMS (keV/cm)']
+  names = ['cdc_dedx_overallmean_status','cdc_dedx_overallmean','cdc_dedx_sigma']
+  values = [-1,-1,-1]
+
+  if not rootfile :  # called by init function
+    return [names, titles, values]
+
+  dirname = '/CDC_dedx'
+  histoname = 'dedx_p'
+
+  test = rootfile.cd(dirname)
+
+  if test == False: 
+    print('Could not find ' + dirname)
+    return values
+
+  h = gROOT.FindObject(histoname)
+
+  if (not not h) == False :
+    print('Could not find ' + histoname)
+    return values
+
+  pp = h.ProjectionY("p1",0,10)
+
+  mean = pp.GetMean()
+  sig = pp.GetRMS()
+    
+  status = 1
+  if mean < dedxmeanmin or mean > dedxmeanmax:
+      status=0
+  if sig < dedxsigmin or sig > dedxsigmax:
+      status=0
+
+  values = [status, float('%.5f'%(mean)), float('%.5f'%(sig)) ]
+  
+  return values
+
+
+
+
+
 
 
 def cdc_ttod(rootfile, ttodmeanmax=15.0, ttodsigmamax=150.0) :

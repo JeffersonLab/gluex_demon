@@ -176,7 +176,6 @@ def cdc_efficiency(rootfile, e0min=0.97, e5min=0.96, e6min=0.89) :
     return values
 
   if h.GetEntries()<100 :
-    values[0] = -2
     return values
 
   else :

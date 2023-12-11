@@ -22,7 +22,7 @@ from ROOT import gROOT
 
 def init() : 
 
-  pagename = 'New Module'          # Title for the page of graphs
+  pagename = 'New_Module'          # Title for the page of graphs.  Best avoid spaces.
 
   # These lists are the headers for the overall status summary for this module
   # Do not add any more list elements here
