@@ -101,7 +101,7 @@ function get_url_args() {
 async function getgraphnames() {
 
 
-    const homedir = 'https://halldweb.jlab.org/calib_dashboard/';
+    const homedir = 'https://halldweb.jlab.org/gluex_demon/';
 
     let group = [];
     let statusgraphs = ['readiness'];
