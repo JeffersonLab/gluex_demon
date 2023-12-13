@@ -1,2 +1,6 @@
 * new_module.py is a template module which should be copied, renamed and customized.
-* test_new_module.py is the script to run to test the new module, after changing 3 lines (it contains instructions). 
+* test_new_module.py is the script to run to test the new module, after changing 3 lines (it contains instructions).
+
+The module (new_module.py) contains functions init, check, and then one function for each histogram to be inspected.  init and check call all of the other functions.  When the functions are called by init (the file pointer is set false), then they return lists of the names, titles and default status (-1) of whatever quantities are to be graphed.  When they are called by check (with a valid pointer to the opened root file), they extract these quantities from the histogram, assess them, and return a list of quantities and status flags.  The status should be 1 (good), 0 (bad) or -1 (undefined).  If there is no real good or bad range for a quantity, set its status to 1 (good). 
+
+The quantities and their assigned status ratings will appear on graphs on the module's web page.  A combined status graph for each  module is concocted from the status ratings of all of that module's quantities.  The combined status graph is shown on the module's page and also on the overview page.  An overall status is derived from all of these combined status values and shown as 'readiness' on the overview page. 
