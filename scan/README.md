@@ -27,3 +27,15 @@ The combined status graph is shown on the module's page and also on the overview
 An overall status is derived from all of these combined status values and shown as 'readiness' on the overview page. 
 
 The overvew web page contains links to the root file containing all of the graphs and a csv file containing all of the quantities used to create the graphs.  The csv file might be useful for recalibration.
+
+
+# How to add a module
+
+[Follow the instructions here](https://github.com/JeffersonLab/gluex_demon/tree/main/make_new_module)
+
+Contact Naomi when you're happy with it and ready to add it to the collection.
+
+
+# Where to find the graphs online
+
+[https://halldweb.jlab.org/gluex_demon/demon.html](here)
