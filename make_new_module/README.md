@@ -3,7 +3,7 @@
 * new_module.py is a template module which should be copied, renamed and customized.
 * test_new_module.py is the script to run to test the new module, after changing 3 lines (it contains instructions).
   
-= How it works
+# How it works
 
 The module (new_module.py) contains several functions:
 * init
@@ -21,7 +21,7 @@ When the histogram-inspection functions are called by _check_ (with a valid poin
 The quantities and their assigned status ratings are used to compile root graphs which will appear on the module's web page.  A combined status graph for each  module is concocted from the status ratings of all of that module's quantities.  The combined status graph is shown on the module's page and also on the overview page.  An overall status is derived from all of these combined status values and shown as 'readiness' on the overview page. 
 
 
-= How to make your own module
+# How to make your own module
 
 Download the two scripts.  Rename _new\_module.py_ to suit your detector or purpose, and follow the instructions inside to customize it.  Then follow the instructions inside _test\_new\_module.py_ to test it. 
 
