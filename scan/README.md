@@ -1,3 +1,5 @@
+==How it works==
+
 * scan.py is the control script that calls the contributed/detector modules and compiles graphs from their results.
 * cdc.py, cdc_cpp.py etc are some of the contributed/detector modules that inspect monitoring histograms and return metrics.
 
