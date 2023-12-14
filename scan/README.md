@@ -38,4 +38,4 @@ Contact Naomi when you're happy with it and ready to add it to the collection.
 
 # Where to find the graphs online
 
-[https://halldweb.jlab.org/gluex_demon/demon.html](here)
+[here](https://halldweb.jlab.org/gluex_demon/demon.html)
