@@ -2,7 +2,7 @@
 
 ## GlueX/Hall D detector monitoring scripts.
 
-These scan GlueX/HallD monitoring histograms and make root graphs to show on halldweb
+These scan GlueX/HallD monitoring histograms and make root graphs to show on [halldweb](https://halldweb.jlab.org/gluex_demon/demon.html?RunPeriod=RunPeriod-2022-05&Version=24)
 
 ### Directory structure
 
