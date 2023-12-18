@@ -1,9 +1,13 @@
 // functions for gluex detector calibration monitoring page
 
+const homedir = 'https://halldweb.jlab.org/gluex_demon/';
 
 var RunPeriod = "";
 var Version = "";
 var Detector = "";
+var Graph = "";
+
+const default_RP = "RunPeriod-2022-05";
 
 var graphs_filename = "";  // root file
 var pagenames = "";
@@ -12,28 +16,78 @@ var graphs_this_page = [];
 
 import { openFile, draw } from 'https://root.cern/js/latest/modules/main.mjs';
 
-$(document).ready(function () {
+var RP_list = [];  // list of available run periods  in runperiods.txt
+var ver_list = []; // list of available versions     in versions.txt inside RP's subdir
 
-    get_url_args();
+const RP_file = './runperiods.txt';
 
-    if ( RunPeriod === "" || Version === "") {
-
-        let example_url1 = document.URL.split("?")[0] + '?RunPeriod=RunPeriod-2022-05&Version=24';
-        let example_url2 = document.URL.split("?")[0] + '?RunPeriod=RunPeriod-2023-01&Version=06';
-        let errortext = '<span style="text-size:0.8em;">';
-        errortext = errortext + `Incomplete url? <br/><br/> Try <a href="${example_url1}">${example_url1}</a><br/><br/>`;
-        errortext = errortext + `or <a href="${example_url2}">${example_url2}</a>`;
-        errortext = errortext + '</span>';
-
-        document.getElementById("RunPeriod").innerHTML = errortext;
-        document.getElementById("loading").innerHTML = "";
-        document.getElementById("titles2").innerHTML = "";
+// just in case
+let example_url = document.URL.split("?")[0] + '?RunPeriod=RunPeriod-2022-05&Version=24';
+let errortext = `<a href="${example_url}">${example_url}</a>`;
 
 
+$(document).ready(async function () {
+
+    await get_url_args();
+
+    RP_list = await readlist(RP_file);
+
+    await fillmenu("select_rp",RP_list,RunPeriod);
+
+    if ( RunPeriod === "" ) {
+
+        show_problem('Choose Run Period & Version, or try ' + errortext);
+        Version = "";
+        Detector = "";
+      
     } else {
+
+        if (! RP_list.includes(RunPeriod) ) {
+
+            show_problem(`${RunPeriod} is not known!<br/>Try ` + errortext);                
+            RunPeriod = "";
+            Version = "";
+            Detector = "";
+        }
+    } 
+    
+
+    ver_list = [];
+
+    if (RunPeriod != "") {
+
+        ver_list = await readlist(`${RunPeriod}/versions.txt`);
+
+        if (Version == "") { 
+
+            show_problem('Incomplete url!<br/>Try ' + errortext);                
+            Detector = "";
+
+        } else if (Version != "") {
+
+            if (! ver_list.includes(Version) ) {
+
+                show_problem(`${RunPeriod} version ${Version} is not known!<br/>Try ` + errortext);        
+                Version = "";
+                Detector = "";
+
+            }
+        }
+
+        await fillmenu("select_ver",ver_list,Version);
+
+    }
+
+
+
+
+
+
+    if ( RunPeriod != "" && Version != "") {
 
         document.getElementById("RunPeriod").innerHTML = RunPeriod;
         document.getElementById("Version").innerHTML = 'Version ' + Version;
+        document.getElementById("loading").innerHTML = "Loading...";
 
         let year_month = RunPeriod.substring(10,17);
         let subtitle = Detector;
@@ -43,6 +97,8 @@ $(document).ready(function () {
         graphs_filename = `./${RunPeriod}/${Version}/monitoring_graphs_${year_month}_ver${Version}.root`
         pagenames = `./${RunPeriod}/${Version}/monitoring_pagenames_${year_month}_ver${Version}.txt`
         let csv_filename = `./${RunPeriod}/${Version}/monitoring_data_${year_month}_ver${Version}.csv`
+
+        // what if a nonexistent detector name is supplied?
 
         if (Detector === "") {
             subtitle = "Overview";
@@ -55,25 +111,22 @@ $(document).ready(function () {
         document.getElementById("Detector").innerHTML = subtitle;
         document.getElementById("graphs_or_return").innerHTML = link_1;
         document.getElementById("csv").innerHTML = link_2;
-
         document.getElementById("loading").innerHTML = "Loading...";
 
-        getgraphnames();
+        await getgraphnames();
 
-        drawGraphs();
+        drawGraphs().then(
+           function(text) { 
+                console.log(Graph);
+                if (Graph != "") {
+                    document.getElementById(Graph).scrollIntoView();
+                }
+        });
+
+
     }
 
 });
-
-
-async function fetchfiledata(filename) {
-        const response = await fetch(filename);
-      // waits until the request completes...
-
-        const text = await response.text();
-
-        return text;
-}
 
 
 function get_url_args() {
@@ -81,8 +134,16 @@ function get_url_args() {
     /* read in the url, split it into arguments */
 
     let par_from_url = { RunPeriod: "", Version: "", Detector: ""};
+    let currentURL_split = "";
 
-    let currentURL_split = document.URL.split("?");
+    if (document.URL.includes("#")) {
+        Graph = document.URL.split("#")[1];
+        currentURL_split = document.URL.split("#")[0].split("?");
+    } else {
+        Graph = "";
+        currentURL_split = document.URL.split("?");
+    }
+
     if (currentURL_split.length === 2) {
         let URL_AND_split = currentURL_split[1].split("&");
         for (let i = 0; i < URL_AND_split.length; i++) {
@@ -98,10 +159,32 @@ function get_url_args() {
 }
 
 
+
+
+async function fetchfiledata(filename) {
+
+
+    const response = await fetch(filename);
+    // waits until the request completes...
+
+    let text = await response.text();
+    // this will be 404 if the file doesn't exist
+    console.log(text);
+
+    if (text.includes('404 Not Found')) {
+        console.log('ERROR: ' + filename + ' not found!');
+        text = false;
+    }
+
+    return text;
+
+}
+
+
+
+
 async function getgraphnames() {
 
-
-    const homedir = 'https://halldweb.jlab.org/gluex_demon/';
 
     let group = [];
     let statusgraphs = ['readiness'];
@@ -109,74 +192,151 @@ async function getgraphnames() {
     let styletext = ' class="graphpanel"';
     let divtext = '';
     let linkfile = '';
+    let listoflinks = '';
 
-    graphs_this_page = [];
+    graphs_this_page = [];  // tells jsROOT which graphs to show
 
+    let text = await fetchfiledata(pagenames);
 
-    fetchfiledata(pagenames).then(
-        function(text) {
-
-        let lineArr = text.split('\n'); 
+    let lineArr = text.split('\r\n'); 
              // eg CDC - CPP,4,cdc_status,cdc_occ,cdc_missing,cdc_eff
 
-        let npages = lineArr.length - 1;  // NO IDEA 
+    let npages = lineArr.length - 1;  // ignore the empty last line
 
-        for (let i=0; i<npages; i++) {
-            group.push(lineArr[i].split(','));
-            let name_without_spaces = group[i][0].replaceAll(" ","_");         
-            detectors.push(name_without_spaces);
-            statusgraphs.push(group[i][2]);   // overall readiness is first
-        }
+    for (let i=0; i<npages; i++) {
+        group.push(lineArr[i].split(','));
+        let name_without_spaces = group[i][0].replaceAll(" ","_");         
+        detectors.push(name_without_spaces);
+            
+        statusgraphs.push((group[i][2]));   // overall readiness is first
+    }
 
-        if (Detector === "") {  // overview page
 
-            for (let i = 0; i < statusgraphs.length; i++) {
-                divtext += '<div id=' + statusgraphs[i] + styletext + '>';
-                graphs_this_page.push(statusgraphs[i]);  // copy graph name into array for this page
-                
-                divtext += '</div>';
+    if (Detector != "") {  // detector page
 
-                if (i>0) { // no detector link for overall readiness
+        let found = false;
 
-                    let thisdetector = detectors[i-1];
+        for (let j = 0; j < detectors.length; j++) {
 
-                    linkfile = document.URL + '&Detector=' + thisdetector;
-                    divtext += '<span><a href=' + linkfile + '> ' + thisdetector + ' details </a>';
-                    divtext += '</span>';
+            if (Detector === detectors[j]) {
+
+                const ngraphs = Number(group[j][1]);
+
+                for (let i = 2; i < ngraphs+2 ; i++) {
+
+                    let thisgraph =  group[j][i];
+
+                    graphs_this_page.push(thisgraph);  // copy graph name into array for this page
+
+                    divtext += `<div id="${thisgraph}" class="graph_top"></div>`;
+
+                    divtext += '<div id=g_' + thisgraph + styletext + '>';
+                    divtext += '</div>';
+                    divtext += `<div class="graph_names">${thisgraph}</div>`;
+                    listoflinks += `<a href = "#${thisgraph}">${thisgraph}</a> `;
 
                 }
-            }          
+            }
+        }          
 
-        } else { // detector page
-
-            for (let j = 0; j < detectors.length; j++) {
-                if (Detector === detectors[j]) {
-                    let ngraphs = group[j][1];
-                    console.log('ngraphs:'+ngraphs);
-                    for (let i = 2; i < ngraphs; i++) {
-                        graphs_this_page.push(group[j][i]);  // copy graph name into array for this page
-                        divtext += '<div id=' + group[j][i] + styletext + '>';
-                        divtext += '</div>';
-                    }
-                }
-            }          
-
+        if (! found) {
+            Detector = "";   // nonexistent
+            document.getElementById("Detector").innerHTML = "";
         }
 
-        document.getElementById("graphs").innerHTML = divtext;    
 
-    },
-        function(error){console.log('Error - could not read the file '+pagenames)}
-    );
+    } else  {    // overview page
+
+        for (let i = 0; i < statusgraphs.length; i++) {
+
+            let thisgraph = statusgraphs[i];
+
+            graphs_this_page.push(thisgraph);  // copy graph name into array for this page
+
+            //divtext += `<div id="${statusgraphs[i]}" class="graph_names">${statusgraphs[i]}</div>`;
+            divtext += `<div id="${thisgraph}" class="graph_top"></div>`;
+            divtext += `<div id=g_${thisgraph} ${styletext}></div>`;  // the graph gets inserted inside this later
+            divtext += `<div class="graph_names">${thisgraph}</div>`;
+
+            listoflinks += `<a href = "#${thisgraph}">${thisgraph}</a> `;
+
+            if (i>0) { // no detector link for overall readiness
+
+                let thisdetector = detectors[i-1];
+
+                linkfile = document.URL.split("#")[0] + '&Detector=' + thisdetector;   // ignore #graphname
+                divtext += '<span><a href=' + linkfile + '> ' + thisdetector + ' details </a>';
+                divtext += '</span>';
+
+            }
+        }          
+
+    } 
+
+    document.getElementById("graphs").innerHTML = divtext;    
+    document.getElementById("links_graphs_this_page").innerHTML = 'Graphs on this page: ' + listoflinks;    
 
 }
 
     
-///import { openFile, draw } from 'https://root.cern/js/latest/modules/main.mjs';
-    
-//    $(document).ready(function () {
-//        drawGraphs();
-//    });
+
+async function readlist(listfile) {
+
+    const text = await fetchfiledata(listfile);
+
+    console.log('fetchfiledata result: '+ text);
+
+    let returntext = '';
+
+    if (!text) {  // file not found
+
+        console.log('Error (readlist) - could not read the file '+listfile);
+        returntext = false;
+
+    } else {
+
+        returntext = text.split('\n');    // array of lines,  with '' in last place
+        
+        if (returntext[returntext.length-1] === '') returntext.pop();
+
+    }
+
+    console.log('fillmenu returning ',returntext);
+    return returntext;
+}
+
+
+
+
+async function fillmenu(select_id,list,preselect) {
+
+    let x = document.getElementById(select_id);
+
+    // remove existing list
+    for (let i = x.options.length-1 ; i>=0; i-- ) {           
+        x.options.remove(i);
+    }
+
+
+    for (let i=0; i<list.length; i++) {
+
+         let c = document.createElement("option");
+         c.text = list[i];
+         x.options.add(c);
+         if (list[i] == preselect) {
+             c.selected = true;
+         } 
+    }
+
+}
+
+
+function show_problem(message) {
+    document.getElementById("RunPeriod").innerHTML = "";
+    document.getElementById("titles2").innerHTML = "";
+    document.getElementById("problems").innerHTML = message; //'Choose Run Period & Version.';
+}
+
     
 async function drawGraphs() {
 
@@ -184,6 +344,8 @@ async function drawGraphs() {
 
     if (file) {
         console.log('file opened');
+
+        console.log(graphs_this_page);
             
         const obj = [];
 
@@ -197,7 +359,8 @@ async function drawGraphs() {
             obj[i].fMarkerColor=890;
             obj[i].fEditable=0;
 
-            await draw(gname, obj[i], 'ap;gridx;gridy;');
+            let divname = 'g_' + gname;
+            await draw(divname, obj[i], 'ap;gridx;gridy;');
         }
 
         console.log('drawing completed');
@@ -211,72 +374,28 @@ async function drawGraphs() {
 
 
 
+select_rp.addEventListener('change', async function () {
+    const selectedRP = select_rp.value;
+    let listfile = `${selectedRP}/versions.txt`;
 
-/*<!--
-<script>
-    var PossiblePlots;
-    PossiblePlots = ["CDC", "FCAL", "SC", "TOF", "DIRC", "BCAL", "FDC", "fa125_itrig"]
-    possiblePlots = [];
+    Version = '';
+    let ver_list = await readlist(listfile);
 
-    $(document).ready(function () {
-        populatePlotDropdown();
-    });
+    await fillmenu("select_ver",ver_list,Version);
 
-    function populatePlotDropdown() {
-        const plotSelect = document.getElementById('detectorSelect');
+});
 
-        // Add 'All' option
-        const allOption = document.createElement('option');
-        allOption.value = 'All';
-        allOption.textContent = 'All';
-        plotSelect.appendChild(allOption);
 
-        // Add options from keys array
-        for (const plotName of PossiblePlots) {
-            const option = document.createElement('option');
-            option.value = plotName;
-            option.textContent = plotName;
-            plotSelect.appendChild(option);
-            // Update possiblePlots array
-            if (!possiblePlots.includes(plotName)) {
-                possiblePlots.push(plotName);
-            }
-        }
-    }
 
-    detectorSelect.addEventListener('change', function () {
-        const selectedDetector = detectorSelect.value;
-        loadAndDisplayImage(selectedDetector);
-    });
 
-    function clearPlotContainer() {
-        // Clear the plot container
-        document.getElementById('plotContainer').innerHTML = '';
-    }
 
-    async function loadAndDisplayImage(detector) {
-        const file = await JSROOT.openFile('./cdc_summary_histos.root');
-        if (file) {
-            console.log('File opened');
+reload.addEventListener('click', function () {
+    const RP = select_rp.value;
+    const ver = select_ver.value;
 
-            // Construct the object name based on the selected detector
-            const objectName = `gdedx`; //`${detector}_dedx/dedx_p`;
+    let new_url = document.URL.split("?")[0] + `?RunPeriod=${RP}&Version=${ver}`;
+    console.log(new_url);
+    window.location.assign(new_url);
+});
 
-            try {
-                const obj = await file.readObject(objectName);
-
-                // Clear the plot container and draw the object
-                clearPlotContainer();
-                await JSROOT.draw('plotContainer', obj, 'ap');
-
-                console.log('Drawing completed');
-            } catch (error) {
-                console.error('Error loading object:', error);
-            }
-        } else {
-            console.error('Error opening file');
-        }
-    }
-
-*/
 
