@@ -42,7 +42,7 @@ def check(run, rootfile) :
     print('\nERROR - this module is for CPP runs, 100000-109999, not for run %s\n'%run)
     return 0
 
-  occmax = 16 # CPP - expect 11 dead, handful more missing from tracking
+  occmax = 28 # CPP - expect 11 dead, handful more missing from tracking, many more missing in ET runs
 
 #  dedxmin = 1.9998
 #  dedxmax = 2.0402
@@ -58,9 +58,9 @@ def check(run, rootfile) :
 #  e5min = 0.96
 #  e6min = 0.89
 
-  e0min = 0.9  #CPP
-  e5min = 0.9
-  e75min = 0.6
+  e0min = 0.8  #CPP
+  e5min = 0.7
+  e75min = 0.3
 
 #  ttodmeanmax = 15.0
 #  ttodsigmamax = 150.0
@@ -102,7 +102,7 @@ def check(run, rootfile) :
 def cdc_occupancy_cpp(rootfile, occmax=9) :
 
   titles = ['Occupancy status','Missing straw count']
-  names = ['cdc_occ','cdc_missing']
+  names = ['cdc_occ_status','cdc_missing']
   values = [-1, -1]
 
   if not rootfile :  # called by init function
@@ -195,7 +195,7 @@ def cdc_occupancy_cpp(rootfile, occmax=9) :
 def cdc_efficiency_cpp(rootfile, e0min=0.97, e5min=0.96, e75min=0.89) :
 
   titles = ['Efficiency status','Hit efficiency at 0.04mm','Hit efficiency at 5mm','Hit efficiency at 7.5mm']
-  names = ['cdc_eff','cdc_eff0','cdc_eff5','cdc_eff7']
+  names = ['cdc_eff_status','cdc_eff0','cdc_eff5','cdc_eff7']
   values = [-1,-1,-1,-1]
 
   if not rootfile :  # called by init function
@@ -246,7 +246,7 @@ def cdc_efficiency_cpp(rootfile, e0min=0.97, e5min=0.96, e75min=0.89) :
 def cdc_dedx_cpp(rootfile, dedxmin=1.9998, dedxmax=2.0402, dedxresmin=0.25, dedxresmax=0.37) :
 
   titles = ['dE/dx status','dE/dx mean at 1.5 GeV/c (keV/cm)','dE/dx resolution at 1.5 GeV/c']
-  names = ['cdc_dedx','cdc_dedxmean','cdc_dedxres']
+  names = ['cdc_dedx_status','cdc_dedxmean','cdc_dedxres']
   values = [-1,-1,-1]
 
   if not rootfile :  # called by init function
@@ -434,7 +434,7 @@ def cdc_dedx_mean_cpp(rootfile, dedxmeanmin=1.5, dedxmeanmax=2.5, dedxsigmin=0.2
 def cdc_ttod(rootfile, ttodmeanmax=15.0, ttodsigmamax=150.0) :
 
   titles = ['TTOD status','TTOD residual mean (#mum)','TTOD residual width (#mum)']
-  names = ['cdc_ttod','cdc_ttodmean','cdc_ttodres']
+  names = ['cdc_ttod_status','cdc_ttodmean','cdc_ttodres']
   values = [-1,-1,-1]
 
   if not rootfile :  # called by init function

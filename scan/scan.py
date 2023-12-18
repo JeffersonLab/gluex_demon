@@ -31,12 +31,14 @@ if nargs<4 or nargs>5 or sys.argv[0] == "-h" or sys.argv[0] == "--h" or sys.argv
 import cdc 
 import cdc_cpp   
 import timing
+import timing_MD
+import tof_1
 
-modules_def = [cdc,timing]       # default list of modules
-modules_cpp = [cdc_cpp,timing]   # modules for CPP
+modules_def = [cdc,timing,timing_MD,tof_1]       # default list of modules
+modules_cpp = [cdc_cpp,timing,timing_MD,tof_1]   # modules for CPP
 
 testing = 0  # stop after <runlimit> files, print diagnostics
-runlimit = 2 # process this number of runs if testing=1
+runlimit = 10 # process this number of runs if testing=1
 
 RunPeriod=""
 VersionNumber=""
