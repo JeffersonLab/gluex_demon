@@ -2,7 +2,7 @@
 
 ## GlueX/Hall D detector monitoring scripts.
 
-These scan GlueX/HallD monitoring histograms and make root graphs to show on halldweb
+These scan GlueX/HallD monitoring histograms and make root graphs to show on [halldweb](https://halldweb.jlab.org/gluex_demon/demon.html?RunPeriod=RunPeriod-2022-05&Version=24)
 
 ### Directory structure
 
@@ -10,7 +10,7 @@ These scan GlueX/HallD monitoring histograms and make root graphs to show on hal
 
 * scan contains the operational modules and the script to run them.
 
-* web will contain the files for halldweb.
+* web contains the files for halldweb.
 
 ### Caveat
 This is fledgling code, under development by Naomi Jarvis.
