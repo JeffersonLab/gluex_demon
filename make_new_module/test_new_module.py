@@ -5,6 +5,7 @@
 #   switch it to True in run_module 
 #
 # Run this script with one argument, the monitoring histogram directory
+# eg python3.6 test_new_module.py /work/halld/data_monitoring/RunPeriod-2022-05/mon_ver24/rootfiles/
 #
 # It should create 4 files:
 #   filename_graphs = 'test_new_module_graphs.root'   # root file of graphs
