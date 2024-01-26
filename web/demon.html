@@ -16,12 +16,13 @@
     <script src="https://root.cern/js/latest/scripts/JSRoot.core.js"></script>
     <script src="https://root.cern/js/latest/scripts/JSRoot.core.min.js"></script>
     <style>
-        body {margin:5em;}
+        body {margin:1em 5em 1em 5em;}  
         #selectors,#titles {margin-top: 1em; margin-bottom: 1em;}
-        #problems {margin-top: 0em; margin-bottom: 0em;}
+        #problems {margin-top: 0em; margin-bottom: 0em; font-size:1.5em; color:red;}
         #titles2 {margin-top: 1em; margin-bottom: 2em;}
         #links_graphs_this_page {margin-bottom: 4em;}
-
+        #under-dev {margin-top:10px;}
+        #under-dev hr {border: 2px solid #505050;}
         .red {color:red;}
         .graphpanel {width:1200px; height:400px; margin-top: 50px;}
         .graph_top {margin-top:2.5em;}
@@ -32,34 +33,41 @@
 </head>
 
 
-
-
 <body>
+
+        <div id="under-dev" class="red">GlueX Demon is under development! &nbsp; <span style="font-size:1em;"> Contact Naomi Jarvis (njarvis) with any questions<span>
+        </div>
+        <div id="github">
+            <a href="https://github.com/JeffersonLab/gluex_demon">Github repo</a>
+            <hr/>
+        </div>
 
 
         <div id ="selectors">
             <select name="select_rp" id="select_rp">
-            <option value="RunPeriod-2022-05">RunPeriod-2022-05</option>
-            <option value="RunPeriod-2023-01">RunPeriod-2023-01</option>
+            <!--option value="RunPeriod-2022-05">RunPeriod-2022-05</option>
+            <option value="RunPeriod-2023-01">RunPeriod-2023-01</option-->
             </select>
 
             <select name="select_ver" id="select_ver">
             </select>
-            <button type="button" id="reload">Go</button>
+            <button type="button" id="reload" style="display:none">Go</button>
+            <select name="select_det" id="select_det">
+            </select>
         </div>
 
-        <div id="titles">
-            <h1 class="red">Under development! &nbsp; <span style="font-size:0.7em;"> Contact Naomi (njarvis) with any questions<span></h1>
-            <br/>
-            <h1><span id="RunPeriod">Loading...</span>&nbsp;&nbsp;<span id="Version"></span>&nbsp;&nbsp;<span id="Detector"></span></h1></h1><br/>
-        </div>
         <div id="problems">
         </div>
 
+        <div id="titles">
+            <h1><span id="RunPeriod"></span>&nbsp;&nbsp;<span id="Version"></span>&nbsp;&nbsp;<span id="Detector"></span></h1></h1><br/>
+        </div>
+
         <div id="titles2">
+            <div id="statuscodes">
             Status codes are 1 (good), 0 (bad) or -1 (don't know/file problem/not enough data/some other error)
             <br/>
-            <a href="https://github.com/JeffersonLab/gluex_demon">Github repo</a><br/><br/>
+            </div>
             <span id="graphs_or_return"></span><br/>
             <span id="csv"></span><br/>
         </div>
