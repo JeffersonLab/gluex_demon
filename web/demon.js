@@ -2,10 +2,6 @@
 
 const homedir = 'https://halldweb.jlab.org/gluex_demon/';
 const RP_file = './runperiods.txt';
-const default_RP = "RunPeriod-2022-05";
-
-const example_url = document.URL.split("?")[0] + '?RunPeriod=RunPeriod-2022-05&Version=24';
-const errortext = `<a href="${example_url}">${example_url}</a>`;
 
 var RP_list = [];  // list of available run periods  in runperiods.txt
 var ver_list = []; // list of available versions     in versions.txt inside RP's subdir
@@ -21,14 +17,10 @@ var Graph = "";
 
 var graphs_filename = "";  // root file
 var csv_filename = "";
-var pagenames = "";
-
+var pagenames = "";  // file containing lists of graphs
 
 
 import { openFile, draw } from 'https://root.cern/js/latest/modules/main.mjs';
-
-
-
 
 
 $(document).ready(async function () {
@@ -52,96 +44,75 @@ $(document).ready(async function () {
         Detector = "";
     } 
     
-
     await fillmenu("select_rp",RP_list,RunPeriod);
 
     ver_list = [];
 
-    if (RunPeriod != "") {
+    ver_list = await readlist(`${RunPeriod}/versions.txt`);
 
-        ver_list = await readlist(`${RunPeriod}/versions.txt`);
+    if (Version === "") { 
 
-        if (Version == "") { 
+        Version = ver_list[0];                
+        Detector = "";
 
-//            show_problem('Incomplete url!<br/>Try ' + errortext);
-            Version = ver_list[0];                
-            Detector = "";
+    } else if (! ver_list.includes(Version) ) {
 
-        } else if (! ver_list.includes(Version) ) {
-
-            show_problem(`${RunPeriod} version ${Version} is not known!`);//<br/>Try ` + errortext);        
-            Version = var_list[0];                
-            Detector = "";
-        }
-
-        await fillmenu("select_ver",ver_list,Version);
-
+        show_problem(`${RunPeriod} version ${Version} is not known!`);
+        Version = ver_list[0];                
+        Detector = "";
     }
 
+    await fillmenu("select_ver",ver_list,Version);
 
 
-    if ( RunPeriod != "" && Version != "") {
+    document.getElementById("RunPeriod").innerHTML = RunPeriod;
+    document.getElementById("Version").innerHTML = 'Version ' + Version;
 
-        document.getElementById("RunPeriod").innerHTML = RunPeriod;
-        document.getElementById("Version").innerHTML = 'Version ' + Version;
 
-        updatefilenames();
+    let year_month = RunPeriod.substring(10,17);
 
-        await getdetectornames();
-	// this fills det_list and graph_collection
-        // what if a nonexistent detector name is supplied?
+    graphs_filename = `./${RunPeriod}/${Version}/monitoring_graphs_${year_month}_ver${Version}.root`;
+    csv_filename = `./${RunPeriod}/${Version}/monitoring_data_${year_month}_ver${Version}.csv`;
+    pagenames = `./${RunPeriod}/${Version}/monitoring_pagenames_${year_month}_ver${Version}.txt`;
 
-        if (Detector != "") {
-            if (! det_list.includes(Detector) ) {
-                show_problem(`${RunPeriod} version ${Version} does not include ${Detector}!`);//<br/>Try ` + errortext);        
-                Detector = "";
+    await getdetectornames();	// this fills det_list and graph_collection
 
-            }
-	}
 
-        await fillmenu("select_det",det_list,Detector);
-
+    if (! det_list.includes(Detector) ) {   //det_list[0] is ""
+        show_problem(`${RunPeriod} version ${Version} does not include ${Detector}!`);
+        Detector = "";
     }
 
-
- 
-
-    if ( RunPeriod != "" && Version != "" ) {
-
-//        document.getElementById("loading").innerHTML = "Loading...";         
-
-        let subtitle = Detector;
-        let link_1 = "";
-        let link_2 = "";
+    await fillmenu("select_det",det_list,Detector);
 
 
+    console.log('filled detector menu');
 
-        if (Detector === "") {
+    let subtitle = "Overview";
+    let link_1 = `<a href="${graphs_filename}">Download ROOT file of graphs</a>`;
+    let link_2 = `<a href="${csv_filename}">Download CSV file of metrics</a>`;
 
-            subtitle = "Overview";
-            link_1 = `<a href="${graphs_filename}">Download ROOT file of graphs</a>`;
-            link_2 = `<a href="${csv_filename}">Download CSV file of metrics</a>`;
-        } else {
-            link_1 = `<a href="${document.URL.split("&Detector")[0]}">Return to overview page</a>`;
-        }
-
-        document.getElementById("Detector").innerHTML = subtitle;
-        document.getElementById("graphs_or_return").innerHTML = link_1;
-        document.getElementById("csv").innerHTML = link_2;
-        document.getElementById("loading").innerHTML = "Loading...";
-
-        await getgraphnames();
-
-        drawGraphs().then(
-           function(text) { 
-                console.log(Graph);
-                if (Graph != "") {
-                    document.getElementById(Graph).scrollIntoView();
-                }
-        });
-
-
+    if (Detector !== "") {
+        subtitle = Detector;
+        link_1 = `<a href="${document.URL.split("&Detector")[0]}">Return to overview page</a>`;
+        link_2 = "";
     }
+
+    document.getElementById("Detector").innerHTML = subtitle;
+    document.getElementById("graphs_or_return").innerHTML = link_1;
+    document.getElementById("csv").innerHTML = link_2;
+    document.getElementById("loading").innerHTML = "Loading...";
+
+    await getgraphnames();   // reads graph names from pagenames file
+
+    drawGraphs().then(
+       function(text) { 
+           console.log(Graph);
+           if (Graph != "") {
+                document.getElementById(Graph).scrollIntoView();
+           }
+    });
+
 
 });
 
@@ -352,10 +323,10 @@ async function fillmenu(select_id,list,preselect) {
 
 
 function show_problem(message) {
-//    document.getElementById("RunPeriod").innerHTML = "";
-  //  document.getElementById("Version").innerHTML = "";
+    //    document.getElementById("RunPeriod").innerHTML = "";
+    //  document.getElementById("Version").innerHTML = "";
     //document.getElementById("titles2").innerHTML = "";
-    document.getElementById("problems").innerHTML = message; //'Choose Run Period & Version.';
+    document.getElementById("problems").innerHTML = message;
 }
 
     
@@ -366,7 +337,7 @@ async function drawGraphs() {
     if (file) {
         console.log('file opened');
 
-        console.log(graphs_this_page);
+        //console.log(graphs_this_page);
             
         const obj = [];
 
@@ -394,18 +365,6 @@ async function drawGraphs() {
 
 
 
-function updatefilenames() {
-
-        let year_month = RunPeriod.substring(10,17);
-
-        graphs_filename = `./${RunPeriod}/${Version}/monitoring_graphs_${year_month}_ver${Version}.root`;
-        pagenames = `./${RunPeriod}/${Version}/monitoring_pagenames_${year_month}_ver${Version}.txt`;
-        csv_filename = `./${RunPeriod}/${Version}/monitoring_data_${year_month}_ver${Version}.csv`;
-
-
-};
-
-
 
 select_rp.addEventListener('change', async function () {
     const selectedRP = select_rp.value;
@@ -421,11 +380,6 @@ select_rp.addEventListener('change', async function () {
 
     await fillmenu("select_ver",ver_list,most_recent);
 
-//    updatefilenames();
- //   await getdetectornames();
-
-   // await fillmenu("select_det",det_list,Detector);
-
 });
 
 
@@ -438,12 +392,14 @@ select_rp.addEventListener('change', async function () {
 //      show the detector dropdown
 //
 // after the detector changes
-//      reload the page?  or just redraw the graphs?
+//      reload the page
 //
 
 
 
 select_rp.addEventListener('change',function() {
+
+  console.log('rp menu changed');
 
   const sel = document.getElementById("select_det");
   sel.style.display = "none";
@@ -456,6 +412,8 @@ select_rp.addEventListener('change',function() {
 
 select_ver.addEventListener('change',function() {
 
+  console.log('ver menu changed');
+
   const sel = document.getElementById("select_det");
   sel.style.display = "none";
 
@@ -466,6 +424,8 @@ select_ver.addEventListener('change',function() {
 
 
 select_det.addEventListener('change',function() {
+
+  console.log('det menu changed');
 
   const btn = document.getElementById("reload");
   btn.style.display = "none";
@@ -487,6 +447,7 @@ select_det.addEventListener('change',function() {
 
 
 reload.addEventListener('click', function () {  
+console.log('reload');
     const RP = select_rp.value;
     const ver = select_ver.value;
     const det = '';
