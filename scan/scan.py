@@ -33,9 +33,11 @@ import cdc_cpp
 import timing
 import timing_MD
 import tof_1
+import fmwpc
+import ctof
 
 modules_def = [cdc,timing,timing_MD,tof_1]       # default list of modules
-modules_cpp = [cdc_cpp,timing,timing_MD,tof_1]   # modules for CPP
+modules_cpp = [cdc_cpp,timing,timing_MD,tof_1,fmwpc,ctof]   # modules for CPP
 
 testing = 0  # stop after <runlimit> files, print diagnostics
 runlimit = 10 # process this number of runs if testing=1
