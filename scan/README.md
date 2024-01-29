@@ -2,7 +2,8 @@
 
 * scan.py is the control script that calls the contributed/detector modules and compiles graphs from their results.
 * cdc.py, cdc_cpp.py etc are some of the contributed/detector modules that inspect monitoring histograms and return metrics.
-
+* run_scan.sh is a script to run scan.py and copy the output into halldweb. 
+  
 _scan.py_ has provision for a module to be specific to a particular run period (eg _cdc\_cpp.py_ is for CPP/NPP data).
 
 The contributed modules contain several functions:
@@ -38,4 +39,4 @@ Contact Naomi when you're happy with it and ready to add it to the collection.
 
 # Where to find the graphs online
 
-[Here!](https://halldweb.jlab.org/gluex_demon/demon.html?RunPeriod=RunPeriod-2022-05&Version=24)
+[Here!](https://halldweb.jlab.org/gluex_demon/demon.html)
