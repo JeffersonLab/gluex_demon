@@ -1,3 +1,5 @@
+# Examples to adapt
+
 * new_module.py is a template module which should be copied, renamed and customized.
 * test_new_module.py is the script to run to test the new module, after changing 3 lines (it contains instructions).
 
@@ -25,6 +27,6 @@ For graphs with error bars, link the measurement with its uncertainty by giving 
 
 # How to make your own module
 
-Download the two scripts.  Rename _new\_module.py_ to suit your detector or purpose, and follow the instructions inside to customize it.  Then follow the instructions inside _test\_new\_module.py_ to test it. 
+Download the two scripts.  Rename _new\_module.py_ to suit your detector or purpose, and follow the instructions inside to customize it.  Then follow the instructions inside _test\_new\_module.py_ to test it.  
 
 The overvew web page contains links to the root file containing all of the graphs and a csv file containing all of the quantities used to create the graphs.  The csv file might be useful for recalibration.
