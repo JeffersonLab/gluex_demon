@@ -1,6 +1,5 @@
 // functions for gluex detector calibration monitoring page
 
-const homedir = 'https://halldweb.jlab.org/gluex_demon/';
 const RP_file = './runperiods.txt';
 
 var RP_list = [];  // list of available run periods  in runperiods.txt
@@ -161,6 +160,7 @@ async function fetchfiledata(filename) {
 
     if (text.includes('404 Not Found')) {
         console.log('ERROR: ' + filename + ' not found!');
+        show_problem(filename + ' is missing!');
         text = false;
     }
 
@@ -213,19 +213,21 @@ async function getgraphnames() {
 
         let j = det_list.indexOf(Detector) - 1;   // because det_list starts w overview
 
+        const gdir = graph_collection[j][0]; 
         const ngraphs = Number(graph_collection[j][1]); 
 
         for (let i = 2; i < ngraphs+2 ; i++) {
 
             let thisgraph =  graph_collection[j][i];
+            let rootgraph =  gdir + '/' + thisgraph;
 
-            graphs_this_page.push(thisgraph);  // copy graph name into array for this page
+            graphs_this_page.push(rootgraph);  // copy graph name into array for this page
 
             divtext += `<div id="${thisgraph}" class="graph_top"></div>`;
 
             divtext += '<div id=g_' + thisgraph + styletext + '>';
             divtext += '</div>';
-            divtext += `<div class="graph_names"><a href="#${thisgraph}">${thisgraph}</a></div>`;
+            divtext += `<div class="graph_names"><a href="#${thisgraph}">${thisgraph}</a>&nbsp;&nbsp;<a href="#selectors">Top of page</a></div>`;
             listoflinks += `<a href = "#${thisgraph}">${thisgraph}</a> `;
 
         }
@@ -238,16 +240,21 @@ async function getgraphnames() {
         for (let i = 0; i < npages; i++) {
 
             let thisgraph = 'readiness';
+            let gdir = '';
+
             if (i>0 ) {
+                gdir = graph_collection[i-1][0]; 
                 thisgraph = graph_collection[i-1][2];
             }
 
-            graphs_this_page.push(thisgraph);  // copy graph name into array for this page
+            let rootgraph =  gdir + '/' + thisgraph;
+
+            graphs_this_page.push(rootgraph);  // copy graph name into array for this page
 
             //divtext += `<div id="${statusgraphs[i]}" class="graph_names">${statusgraphs[i]}</div>`;
             divtext += `<div id="${thisgraph}" class="graph_top"></div>`;
             divtext += `<div id=g_${thisgraph} ${styletext}></div>`;  // the graph gets inserted inside this later
-            divtext += `<div class="graph_names"><a href="#${thisgraph}">${thisgraph}</a></div>`;
+            divtext += `<div class="graph_names"><a href="#${thisgraph}">${thisgraph}</a>&nbsp;&nbsp;<a href="#selectors">Top of page</a>`; //</div>`;
 
             listoflinks += `<a href = "#${thisgraph}">${thisgraph}</a> `;
 
@@ -256,10 +263,13 @@ async function getgraphnames() {
                 let thisdetector = det_list[i]; 
 
                 linkfile = document.URL.split("#")[0] + '&Detector=' + thisdetector;   // ignore #graphname
-                divtext += '<span><a href=' + linkfile + '> ' + thisdetector + ' details </a>';
-                divtext += '</span>';
-
+//                divtext += '<span><a href=' + linkfile + '> ' + thisdetector + ' details </a>';
+//                divtext += '</span>';
+                divtext += '&nbsp;&nbsp;<a href=' + linkfile + '>Details</a>';
             }
+
+            divtext += '</div>';
+
         }          
 
     } 
@@ -345,14 +355,19 @@ async function drawGraphs() {
 
         for (let i = 0; i < graphs_this_page.length; i++) {
             let gname = graphs_this_page[i];  //graphnames[i]
+            //console.log('looking for graph called ',gname);
             obj[i] = await file.readObject(gname);
             obj[i].fMarkerSize=0.7;
             obj[i].fMarkerStyle=8;
             obj[i].fMarkerColor=890;
             obj[i].fEditable=0;
 
-            let divname = 'g_' + gname;
-            await draw(divname, obj[i], 'ap;gridx;gridy;');
+            if (gname.includes('/')) {
+                gname = gname.split('/')[1];      // the divname doesnt include the directory
+            }
+
+            let divname = 'g_' + gname;             
+            draw(divname, obj[i], 'ap;gridx;gridy;');
         }
 
         console.log('drawing completed');

@@ -15,6 +15,27 @@
 #   filename_pagenames = 'monitoring_pagenames_X.txt' # list of module page titles and graphs
 #
 
+def make_graph(gname,gtitle,nruns,x,y) :
+    gr = TGraph( nruns, x, y )
+    gr.SetName(gname)
+    gr.SetTitle(gtitle)
+    gr.GetXaxis().SetTitle( 'Run number' )
+    gr.GetYaxis().SetTitle( gtitle )
+    gr.SetMarkerStyle( 21 )
+    return gr
+
+
+def make_graph_errs(gname,gtitle,nruns,x,y,dx,dy) :
+    gr = TGraphErrors( nruns, x, y, dx, dy )
+    gr.SetName(gname)
+    gr.SetTitle(gtitle)
+    gr.GetXaxis().SetTitle( 'Run number' )
+    gr.GetYaxis().SetTitle( gtitle )
+    gr.SetMarkerStyle( 21 )
+    return gr
+
+################################################################################
+
 import sys
 import os
 import subprocess
@@ -37,25 +58,21 @@ import fmwpc
 import ctof
 
 modules_def = [cdc,timing,timing_MD,tof_1]       # default list of modules
-modules_cpp = [cdc_cpp,timing,timing_MD,tof_1,fmwpc,ctof]   # modules for CPP
+modules_cpp = [cdc_cpp,timing,timing_MD,tof_1] #,fmwpc,ctof]   # modules for CPP
 
 testing = 0  # stop after <runlimit> files, print diagnostics
-runlimit = 10 # process this number of runs if testing=1
+runlimit = 4 # process this number of runs if testing=1
 
 RunPeriod=""
 VersionNumber=""
 histdir = ""
 
 while len(sys.argv) > 0 :
-
     x = sys.argv.pop(0)
-  
     if x == "-r" :
         RunPeriod = sys.argv.pop(0)
-  
     elif x == "-v" :
         VersionNumber = sys.argv.pop(0)
-  
     else :
         histdir = x
   
@@ -63,7 +80,6 @@ if RunPeriod == "" :
     exit('Please supply Run Period year and month, eg 2022-05')
 if VersionNumber == "" : 
     exit('Please supply Monitoring Version Number, eg 06')
-
 if histdir == "" : 
     histdir = '/work/halld/data_monitoring/RunPeriod-' + RunPeriod + '/mon_ver' + VersionNumber + '/rootfiles'
 
@@ -78,7 +94,7 @@ if not os.path.exists(histdir):
 
 # import ROOT now (after passing early checks), as the import is slow
 
-from ROOT import TFile, TGraph
+from ROOT import TFile, TGraph, TGraphErrors
 from ROOT import gROOT
 gROOT.SetBatch(True)
 
@@ -214,7 +230,6 @@ for filename in histofilelist:
     if os.path.splitext(filename)[1] == '.root' :
 
         fullfilepath = histdir + "/" + filename
-    
         findrunnum = re.findall('\d+',filename)   #makes a list of numbers found in the filename
     
         if len(findrunnum) == 0:
@@ -225,7 +240,6 @@ for filename in histofilelist:
             continue
         else:
             run = int(findrunnum[0])
-
     
         try:
             rootfile = TFile(fullfilepath)
@@ -235,10 +249,8 @@ for filename in histofilelist:
             file_errcount = file_errcount + 1
             continue
             
-
         if testing : 
             print('\nRun %i - processing %s\n' % (run,filename))
-
 
         thisrun_values = [run]   # collect all the returned values
         thisrun_status = []      # collect the returned status values, use them later to create a combined status
@@ -250,7 +262,6 @@ for filename in histofilelist:
                 print('Calling module %s' % (active_modules[imod].__name__) )
 
             try: 
-
                 newdata = active_modules[imod].check(run, rootfile)  # run, root file ptr
 
             except:
@@ -259,9 +270,7 @@ for filename in histofilelist:
 
                 print('Calling the module again, to show the error')
                 newdata = active_modules[imod].check(run, rootfile)  # run, root file ptr
-
                 errcount = errcount + 1
-
                 newdata = defaults[imod] 
 
             else:
@@ -275,9 +284,7 @@ for filename in histofilelist:
                         print('ERROR run %i values array length mismatch from module %s' % (run, active_modules[imod].__name__) ) 
                     err_mismatches = True
                     errcount = errcount + 1
-
                     newdata = defaults[imod]
-
 
                 elif len(newdata) != len(defaults[imod]) :
 
@@ -285,14 +292,12 @@ for filename in histofilelist:
                         print('ERROR run %i values array length mismatch from module %s' % (run, active_modules[imod].__name__) ) 
                     err_mismatches = True
                     errcount = errcount + 1
-
                     temparray = newdata
                     temparray.extend(defaults[imod])
 
                     newdata = []
                     for i in range(len(defaults[imod])) :
                         newdata.append(temparray[i])
-                
 
             thisrun_values.extend(newdata)        # extend the 2D list adding columns
             thisrun_status.append(newdata[0])     # append the 1D list adding a row
@@ -306,13 +311,10 @@ for filename in histofilelist:
         # after running all histogram checking modules
         # make a combined status value 
         min_status = min(thisrun_status)
-
         combined_status.append(min_status)  # combined status value for all metrics is the lowest
         
-
         # sum up number of not-good metrics
         badcount = 0
-        
         for status in thisrun_status :
             if (status != 1):
                 badcount = badcount + 1
@@ -341,7 +343,6 @@ for filename in histofilelist:
         if testing == 1 and runcount == runlimit:
             break
 
-
 # skip the post-processing if all modules failed!
 
 if len(gnames) == 0:
@@ -349,38 +350,10 @@ if len(gnames) == 0:
 
 
 
+############################## write output files ##############################
 
-# make TGraphs file
 
-from array import array
-
-f = TFile(filename_graphs,'RECREATE')
-        
 nruns = len(allruns_values)  # number of runs
-
-for igraph in range(1,len(gnames)) : # skip element 0, run number
-
-    #print igraph,gnames[igraph],gtitles[igraph]
-  
-    x, y = array( 'd' ), array( 'd' )  
-  
-    for i in range(nruns) :
-        x.append(allruns_values[i][0])
-        y.append(allruns_values[i][igraph]) 
-      
-    gr = TGraph( nruns, x, y )
-    gr.SetName( gnames[igraph] )
-    gr.SetTitle( gtitles[igraph] )
-    gr.GetXaxis().SetTitle( 'Run number' )
-    gr.GetYaxis().SetTitle( gtitles[igraph] )
-    gr.SetMarkerStyle( 21 )
-    gr.Write()
-  
-    if testing:
-        print('Created graph %s' % (gnames[igraph]) )
-  
-f.Close()
-   
 
 # write out text file in csv
 
@@ -398,31 +371,6 @@ if testing:
     print('Results saved to %s' % (filename_csv) )
 
 
-# write out list of page titles and their graphs 
- 
-f = open(filename_pagenames,"w")
-writer = csv.writer(f)
-
-gstart=1
-
-for i in range(len(pagenames)):
-    newlist = []
-    newlist.append(pagenames[i])
-    newlist.append(gcount[i])
-  
-    for j in range(gstart,gstart+gcount[i]) : # use gcount to find the page titles to save
-        newlist.append(gnames[j])
-    
-    writer.writerow(newlist)
-  
-    gstart = gstart + gcount[i]
-  
-f.close()
-
-if testing:
-    print('List of page titles and graph names saved to %s' % (filename_pagenames) )
-
-
 
 # list of bad runs
 
@@ -438,3 +386,138 @@ if len(badruns) > 0 :
         print('Bad runs listed in %s' % (filename_badruns) )
 
  
+# root file 
+
+
+# set up arrays for run number & 0 err run number
+
+from array import array
+
+x, dx = array( 'd' ), array( 'd' )
+for ii in range(nruns) :
+    x.append(allruns_values[ii][0])
+    dx.append(0)
+
+f = TFile(filename_graphs,'RECREATE')
+f.cd()
+
+y = array( 'd' )        
+igraph=len(gnames)-1 # column number in giant array
+
+for ii in range(nruns) :
+    y.append(allruns_values[ii][igraph]) 
+
+gr = make_graph('readiness','Run readiness',nruns,x,y)      
+#gr = TGraph( nruns, x, y )
+#gr.SetName( 'readiness' )
+#gr.SetTitle( 'Readiness' )
+#gr.GetXaxis().SetTitle( 'Run number' )
+#gr.GetYaxis().SetTitle( 'Readiness' )
+#gr.SetMarkerStyle( 21 )
+gr.Write()
+
+
+# separate the tgrapherrors pairs of thing & thing_err from the tgraphs
+
+
+
+newlistofgraphs=[] # list of list of graph names for all pages
+gstart=1
+
+for i in range(len(pagenames)):
+
+    thisdir = f.mkdir(pagenames[i])
+    thisdir.cd()
+ 
+    graphs = {}    # use dict to keep name & column together
+    enames = []  # list of names ending in _err
+    egraphs = []   # list of tgrapherror [yname ycol dycol]
+
+    newlist = [] # eventual list of graph names for this page
+
+    for j in range(gstart,gstart+gcount[i]) : # use gcount to find the page titles to save
+        graphs.update({gnames[j]:j})
+
+        if "_err" in gnames[j] :
+            enames.append(gnames[j])
+
+    for err in enames:
+        thing = err.split("_err")[0]
+        if thing in graphs:
+            egraphs.append([thing,graphs[thing],graphs[err]])   # hopefully name, col-y, col-dy
+
+    for ething in egraphs:
+        graphs.pop(ething[0])
+        graphs.pop(ething[0]+'_err')
+
+
+
+    for thing in graphs:      ###### this is a good place to put the status graphs first. Nb they won't have errs!
+        if "_status" in thing:
+            newlist.append(thing)
+
+    for thing in graphs:      ###### this is a good place to put the status graphs first. Nb they won't have errs!
+        if "_status" not in thing:
+            newlist.append(thing)
+
+    for ething in egraphs:
+        newlist.append(ething[0])
+   
+    newlistofgraphs.append(newlist)
+  
+    gstart = gstart + gcount[i]
+
+
+    for thing in graphs:   # graphs is a dict
+
+        y = array( 'd' )        
+        igraph=int(graphs[thing]) # column number in giant array
+
+        for ii in range(nruns) :
+            y.append(allruns_values[ii][igraph]) 
+      
+        gr = make_graph(thing,gtitles[igraph],nruns,x,y)
+        gr.Write()
+
+    for ething in egraphs:     # egraphs is an array name, col-y, col-dy
+
+        y, dy = array( 'd' ), array( 'd' )  
+        igraph = int(ething[1]) # column number in giant array
+
+        for ii in range(nruns) :
+            y.append(allruns_values[ii][ething[1]])
+            dy.append(allruns_values[ii][ething[2]])
+      
+        gr = make_graph_errs(gnames[igraph],gtitles[igraph],nruns,x,y,dx,dy) 
+        gr.Write()
+
+    f.cd("../")
+
+f.Close()
+
+if testing:
+    print('Graphs saved to %s' % (filename_graphs) )
+
+
+# write out list of page titles and their graphs 
+ 
+f = open(filename_pagenames,"w")
+writer = csv.writer(f)
+
+for i in range(len(pagenames)):
+
+    line = []
+    line.append(pagenames[i])
+    line.append(len(newlistofgraphs[i]))
+    line.extend(newlistofgraphs[i])
+    
+    writer.writerow(line)
+    
+f.close()
+
+if testing:
+    print('List of page titles and graph names saved to %s' % (filename_pagenames) )
+
+################################################################################
+
+
