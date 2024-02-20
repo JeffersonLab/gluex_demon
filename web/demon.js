@@ -203,6 +203,7 @@ async function getgraphnames() {
 
     let statusgraphs = ['readiness'];
     let styletext = ' class="graphpanel"';
+    let styletext2 = ' class="statusgraphpanel"';
     let divtext = '';
     let linkfile = '';
     let listoflinks = '';
@@ -220,12 +221,18 @@ async function getgraphnames() {
 
             let thisgraph =  graph_collection[j][i];
             let rootgraph =  gdir + '/' + thisgraph;
+            let style = styletext
+
+           // if (thisgraph.includes('status')) style = styletext2;
+
+            // only show composite status graphs, hide the others
+            if (thisgraph.includes('status') && !thisgraph.includes('composite')) continue;
 
             graphs_this_page.push(rootgraph);  // copy graph name into array for this page
 
             divtext += `<div id="${thisgraph}" class="graph_top"></div>`;
 
-            divtext += '<div id=g_' + thisgraph + styletext + '>';
+            divtext += '<div id=g_' + thisgraph + style + '>';
             divtext += '</div>';
             divtext += `<div class="graph_names"><a href="#${thisgraph}">${thisgraph}</a>&nbsp;&nbsp;<a href="#selectors">Top of page</a></div>`;
             listoflinks += `<a href = "#${thisgraph}">${thisgraph}</a> `;
@@ -355,12 +362,22 @@ async function drawGraphs() {
 
         for (let i = 0; i < graphs_this_page.length; i++) {
             let gname = graphs_this_page[i];  //graphnames[i]
+
+            // only show composite status graphs, hide the others
+            if (gname.includes('status') && !gname.includes('composite')) continue;
+
             //console.log('looking for graph called ',gname);
             obj[i] = await file.readObject(gname);
             obj[i].fMarkerSize=0.7;
             obj[i].fMarkerStyle=8;
             obj[i].fMarkerColor=890;
             obj[i].fEditable=0;
+
+            if (gname.includes('composite')) {
+                obj[i].fMinimum = -1.5;
+                obj[i].fMaximum = 1.5;
+		// obj[i].fYaxis.fNdivisions = 1;  // gives an error
+            }
 
             if (gname.includes('/')) {
                 gname = gname.split('/')[1];      // the divname doesnt include the directory

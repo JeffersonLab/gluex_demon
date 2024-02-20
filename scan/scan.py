@@ -34,6 +34,19 @@ def make_graph_errs(gname,gtitle,nruns,x,y,dx,dy) :
     gr.SetMarkerStyle( 21 )
     return gr
 
+
+def make_multigraph(gname,gtitle) :
+    gr = TMultiGraph()
+    gr.SetName(gname)
+    gr.SetTitle(gtitle)
+#    gr.GetXaxis().SetTitle( 'Run number' ) # This empties the multigraph!
+#    gr.GetYaxis().SetTitle( gtitle )
+    return gr
+
+
+
+
+
 ################################################################################
 
 import sys
@@ -51,14 +64,15 @@ if nargs<4 or nargs>5 or sys.argv[0] == "-h" or sys.argv[0] == "--h" or sys.argv
 # detector monitoring modules
 import cdc 
 import cdc_cpp   
+import fdc
 import timing
 import timing_MD
 import tof_1
 import fmwpc
 import ctof
 
-modules_def = [cdc,timing,timing_MD,tof_1]       # default list of modules
-modules_cpp = [cdc_cpp,timing,timing_MD,tof_1] #,fmwpc,ctof]   # modules for CPP
+modules_def = [cdc,fdc,timing,timing_MD,tof_1]       # default list of modules
+modules_cpp = [cdc_cpp,fdc,timing,timing_MD,tof_1,fmwpc,ctof]   # modules for CPP
 
 testing = 0  # stop after <runlimit> files, print diagnostics
 runlimit = 4 # process this number of runs if testing=1
@@ -94,7 +108,7 @@ if not os.path.exists(histdir):
 
 # import ROOT now (after passing early checks), as the import is slow
 
-from ROOT import TFile, TGraph, TGraphErrors
+from ROOT import TFile, TGraph, TGraphErrors, TMultiGraph
 from ROOT import gROOT
 gROOT.SetBatch(True)
 
@@ -468,6 +482,16 @@ for i in range(len(pagenames)):
     gstart = gstart + gcount[i]
 
 
+    # put status graphs onto a multigraph, except the overall status which is first in the list
+
+    first_graph = True
+    mg_colours = [63, 887, 907, 807, 801]
+    mg_symbols = [107, 108, 109, 113]
+
+    mg_name = pagenames[i]+"_status_composite"
+
+    mg = make_multigraph(mg_name,pagenames[i]+" status composite") 
+
     for thing in graphs:   # graphs is a dict
 
         y = array( 'd' )        
@@ -475,9 +499,29 @@ for i in range(len(pagenames)):
 
         for ii in range(nruns) :
             y.append(allruns_values[ii][igraph]) 
-      
-        gr = make_graph(thing,gtitles[igraph],nruns,x,y)
+
+        gr = make_graph(thing,gtitles[igraph],nruns,x,y)   
+
         gr.Write()
+
+        if first_graph :
+            mg_n = 0
+            print('skipping',thing)
+            first_graph = False
+
+        elif "_status" in thing:
+
+            gr.SetMarkerColor(mg_colours[mg_n % 5])
+            gr.SetMarkerStyle(mg_symbols[int(mg_n/5) % 4])
+            mg.Add(gr)
+            print('adding',thing)
+            mg_n = mg_n + 1
+#            print(mg_name,mg_n%5,int(mg_n/5)%4)
+
+
+    mg.Write()
+
+    newlistofgraphs[i].insert(0,mg_name)
 
     for ething in egraphs:     # egraphs is an array name, col-y, col-dy
 
@@ -519,5 +563,6 @@ if testing:
     print('List of page titles and graph names saved to %s' % (filename_pagenames) )
 
 ################################################################################
+
 
 

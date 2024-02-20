@@ -14,9 +14,10 @@ def init() :
   occ = cdc_occupancy(False)  # return names, titles, values
   eff = cdc_efficiency(False)
   dedx = cdc_dedx(False)
+  dedxmean = cdc_dedx_mean(False)
   ttod = cdc_ttod(False)
 
-  for thing in [ occ, eff, dedx, ttod ] : 
+  for thing in [ occ, eff, dedx, dedxmean, ttod ] : 
 
     names.extend(thing[0])
     titles.extend(thing[1])
@@ -35,12 +36,18 @@ def check(run, rootfile) :
 
   # acceptable value limits, defined here for accessibility
 
-  occmax = 9
+  occmax = 25 # expect 9 dead but more look dead in ET runs
 
   dedxmin = 1.9998
   dedxmax = 2.0402
   dedxresmin = 0.25
   dedxresmax = 0.37
+
+  dedxmeanmin = 2.5  # for overall dedx, 0 to 10 GeV
+  dedxmeanmax = 4.5
+  dedxsigmin = 1.0
+  dedxsigmax = 4.0
+
 
   e0min = 0.97
   e5min = 0.96
@@ -54,12 +61,13 @@ def check(run, rootfile) :
   occ = cdc_occupancy(rootfile, occmax)
   eff = cdc_efficiency(rootfile, e0min, e5min, e6min)
   dedx = cdc_dedx(rootfile, dedxmin, dedxmax, dedxresmin, dedxresmax)
+  dedxmean = cdc_dedx_mean(rootfile, dedxmeanmin, dedxmeanmax, dedxsigmin, dedxsigmax)
   ttod = cdc_ttod(rootfile, ttodmeanmax, ttodsigmamax)
 
   # set the overall status to the min value of each histogram status
 
   statuslist = []
-  for thing in [occ, eff, dedx, ttod] : 
+  for thing in [ occ, eff, dedx, dedxmean, ttod ] : 
     statuslist.append(thing[0])   # status is the first value in the array
 
   cdc_status = min(statuslist)
@@ -67,7 +75,7 @@ def check(run, rootfile) :
   # add overall status to the start of the lists before concatenating & returning.
 
   allvals = [cdc_status]
-  for thing in [occ, eff, dedx, ttod] : 
+  for thing in [ occ, eff, dedx, dedxmean, ttod ] : 
     allvals.extend(thing) 
 
   return allvals
@@ -115,6 +123,9 @@ def cdc_occupancy(rootfile, occmax=9) :
     floatnstraws = float(Nstraws[ring])
 
     mean_hits_per_straw = int(hits_ring/floatnstraws)
+
+    if mean_hits_per_straw < 20 :  
+      continue
 
     for straw in range(Nfirst+1, Nfirst+Nstraws[ring]+1) :
 
@@ -223,21 +234,33 @@ def cdc_dedx(rootfile, dedxmin=1.9998, dedxmax=2.0402, dedxresmin=0.25, dedxresm
     print('Could not find ' + histoname)
     return values
 
-  pcut = 1.5 #;    // draw cut through histo at p=1.5 GeV/c
-  pbin = h.GetXaxis().FindBin(pcut)
-  p = h.ProjectionY("p1",pbin,pbin)
+
+  ntracks = h.GetEntries()
+  scale = 1.0
+
+  if ntracks > 1e6: 
+    pbin1 = 38  # h.GetXaxis().FindBin(pcut)
+    pbin2 = pbin1
+  elif ntracks < 1000:
+    return values
+  else :
+    pbin1 = 38
+    pbin2 = 48
+    scale = 1.0214     #scales 10bin q+ result to match 1bin q+ result
+    
+  p = h.ProjectionY("p1",pbin1,pbin2)
 
   if p.GetEntries()<5 :
     return values 
 
   g = TF1('g','gaus',0,12)
 
-  fitstat = p.Fit('g','0qwes')
+  fitstat = p.Fit('g','0qwers')
   
   #print 'fit status ',fitstat.IsValid(), fitstat.Status()
 
   if fitstat == 0:
-    mean = g.GetParameter(1)
+    mean = scale*g.GetParameter(1)
     res = 2.0*g.GetParameter(2)/mean
 
     status = 1
@@ -249,6 +272,52 @@ def cdc_dedx(rootfile, dedxmin=1.9998, dedxmax=2.0402, dedxresmin=0.25, dedxresm
     values = [status, float('%.5f'%(mean)), float('%.5f'%(res)) ]
   
   return values
+
+
+
+def cdc_dedx_mean(rootfile, dedxmeanmin=1.5, dedxmeanmax=2.5, dedxsigmin=0.2, dedxsigmax=3.0) :
+
+  titles = ['dE/dx (overall mean, 0-10 GeV/c) status','dE/dx mean (keV/cm)','dE/dx RMS (keV/cm)']
+  names = ['cdc_dedx_overallmean_status','cdc_dedx_overallmean','cdc_dedx_sigma']
+  values = [-1,-1,-1]
+
+  if not rootfile :  # called by init function
+    return [names, titles, values]
+
+  dirname = '/CDC_dedx'
+  histoname = 'dedx_p'
+
+  test = rootfile.cd(dirname)
+
+  if test == False: 
+    print('Could not find ' + dirname)
+    return values
+
+  h = gROOT.FindObject(histoname)
+
+  if (not not h) == False :
+    print('Could not find ' + histoname)
+    return values
+
+  pp = h.ProjectionY("p1",0,10)
+
+  mean = pp.GetMean()
+  sig = pp.GetRMS()
+    
+  status = 1
+  if mean < dedxmeanmin or mean > dedxmeanmax:
+      status=0
+  if sig < dedxsigmin or sig > dedxsigmax:
+      status=0
+
+  values = [status, float('%.5f'%(mean)), float('%.5f'%(sig)) ]
+  
+  return values
+
+
+
+
+
 
 
 def cdc_ttod(rootfile, ttodmeanmax=15.0, ttodsigmamax=150.0) :

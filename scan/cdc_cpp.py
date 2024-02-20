@@ -42,7 +42,7 @@ def check(run, rootfile) :
     print('\nERROR - this module is for CPP runs, 100000-109999, not for run %s\n'%run)
     return 0
 
-  occmax = 28 # CPP - expect 11 dead, handful more missing from tracking, many more missing in ET runs
+  occmax = 50 # CPP - expect 11 dead, handful more missing from tracking, many more missing in ET runs
 
 #  dedxmin = 1.9998
 #  dedxmax = 2.0402
@@ -152,7 +152,7 @@ def cdc_occupancy_cpp(rootfile, occmax=9) :
     floatnstraws = float(1+last-first)
     mean_hits_per_straw = int(hits_ring/floatnstraws)
 
-    if mean_hits_per_straw < 10 :  
+    if mean_hits_per_straw < 20 :  
       continue
 
 #    print ('ring ',ring+1, ' straws: ',1+last-first, ' hits/straw: ',mean_hits_per_straw)
