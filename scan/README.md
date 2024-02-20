@@ -2,7 +2,8 @@
 
 * scan.py is the control script that calls the contributed/detector modules and compiles graphs from their results.
 * cdc.py, cdc_cpp.py etc are some of the contributed/detector modules that inspect monitoring histograms and return metrics.
-* run_scan.sh is a script to run scan.py and copy the output into halldweb. 
+* run_scan.sh is a script to run scan.py and copy the output into halldweb.
+* extract_col.py extracts the run numbers and the named values specified from the output csv file. 
   
 _scan.py_ has provision for a module to be specific to a particular run period (eg _cdc\_cpp.py_ is for CPP/NPP data).
 
