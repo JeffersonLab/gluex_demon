@@ -74,6 +74,8 @@ $(document).ready(async function () {
     csv_filename = `./${RunPeriod}/${Version}/monitoring_data_${year_month}_ver${Version}.csv`;
     pagenames = `./${RunPeriod}/${Version}/monitoring_pagenames_${year_month}_ver${Version}.txt`;
 
+    let compare_link = `https://halldweb.jlab.org/gluex_demon/compare.html?RunPeriod=${RunPeriod}&Version=${Version}`;
+
     await getdetectornames();	// this fills det_list and graph_collection
 
 
@@ -88,18 +90,21 @@ $(document).ready(async function () {
     console.log('filled detector menu');
 
     let subtitle = "Overview";
-    let link_1 = `<a href="${graphs_filename}">Download ROOT file of graphs</a>`;
-    let link_2 = `<a href="${csv_filename}">Download CSV file of metrics</a>`;
+    let link_1 = `<a href="${graphs_filename}">ROOT file</a>`;
+    let link_2 = `<a href="${csv_filename}">CSV file</a>`;
+    let link_3 = `<a href="${compare_link}">Compare graphs</a>`;    
 
     if (Detector !== "") {
         subtitle = Detector;
-        link_1 = `<a href="${document.URL.split("&Detector")[0]}">Return to overview page</a>`;
-        link_2 = "";
+        document.getElementById("return").innerHTML = `<a href="${document.URL.split("&Detector")[0]}">Return to overview page</a>`;
     }
 
     document.getElementById("Detector").innerHTML = subtitle;
-    document.getElementById("graphs_or_return").innerHTML = link_1;
+
+    document.getElementById("rootfile").innerHTML = link_1;
     document.getElementById("csv").innerHTML = link_2;
+    document.getElementById("compare").innerHTML = link_3;
+
     document.getElementById("loading").innerHTML = "Loading...";
 
     await getgraphnames();   // reads graph names from pagenames file
