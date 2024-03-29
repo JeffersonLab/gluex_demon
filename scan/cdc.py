@@ -255,6 +255,8 @@ def cdc_dedx(rootfile, dedxmin=1.9998, dedxmax=2.0402, dedxresmin=0.25, dedxresm
 
   g = TF1('g','gaus',0,12)
 
+  p.GetXaxis().SetRangeUser(0,5)
+
   fitstat = p.Fit('g','0qwers')
   
   #print 'fit status ',fitstat.IsValid(), fitstat.Status()

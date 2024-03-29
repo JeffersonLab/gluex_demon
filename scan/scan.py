@@ -40,7 +40,6 @@ def make_multigraph(gname,gtitle) :
     gr.SetName(gname)
     gr.SetTitle(gtitle)
 #    gr.GetXaxis().SetTitle( 'Run number' ) # This empties the multigraph!
-#    gr.GetYaxis().SetTitle( gtitle )
     return gr
 
 
@@ -58,8 +57,8 @@ import csv
 script = sys.argv.pop(0)
 nargs = len(sys.argv)
 
-if nargs<4 or nargs>5 or sys.argv[0] == "-h" or sys.argv[0] == "--h" or sys.argv[0] == "--help":
-    exit("This script scans GlueX/Hall D detector monitoring histograms to create graphs.\nUsage: python3.6 scan.py -r Year-Month -v VersionNumber [path_to_monitoring_histogram_directory]\n    eg python3.6 scan.py -r 2022-05 -v 06\nThe histogram directory is optional if it is the usual one.")
+if nargs<4 or nargs>6 or sys.argv[0] == "-h" or sys.argv[0] == "--h" or sys.argv[0] == "--help":
+    exit("This script scans GlueX/Hall D detector monitoring histograms to create graphs.\nUsage: python3.6 scan.py -r Year-Month -v VersionNumber [path_to_monitoring_histogram_directory] [checkstatus]\n    eg python3.6 scan.py -r 2022-05 -v 06\nThe histogram directory is optional if it is the usual one. If the arg checkstatus is supplied, only the runs with RCDB status nonzero are checked.")
 
 # detector monitoring modules
 import cdc 
@@ -70,12 +69,14 @@ import timing_MD
 import tof_1
 import fmwpc
 import ctof
+import rf
 
-modules_def = [cdc,fdc,timing,timing_MD,tof_1]       # default list of modules
-modules_cpp = [cdc_cpp,fdc,timing,timing_MD,tof_1,fmwpc,ctof]   # modules for CPP
+modules_def = [rf, cdc ,fdc, timing, timing_MD, tof_1]       # default list of modules
+modules_cpp = [rf, cdc_cpp,fdc,timing,timing_MD,tof_1,fmwpc,ctof]   # modules for CPP
 
-testing = 0  # stop after <runlimit> files, print diagnostics
-runlimit = 4 # process this number of runs if testing=1
+testing = 1  # stop after <runlimit> files, print diagnostics
+runlimit = 1 # process this number of runs if testing=1
+checkstatus = 0  # skip RCDB check
 
 RunPeriod=""
 VersionNumber=""
@@ -87,6 +88,8 @@ while len(sys.argv) > 0 :
         RunPeriod = sys.argv.pop(0)
     elif x == "-v" :
         VersionNumber = sys.argv.pop(0)
+    elif x == "checkstatus" :
+        checkstatus = 1
     else :
         histdir = x
   
@@ -234,6 +237,10 @@ for imod in range(len(modules)) :
        active_modules.append(modules[imod])
 
 
+if checkstatus == 1 :
+    import rcdb
+    db = rcdb.RCDBProvider("mysql://rcdb@hallddb/rcdb")
+
 
 # loop through the runs, running the module check functions to gather status and other metrics
 
@@ -245,7 +252,7 @@ for filename in histofilelist:
 
         fullfilepath = histdir + "/" + filename
         findrunnum = re.findall('\d+',filename)   #makes a list of numbers found in the filename
-    
+
         if len(findrunnum) == 0:
             run = 0
             if file_errcount < max_file_errcount:
@@ -255,6 +262,17 @@ for filename in histofilelist:
         else:
             run = int(findrunnum[0])
     
+        skiprun = 0
+
+        if checkstatus == 1 :
+            condition = db.get_condition(run, "status")
+            if condition.value == 0:
+                skiprun = 1
+
+        if skiprun:
+            continue
+    
+
         try:
             rootfile = TFile(fullfilepath)
         except :
@@ -506,7 +524,6 @@ for i in range(len(pagenames)):
 
         if first_graph :
             mg_n = 0
-            print('skipping',thing)
             first_graph = False
 
         elif "_status" in thing:
@@ -514,10 +531,7 @@ for i in range(len(pagenames)):
             gr.SetMarkerColor(mg_colours[mg_n % 5])
             gr.SetMarkerStyle(mg_symbols[int(mg_n/5) % 4])
             mg.Add(gr)
-            print('adding',thing)
             mg_n = mg_n + 1
-#            print(mg_name,mg_n%5,int(mg_n/5)%4)
-
 
     mg.Write()
 
@@ -533,6 +547,7 @@ for i in range(len(pagenames)):
             dy.append(allruns_values[ii][ething[2]])
       
         gr = make_graph_errs(gnames[igraph],gtitles[igraph],nruns,x,y,dx,dy) 
+        gr.SetLineColor(17);
         gr.Write()
 
     f.cd("../")

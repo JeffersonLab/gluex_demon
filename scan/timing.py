@@ -185,7 +185,7 @@ def tof_rf_time(rootfile, timemin=-0.1, timemax=0.1) :
   h1d = h.ProjectionY("DeltaTVsP_PiMinus_1D", 35, 250)
   max = h1d.GetBinCenter(h1d.GetMaximumBin())
 
-  r = h.Fit("gaus", "0SQ", "", max - low_limit, max + high_limit)
+  r = h1d.Fit("gaus", "0SQ", "", max - low_limit, max + high_limit)
 
   if int(r) != 0 :  # bad fit
     return values 
@@ -636,7 +636,7 @@ def tagm_rf_time(rootfile, timemin=-0.1, timemax=0.1) :
   max = h.GetBinCenter(h.GetMaximumBin())
 
   r = h.Fit("gaus", "0SQ", "", max + low_limit, max + high_limit)
-
+ 
   if int(r) != 0 :  # bad fit
     return values 
 

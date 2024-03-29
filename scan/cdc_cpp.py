@@ -287,6 +287,7 @@ def cdc_dedx_cpp(rootfile, dedxmin=1.9998, dedxmax=2.0402, dedxresmin=0.25, dedx
   g.SetParameter(2,0.3*maxval)   # sigma - root limits this if mean is limited
   g.SetParLimits(2,0.25*maxval,0.75*maxval)
 
+  p.GetXaxis().SetRangeUser(0,5)
 
   fitstat = p.Fit('g','q0wB')
   
