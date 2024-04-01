@@ -115,17 +115,11 @@ def sc_rf_time(rootfile, timemin=-0.1, timemax=0.1) :
   histoname = 'DeltaTVsP_Pi-'      # monitoring histogram to check
   dirname = '/Independent/Hist_DetectorPID/SC'          # directory containing that histogram
 
+  min_counts = 1000
 
-  test = rootfile.cd(dirname)
+  h = get_histo(rootfile, dirname, histoname, min_counts)
 
-  if test == False: 
-    print('Could not find ' + dirname)
-    return values
-
-  h = gROOT.FindObject(histoname)
-
-  if (not not h) == False :
-    print('Could not find ' + histoname)
+  if (not h) :
     return values
 
   low_limit = 0.3
@@ -165,17 +159,11 @@ def tof_rf_time(rootfile, timemin=-0.1, timemax=0.1) :
   histoname = 'DeltaTVsP_Pi-'      # monitoring histogram to check
   dirname = '/Independent/Hist_DetectorPID/TOF'          # directory containing that histogram
 
+  min_counts = 1000
 
-  test = rootfile.cd(dirname)
+  h = get_histo(rootfile, dirname, histoname, min_counts)
 
-  if test == False: 
-    print('Could not find ' + dirname)
-    return values
-
-  h = gROOT.FindObject(histoname)
-
-  if (not not h) == False :
-    print('Could not find ' + histoname)
+  if (not h) :
     return values
 
   low_limit = 0.15
@@ -197,7 +185,6 @@ def tof_rf_time(rootfile, timemin=-0.1, timemax=0.1) :
   if tof_time_mean < timemin or tof_time_mean > timemax:
       status=0
 
-
   values = [status, float('%.5f'%(tof_time_mean)), float('%.5f'%(tof_time_sigma)) ]
   #print(values)
   return values       # return array of values, status first
@@ -215,17 +202,11 @@ def bcal_neut_rf_time(rootfile, timemin=-0.1, timemax=0.1) :
   histoname = 'DeltaTVsShowerE_Photon'      # monitoring histogram to check
   dirname = '/Independent/Hist_DetectorPID/BCAL'          # directory containing that histogram
 
+  min_counts = 1000
 
-  test = rootfile.cd(dirname)
+  h = get_histo(rootfile, dirname, histoname, min_counts)
 
-  if test == False: 
-    print('Could not find ' + dirname)
-    return values
-
-  h = gROOT.FindObject(histoname)
-
-  if (not not h) == False :
-    print('Could not find ' + histoname)
+  if (not h) :
     return values
 
   low_limit = 0.3
@@ -247,7 +228,6 @@ def bcal_neut_rf_time(rootfile, timemin=-0.1, timemax=0.1) :
   if bcal_time_mean < timemin or bcal_time_mean > timemax:
       status=0
 
-
   values = [status, float('%.5f'%(bcal_time_mean)), float('%.5f'%(bcal_time_sigma)) ]
   #print(values)
   return values       # return array of values, status first
@@ -265,17 +245,11 @@ def bcal_chg_rf_time(rootfile, timemin=-0.1, timemax=0.1) :
   histoname = 'DeltaTVsP_Pi-'      # monitoring histogram to check
   dirname = '/Independent/Hist_DetectorPID/BCAL'          # directory containing that histogram
 
+  min_counts = 1000
 
-  test = rootfile.cd(dirname)
+  h = get_histo(rootfile, dirname, histoname, min_counts)
 
-  if test == False: 
-    print('Could not find ' + dirname)
-    return values
-
-  h = gROOT.FindObject(histoname)
-
-  if (not not h) == False :
-    print('Could not find ' + histoname)
+  if (not h) :
     return values
 
   low_limit = 0.3
@@ -297,7 +271,6 @@ def bcal_chg_rf_time(rootfile, timemin=-0.1, timemax=0.1) :
   if bcal_time_mean < timemin or bcal_time_mean > timemax:
       status=0
 
-
   values = [status, float('%.5f'%(bcal_time_mean)), float('%.5f'%(bcal_time_sigma)) ]
   #print(values)
   return values       # return array of values, status first
@@ -315,17 +288,11 @@ def fcal_neut_rf_time(rootfile, timemin=-0.1, timemax=0.1) :
   histoname = 'DeltaTVsShowerE_Photon'      # monitoring histogram to check
   dirname = '/Independent/Hist_DetectorPID/FCAL'          # directory containing that histogram
 
+  min_counts = 1000
 
-  test = rootfile.cd(dirname)
+  h = get_histo(rootfile, dirname, histoname, min_counts)
 
-  if test == False: 
-    print('Could not find ' + dirname)
-    return values
-
-  h = gROOT.FindObject(histoname)
-
-  if (not not h) == False :
-    print('Could not find ' + histoname)
+  if (not h) :
     return values
 
   low_limit = 0.5
@@ -347,7 +314,6 @@ def fcal_neut_rf_time(rootfile, timemin=-0.1, timemax=0.1) :
   if fcal_time_mean < timemin or fcal_time_mean > timemax:
       status=0
 
-
   values = [status, float('%.5f'%(fcal_time_mean)), float('%.5f'%(fcal_time_sigma)) ]
   #print(values)
   return values       # return array of values, status first
@@ -365,17 +331,11 @@ def fcal_chg_rf_time(rootfile, timemin=-0.1, timemax=0.1) :
   histoname = 'DeltaTVsP_Pi-'      # monitoring histogram to check
   dirname = '/Independent/Hist_DetectorPID/FCAL'          # directory containing that histogram
 
+  min_counts = 1000
 
-  test = rootfile.cd(dirname)
+  h = get_histo(rootfile, dirname, histoname, min_counts)
 
-  if test == False: 
-    print('Could not find ' + dirname)
-    return values
-
-  h = gROOT.FindObject(histoname)
-
-  if (not not h) == False :
-    print('Could not find ' + histoname)
+  if (not h) :
     return values
 
   low_limit = 0.5
@@ -397,7 +357,6 @@ def fcal_chg_rf_time(rootfile, timemin=-0.1, timemax=0.1) :
   if fcal_time_mean < timemin or fcal_time_mean > timemax:
       status=0
 
-
   values = [status, float('%.5f'%(fcal_time_mean)), float('%.5f'%(fcal_time_sigma)) ]
   #print(values)
   return values       # return array of values, status first
@@ -415,17 +374,11 @@ def cdc_rf_time(rootfile, timemin=-0.1, timemax=0.1) :
   histoname = 'Earliest CDC Time Minus Matched SC Time'      # monitoring histogram to check
   dirname = '/HLDetectorTiming/Physics Triggers/TRACKING'          # directory containing that histogram
 
+  min_counts = 1000
 
-  test = rootfile.cd(dirname)
+  h = get_histo(rootfile, dirname, histoname, min_counts)
 
-  if test == False: 
-    print('Could not find ' + dirname)
-    return values
-
-  h = gROOT.FindObject(histoname)
-
-  if (not not h) == False :
-    print('Could not find ' + histoname)
+  if (not h) :
     return values
 
   low_limit = 15.
@@ -465,17 +418,11 @@ def fdc_rf_time(rootfile, timemin=-0.1, timemax=0.1) :
   histoname = 'Earliest Flight-time Corrected FDC Time'      # monitoring histogram to check
   dirname = '/HLDetectorTiming/Physics Triggers/TRACKING'          # directory containing that histogram
 
+  min_counts = 1000
 
-  test = rootfile.cd(dirname)
+  h = get_histo(rootfile, dirname, histoname, min_counts)
 
-  if test == False: 
-    print('Could not find ' + dirname)
-    return values
-
-  h = gROOT.FindObject(histoname)
-
-  if (not not h) == False :
-    print('Could not find ' + histoname)
+  if (not h) :
     return values
 
   low_limit = 15.
@@ -515,17 +462,11 @@ def ps_rf_time(rootfile, timemin=-0.1, timemax=0.1) :
   histoname = 'PSTAGH_tdiffVsEdiff'      # monitoring histogram to check
   dirname = '/PSPair/PSC_PS_TAGH/'          # directory containing that histogram
 
+  min_counts = 1000
 
-  test = rootfile.cd(dirname)
+  h = get_histo(rootfile, dirname, histoname, min_counts)
 
-  if test == False: 
-    print('Could not find ' + dirname)
-    return values
-
-  h = gROOT.FindObject(histoname)
-
-  if (not not h) == False :
-    print('Could not find ' + histoname)
+  if (not h) :
     return values
 
   low_limit = 0.3
@@ -565,17 +506,11 @@ def tagh_rf_time(rootfile, timemin=-0.1, timemax=0.1) :
   histoname = 'Tagger - RFBunch 1D Time'      # monitoring histogram to check
   dirname = '/HLDetectorTiming/Physics Triggers/TRACKING'          # directory containing that histogram
 
+  min_counts = 1000
 
-  test = rootfile.cd(dirname)
+  h = get_histo(rootfile, dirname, histoname, min_counts)
 
-  if test == False: 
-    print('Could not find ' + dirname)
-    return values
-
-  h = gROOT.FindObject(histoname)
-
-  if (not not h) == False :
-    print('Could not find ' + histoname)
+  if (not h) :
     return values
 
   low_limit = 0.3
@@ -615,17 +550,11 @@ def tagm_rf_time(rootfile, timemin=-0.1, timemax=0.1) :
   histoname = 'TAGM - RFBunch 1D Time'      # monitoring histogram to check
   dirname = '/HLDetectorTiming/Physics Triggers/TRACKING'          # directory containing that histogram
 
+  min_counts = 1000
 
-  test = rootfile.cd(dirname)
+  h = get_histo(rootfile, dirname, histoname, min_counts)
 
-  if test == False: 
-    print('Could not find ' + dirname)
-    return values
-
-  h = gROOT.FindObject(histoname)
-
-  if (not not h) == False :
-    print('Could not find ' + histoname)
+  if (not h) :
     return values
 
   low_limit = 0.3
@@ -652,3 +581,24 @@ def tagm_rf_time(rootfile, timemin=-0.1, timemax=0.1) :
   #print(values)
   return values       # return array of values, status first
 
+
+def get_histo(rootfile, dirname, histoname, min_counts) :
+
+  test = rootfile.GetDirectory(dirname) 
+
+  if (not test):
+    #print('Could not find ' + dirname)
+    return False
+
+  rootfile.cd(dirname)
+
+  h = gROOT.FindObject(histoname)
+
+  if (not h) :
+    #print('Could not find ' + histoname)
+    return False
+
+  if h.GetEntries() < min_counts:
+    return False
+
+  return h

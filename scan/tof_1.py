@@ -8,17 +8,6 @@ from ROOT import gROOT
 #
 # 'init' and 'check' call the custom functions.  'init' returns graph names and titles. 'check' returns the numbers to be graphed.
 #
-#
-# Change all instances of tof_1 to your module's name 
-#
-# Adapt the example custom functions (tof_1_occupancy and tof_1_e) to retrieve the metrics needed from their histogram.
-# Add more custom functions, or remove one if it is not required.
-#
-# Add the custom functions to the list of functions in 'init' and 'check'.
-#
-# In 'check', provide the set of limits for each metric, and adapt the code to use these. 
-#
-
 
 
 def init() : 
@@ -110,30 +99,24 @@ def tof_1_dEdxP1(rootfile) :
   histoname = 'TOFPointEnergyP1'   # monitoring histogram to check
   dirname = '/Independent/Hist_Reconstruction'      # directory containing the histogram
   
-  test = rootfile.cd(dirname)
-  
-  if test == False: 
-    print('Could not find ' + dirname)
-    return values
-  
-  h = gROOT.FindObject(histoname)
-  
-  if (not not h) == False :
-    print('Could not find ' + histoname)
-    return values
+  min_counts = 1000
 
+  h = get_histo(rootfile, dirname, histoname, min_counts)
+
+  if (not h) :
+    return values
   
   # code to check the histogram and find the status values
   
-  if h.GetEntries() < 1000 :   # not enough entries
-    return values 
-
   MAX = h.GetBinCenter(h.GetMaximumBin())
-  h.Fit("landau","Q","R", MAX*0.9, MAX*2.2)
+  r = h.Fit("landau","Q","R", MAX*0.9, MAX*2.2)
+
+  if int(r) != 0 :  # bad fit
+    return values
+
   f1 = h.GetFunction("landau")
   MPV = f1.GetParameter(1);
-  dMPV = f1.GetParError(1);
-  
+  dMPV = f1.GetParError(1);  
   
   tof_1_dEdxP1 = MPV
   tof_1_dEdxP1_err = dMPV
@@ -168,26 +151,22 @@ def tof_1_dEdxP2(rootfile) :
   histoname = 'TOFPointEnergyP2'   # monitoring histogram to check
   dirname = '/Independent/Hist_Reconstruction'      # directory containing the histogram
 
-  test = rootfile.cd(dirname)
+  min_counts = 1000
 
-  if test == False: 
-    print('Could not find ' + dirname)
+  h = get_histo(rootfile, dirname, histoname, min_counts)
+
+  if (not h) :
     return values
-
-  h = gROOT.FindObject(histoname)
-  
-  if (not not h) == False :
-    print('Could not find ' + histoname)
-    return values
-
 
   # code to check the histogram and find the status values
 
-  if h.GetEntries() < 1000 :   # not enough entries
-    return values 
-
   MAX = h.GetBinCenter(h.GetMaximumBin())
-  h.Fit("landau","Q","R", MAX*0.9, MAX*2.2)
+
+  r = h.Fit("landau","Q","R", MAX*0.9, MAX*2.2)
+
+  if int(r) != 0 :  # bad fit
+    return values
+
   f1 = h.GetFunction("landau")
   MPV = f1.GetParameter(1);
   dMPV = f1.GetParError(1);
@@ -285,18 +264,12 @@ def tof_1_dxpos(rootfile):
   histoname = 'TOFTrackDeltaXVsHorizontalPaddle'   # monitoring histogram to check
   dirname = '/Independent/Hist_DetectorMatching/TimeBased/TOFPoint'      # directory containing the histogram
   
-  test = rootfile.cd(dirname)
-  
-  if test == False: 
-    print('Could not find ' + dirname)
+  min_counts = 4e4
+
+  h = get_histo(rootfile, dirname, histoname, min_counts)
+
+  if (not h) :
     return values
-
-  h = gROOT.FindObject(histoname)
-
-  if (not not h) == False :
-    print('Could not find ' + histoname)
-    return values
-
 
   # code to check the histogram and find the status values
   POS = []
@@ -320,11 +293,12 @@ def tof_1_dxpos(rootfile):
         h1d.Fit("gaus", "Q","R", pos-4., pos+4.)
         f1 = h1d.GetFunction("gaus")
         pos = f1.GetParameter(1)
-        h1d.Fit("gaus", "Q","R", pos-4., pos+4.)
+        r = h1d.Fit("gaus", "Q","R", pos-4., pos+4.)
         f1 = h1d.GetFunction("gaus")
 
-        POSval = f1.GetParameter(1)
-        dPOSval = f1.GetParError(1)    
+        if int(r) == 0:
+          POSval = f1.GetParameter(1)
+          dPOSval = f1.GetParError(1)    
   
     POS.append(POSval)
     dPOS.append(dPOSval)
@@ -423,18 +397,12 @@ def tof_1_dypos(rootfile):
   histoname = 'TOFTrackDeltaYVsVerticalPaddle'   # monitoring histogram to check
   dirname = '/Independent/Hist_DetectorMatching/TimeBased/TOFPoint'      # directory containing the histogram
   
-  test = rootfile.cd(dirname)
-  
-  if test == False: 
-    print('Could not find ' + dirname)
+  min_counts = 4e4
+
+  h = get_histo(rootfile, dirname, histoname, min_counts)
+
+  if (not h) :
     return values
-
-  h = gROOT.FindObject(histoname)
-
-  if (not not h) == False :
-    print('Could not find ' + histoname)
-    return values
-
 
   # code to check the histogram and find the status values
   POS = []
@@ -458,11 +426,12 @@ def tof_1_dypos(rootfile):
         h1d.Fit("gaus", "Q","R", pos-4., pos+4.)
         f1 = h1d.GetFunction("gaus")
         pos = f1.GetParameter(1)
-        h1d.Fit("gaus", "Q","R", pos-4., pos+4.)
+        r = h1d.Fit("gaus", "Q","R", pos-4., pos+4.)
         f1 = h1d.GetFunction("gaus");
-
-        POSval = f1.GetParameter(1)
-        dPOSval = f1.GetParError(1)    
+  
+        if int(r) == 0:
+          POSval = f1.GetParameter(1)
+          dPOSval = f1.GetParError(1)    
 
     POS.append(POSval)
     dPOS.append(dPOSval)
@@ -476,3 +445,28 @@ def tof_1_dypos(rootfile):
     values.append(float('%.5f'%(dPOS[n])))
     
   return values       # return array of values, status first
+
+
+
+def get_histo(rootfile, dirname, histoname, min_counts) :
+
+  test = rootfile.GetDirectory(dirname) 
+
+  # file pointer contains tobj if dir exists, set false if not
+
+  if (not test):
+    #print('Could not find ' + dirname)
+    return False
+
+  rootfile.cd(dirname)
+
+  h = gROOT.FindObject(histoname)
+
+  if (not h) :
+    #print('Could not find ' + histoname)
+    return False
+
+  if h.GetEntries() < min_counts:
+    return False
+
+  return h

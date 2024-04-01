@@ -70,12 +70,13 @@ import tof_1
 import fmwpc
 import ctof
 import rf
+import ps_e
 
-modules_def = [rf, cdc ,fdc, timing, timing_MD, tof_1]       # default list of modules
-modules_cpp = [rf, cdc_cpp,fdc,timing,timing_MD,tof_1,fmwpc,ctof]   # modules for CPP
+modules_def = [rf, ps_e, cdc, fdc, timing, timing_MD, tof_1]       # default list of modules
+modules_cpp = [rf, ps_e, cdc_cpp,fdc,timing,timing_MD,tof_1,fmwpc,ctof]   # modules for CPP
 
 testing = 0  # stop after <runlimit> files, print diagnostics
-runlimit = 1 # process this number of runs if testing=1
+runlimit = 13 # process this number of runs if testing=1
 checkstatus = 0  # skip RCDB check
 
 RunPeriod=""

@@ -82,23 +82,18 @@ def fdc_dedxpos(rootfile, dedxmin=1.9998, dedxmax=2.0402, dedxresmin=0.25, dedxr
   dirname = '/Independent/Hist_DetectorPID/FDC'
   histoname = 'dEdXVsP_q+'
 
-  test = rootfile.cd(dirname)
+  min_counts = 5e4
 
-  if test == False: 
-    print('Could not find ' + dirname)
-    return values
+  h = get_histo(rootfile, dirname, histoname, min_counts)
 
-  h = gROOT.FindObject(histoname)
-
-  if (not not h) == False :
-    print('Could not find ' + histoname)
+  if (not h) :
     return values
 
   pcut = 1.5 #;    // draw cut through histo at p=1.5 GeV/c
   pbin = h.GetXaxis().FindBin(pcut)
   p = h.ProjectionY("p1",pbin,pbin)
 
-  if p.GetEntries()<5 :
+  if p.GetEntries() < 1000 :
     return values 
 
   p.GetXaxis().SetRangeUser(0,5)
@@ -109,7 +104,7 @@ def fdc_dedxpos(rootfile, dedxmin=1.9998, dedxmax=2.0402, dedxresmin=0.25, dedxr
   
   #print 'fit status ',fitstat.IsValid(), fitstat.Status()
 
-  if fitstat == 0:
+  if int(fitstat) == 0:
     mean = g.GetParameter(1)
     res = 2.0*g.GetParameter(2)/mean
 
@@ -136,23 +131,18 @@ def fdc_dedxneg(rootfile, dedxmin=1.9998, dedxmax=2.0402, dedxresmin=0.25, dedxr
   dirname = '/Independent/Hist_DetectorPID/FDC'
   histoname = 'dEdXVsP_q-'
 
-  test = rootfile.cd(dirname)
+  min_counts = 5e4
 
-  if test == False: 
-    print('Could not find ' + dirname)
-    return values
+  h = get_histo(rootfile, dirname, histoname, min_counts)
 
-  h = gROOT.FindObject(histoname)
-
-  if (not not h) == False :
-    print('Could not find ' + histoname)
+  if (not h) :
     return values
 
   pcut = 1.5 #;    // draw cut through histo at p=1.5 GeV/c
   pbin = h.GetXaxis().FindBin(pcut)
   p = h.ProjectionY("p1",pbin,pbin)
 
-  if p.GetEntries()<5 :
+  if p.GetEntries() < 1000 :
     return values 
 
   g = TF1('g','gaus',0,12)
@@ -189,16 +179,11 @@ def fdc_tdc(rootfile, tdcmin=-2, tdcmax=2) :
   dirname = '/HLDetectorTiming/Physics Triggers/FDC'
   histoname = 'FDCHit Wire time vs. module'
 
-  test = rootfile.cd(dirname)
+  min_counts = 1000
 
-  if test == False: 
-    print('Could not find ' + dirname)
-    return values
+  h = get_histo(rootfile, dirname, histoname, min_counts)
 
-  h = gROOT.FindObject(histoname)
-
-  if (not not h) == False :
-    print('Could not find ' + histoname)
+  if (not h) :
     return values
 
   n = h.GetEntries()
@@ -234,4 +219,25 @@ def fdc_tdc(rootfile, tdcmin=-2, tdcmax=2) :
 
 
 
+def get_histo(rootfile, dirname, histoname, min_counts) :
 
+  test = rootfile.GetDirectory(dirname) 
+
+  # file pointer contains tobj if dir exists, set false if not
+
+  if (not test):
+    #print('Could not find ' + dirname)
+    return False
+
+  rootfile.cd(dirname)
+
+  h = gROOT.FindObject(histoname)
+
+  if (not h) :
+    #print('Could not find ' + histoname)
+    return False
+
+  if h.GetEntries() < min_counts:
+    return
+
+  return h

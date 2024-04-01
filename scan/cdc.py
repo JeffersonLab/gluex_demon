@@ -95,16 +95,11 @@ def cdc_occupancy(rootfile, occmax=9) :
 
   from array import array
 
-  test = rootfile.cd(dirname)
+  min_counts = 1000
 
-  if test == False: 
-    print('Could not find ' + dirname)
-    return values
+  h = get_histo(rootfile, dirname, histoname, min_counts)
 
-  h = gROOT.FindObject(histoname)
-
-  if (not not h) == False :
-    print('Could not find ' + histoname)
+  if (not h) :
     return values
 
   Nstraws = array("I", [42, 42, 54, 54, 66, 66, 80, 80, 93, 93, 106, 106, 123, 123, 135, 135, 146, 146, 158, 158, 170, 170, 182, 182, 197, 197, 209, 209])
@@ -172,21 +167,11 @@ def cdc_efficiency(rootfile, e0min=0.97, e5min=0.96, e6min=0.89) :
   dirname = '/CDC_Efficiency/Online'
   histoname = 'Efficiency Vs DOCA'
 
-  from array import array
+  min_counts = 100
 
-  test = rootfile.cd(dirname)
+  h = get_histo(rootfile, dirname, histoname, min_counts)
 
-  if test == False: 
-    print('Could not find ' + dirname)
-    return values
-
-  h = gROOT.FindObject(histoname)
-
-  if (not not h) == False :
-    print('Could not find ' + histoname)
-    return values
-
-  if h.GetEntries()<100 :
+  if (not h) :
     return values
 
   else :
@@ -222,18 +207,12 @@ def cdc_dedx(rootfile, dedxmin=1.9998, dedxmax=2.0402, dedxresmin=0.25, dedxresm
   dirname = '/CDC_dedx'
   histoname = 'dedx_p_pos'
 
-  test = rootfile.cd(dirname)
+  min_counts = 5e4
 
-  if test == False: 
-    print('Could not find ' + dirname)
+  h = get_histo(rootfile, dirname, histoname, min_counts)
+
+  if (not h) :
     return values
-
-  h = gROOT.FindObject(histoname)
-
-  if (not not h) == False :
-    print('Could not find ' + histoname)
-    return values
-
 
   ntracks = h.GetEntries()
   scale = 1.0
@@ -250,7 +229,7 @@ def cdc_dedx(rootfile, dedxmin=1.9998, dedxmax=2.0402, dedxresmin=0.25, dedxresm
     
   p = h.ProjectionY("p1",pbin1,pbin2)
 
-  if p.GetEntries()<5 :
+  if p.GetEntries()<1000 :
     return values 
 
   g = TF1('g','gaus',0,12)
@@ -261,7 +240,7 @@ def cdc_dedx(rootfile, dedxmin=1.9998, dedxmax=2.0402, dedxresmin=0.25, dedxresm
   
   #print 'fit status ',fitstat.IsValid(), fitstat.Status()
 
-  if fitstat == 0:
+  if int(fitstat) == 0:
     mean = scale*g.GetParameter(1)
     res = 2.0*g.GetParameter(2)/mean
 
@@ -289,16 +268,11 @@ def cdc_dedx_mean(rootfile, dedxmeanmin=1.5, dedxmeanmax=2.5, dedxsigmin=0.2, de
   dirname = '/CDC_dedx'
   histoname = 'dedx_p'
 
-  test = rootfile.cd(dirname)
+  min_counts = 100
 
-  if test == False: 
-    print('Could not find ' + dirname)
-    return values
+  h = get_histo(rootfile, dirname, histoname, min_counts)
 
-  h = gROOT.FindObject(histoname)
-
-  if (not not h) == False :
-    print('Could not find ' + histoname)
+  if (not h) :
     return values
 
   pp = h.ProjectionY("p1",0,10)
@@ -318,10 +292,6 @@ def cdc_dedx_mean(rootfile, dedxmeanmin=1.5, dedxmeanmax=2.5, dedxsigmin=0.2, de
 
 
 
-
-
-
-
 def cdc_ttod(rootfile, ttodmeanmax=15.0, ttodsigmamax=150.0) :
 
   titles = ['TTOD status','TTOD residual mean (#mum)','TTOD residual width (#mum)']
@@ -334,20 +304,12 @@ def cdc_ttod(rootfile, ttodmeanmax=15.0, ttodsigmamax=150.0) :
   dirname = '/CDC_TimeToDistance'
   histoname = 'Residual Vs. Drift Time'
 
-  test = rootfile.cd(dirname)
+  min_counts = 3e5
 
-  if test == False: 
-    print('Could not find ' + dirname)
+  h = get_histo(rootfile, dirname, histoname, min_counts)
+
+  if (not h) :
     return values
-
-  h = gROOT.FindObject(histoname)
-
-  if (not not h) == False :
-    print('Could not find ' + histoname)
-    return values
-
-  if h.GetEntries()<3e5 :  # NB need 1e6 to fit the histo.
-    return values 
 
   mean = 1e4*h.GetMean(2)   # convert from cm to um
   sigma = 1e4*h.GetRMS(2)   # convert from cm to um
@@ -362,3 +324,27 @@ def cdc_ttod(rootfile, ttodmeanmax=15.0, ttodsigmamax=150.0) :
   return values
 
 
+
+def get_histo(rootfile, dirname, histoname, min_counts) :
+
+  test = rootfile.GetDirectory(dirname) 
+
+  # file pointer contains tobj if dir exists, set false if not
+
+  if (not test):
+    #print('Could not find ' + dirname)
+    return False
+
+  rootfile.cd(dirname)
+
+  h = gROOT.FindObject(histoname)
+
+  if (not h) :
+    #print('Could not find ' + histoname)
+    return False
+
+  if h.GetEntries() < min_counts:
+    return False
+
+
+  return h

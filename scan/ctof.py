@@ -110,19 +110,12 @@ def ctof_t(rootfile, tmin=0, tmax=100) :
   histoname = 'h2_ctof_t'   # monitoring histogram to check
   dirname = '/FMWPC'      # directory containing the histogram
 
+  min_counts = 1000
 
-  test = rootfile.cd(dirname)
+  h = get_histo(rootfile, dirname, histoname, min_counts)
 
-  if test == False: 
-    print('Could not find ' + dirname)
+  if (not h) :
     return values
-
-  h = gROOT.FindObject(histoname)
-
-  if (not not h) == False :
-    print('Could not find ' + histoname)
-    return values
-
 
   # code to check the histogram and find the status values
 
@@ -173,19 +166,12 @@ def ctof_dt(rootfile, dtmin=0, dtmax=100) :
   histoname = 'h2_ctof_t_adc_tdc'   # monitoring histogram to check
   dirname = '/FMWPC'      # directory containing the histogram
 
+  min_counts = 1000
 
-  test = rootfile.cd(dirname)
+  h = get_histo(rootfile, dirname, histoname, min_counts)
 
-  if test == False: 
-    print('Could not find ' + dirname)
+  if (not h) :
     return values
-
-  h = gROOT.FindObject(histoname)
-
-  if (not not h) == False :
-    print('Could not find ' + histoname)
-    return values
-
 
   # code to check the histogram and find the status values
 
@@ -215,3 +201,24 @@ def ctof_dt(rootfile, dtmin=0, dtmax=100) :
   
   return values       # return array of values, status first
 
+
+def get_histo(rootfile, dirname, histoname, min_counts) :
+
+  test = rootfile.GetDirectory(dirname) 
+
+  if (not test):
+    #print('Could not find ' + dirname)
+    return False
+
+  rootfile.cd(dirname)
+
+  h = gROOT.FindObject(histoname)
+
+  if (not h) :
+    #print('Could not find ' + histoname)
+    return False
+
+  if h.GetEntries() < min_counts:
+    return False
+
+  return h

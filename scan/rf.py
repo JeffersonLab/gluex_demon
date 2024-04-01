@@ -110,16 +110,9 @@ def rf_tagh_tof(rootfile, tmax=0.1, sigmax=0.1) :
   histoname = 'RFDeltaT_TAGH_TOF'   # monitoring histogram to check
   dirname = '/RF/DeltaT_RF_OtherRFs'      # directory containing the histogram
 
-  test = rootfile.cd(dirname)
+  h = get_histo(rootfile, dirname, histoname)
 
-  if test == False: 
-    print('Could not find ' + dirname)
-    return values
-
-  h = gROOT.FindObject(histoname)
-
-  if (not not h) == False :
-    print('Could not find ' + histoname)
+  if not h:
     return values
 
   if h.GetEntries() < 100 :
@@ -143,16 +136,9 @@ def rf_psc_tof(rootfile, tmax=0.1, sigmax=0.1) :
   histoname = 'RFDeltaT_PSC_TOF'   # monitoring histogram to check
   dirname = '/RF/DeltaT_RF_OtherRFs'      # directory containing the histogram
 
-  test = rootfile.cd(dirname)
+  h = get_histo(rootfile, dirname, histoname)
 
-  if test == False: 
-    print('Could not find ' + dirname)
-    return values
-
-  h = gROOT.FindObject(histoname)
-
-  if (not not h) == False :
-    print('Could not find ' + histoname)
+  if not h:
     return values
 
   if h.GetEntries() < 100 :
@@ -177,16 +163,9 @@ def rf_fdc_tof(rootfile, tmax=0.1, sigmax=0.1) :
   histoname = 'RFDeltaT_FDC_TOF'   # monitoring histogram to check
   dirname = '/RF/DeltaT_RF_OtherRFs'      # directory containing the histogram
 
-  test = rootfile.cd(dirname)
+  h = get_histo(rootfile, dirname, histoname)
 
-  if test == False: 
-    print('Could not find ' + dirname)
-    return values
-
-  h = gROOT.FindObject(histoname)
-
-  if (not not h) == False :
-    print('Could not find ' + histoname)
+  if not h:
     return values
 
   if h.GetEntries() < 100 :
@@ -212,16 +191,9 @@ def rf_fdc_tagh(rootfile, tmax=0.1, sigmax=0.1) :
   histoname = 'RFDeltaT_FDC_TAGH'   # monitoring histogram to check
   dirname = '/RF/DeltaT_RF_OtherRFs'      # directory containing the histogram
 
-  test = rootfile.cd(dirname)
+  h = get_histo(rootfile, dirname, histoname)
 
-  if test == False: 
-    print('Could not find ' + dirname)
-    return values
-
-  h = gROOT.FindObject(histoname)
-
-  if (not not h) == False :
-    print('Could not find ' + histoname)
+  if not h:
     return values
 
   if h.GetEntries() < 100 :
@@ -246,16 +218,9 @@ def rf_fdc_psc(rootfile, tmax=0.1, sigmax=0.1) :
   histoname = 'RFDeltaT_FDC_PSC'   # monitoring histogram to check
   dirname = '/RF/DeltaT_RF_OtherRFs'      # directory containing the histogram
 
-  test = rootfile.cd(dirname)
+  h = get_histo(rootfile, dirname, histoname)
 
-  if test == False: 
-    print('Could not find ' + dirname)
-    return values
-
-  h = gROOT.FindObject(histoname)
-
-  if (not not h) == False :
-    print('Could not find ' + histoname)
+  if (not h) :
     return values
 
   if h.GetEntries() < 100 :
@@ -279,16 +244,9 @@ def rf_psc_tagh(rootfile, tmax=0.1, sigmax=0.1) :
   histoname = 'RFDeltaT_PSC_TAGH'   # monitoring histogram to check
   dirname = '/RF/DeltaT_RF_OtherRFs'      # directory containing the histogram
 
-  test = rootfile.cd(dirname)
+  h = get_histo(rootfile, dirname, histoname)
 
-  if test == False: 
-    print('Could not find ' + dirname)
-    return values
-
-  h = gROOT.FindObject(histoname)
-
-  if (not not h) == False :
-    print('Could not find ' + histoname)
+  if (not h) :
     return values
 
   if h.GetEntries() < 100 :
@@ -322,3 +280,25 @@ def fit_histo(h, tmax, sigmax) :
 
 
   return values  
+
+
+
+def get_histo(rootfile, dirname, histoname) :
+
+  test = rootfile.GetDirectory(dirname) 
+
+  # file pointer contains tobj if dir exists, set false if not
+
+  if (not test):
+    #print('Could not find ' + dirname)
+    return False
+
+  rootfile.cd(dirname)
+
+  h = gROOT.FindObject(histoname)
+
+  if (not h) :
+    #print('Could not find ' + histoname)
+    return False
+
+  return h

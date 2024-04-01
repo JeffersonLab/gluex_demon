@@ -110,19 +110,11 @@ def new_module_occupancy(rootfile, occmin=0.99) :
   histoname = 'an30_100ns'      # monitoring histogram to check
   dirname = '/CDC_amp'          # directory containing that histogram
 
+  min_counts = 1000
+  h = get_histo(rootfile, dirname, histoname, min_counts)
 
-  test = rootfile.cd(dirname)
-
-  if test == False: 
-    print('Could not find ' + dirname)
+  if (not h) :
     return values
-
-  h = gROOT.FindObject(histoname)
-
-  if (not not h) == False :
-    print('Could not find ' + histoname)
-    return values
-
 
   # this is a copy of the CDC's occupancy code
 
@@ -198,19 +190,11 @@ def new_module_e(rootfile, emin=1.8, emax=2.3) :
   histoname = 'dedx_p_pos'   # monitoring histogram to check
   dirname = '/CDC_dedx'      # directory containing the histogram
 
+  min_counts = 1000
+  h = get_histo(rootfile, dirname, histoname, min_counts)
 
-  test = rootfile.cd(dirname)
-
-  if test == False: 
-    print('Could not find ' + dirname)
+  if (not h) :
     return values
-
-  h = gROOT.FindObject(histoname)
-
-  if (not not h) == False :
-    print('Could not find ' + histoname)
-    return values
-
 
   # code to check the histogram and find the status values
 
@@ -232,3 +216,26 @@ def new_module_e(rootfile, emin=1.8, emax=2.3) :
   
   return values       # return array of values, status first
 
+
+def get_histo(rootfile, dirname, histoname, min_counts) :
+
+  test = rootfile.GetDirectory(dirname) 
+
+  # file pointer contains tobj if dir exists, set false if not
+
+  if (not test):
+    #print('Could not find ' + dirname)
+    return False
+
+  rootfile.cd(dirname)
+
+  h = gROOT.FindObject(histoname)
+
+  if (not h) :
+    #print('Could not find ' + histoname)
+    return False
+
+  if h.GetEntries() < min_counts :
+    return False
+
+  return h

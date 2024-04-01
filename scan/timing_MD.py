@@ -194,16 +194,11 @@ def sc_piminus_rf_time(rootfile, timemin=-0.1, timemax=0.1, low_limit=-0.5, high
   dirname = '/Independent/Hist_DetectorPID/SC'          # directory containing that histogram
 
 
-  test = rootfile.cd(dirname)
+  min_counts = 1000
 
-  if test == False: 
-    print('Could not find ' + dirname)
-    return values
+  h = get_histo(rootfile, dirname, histoname, min_counts)
 
-  h = gROOT.FindObject(histoname)
-
-  if (not not h) == False :
-    print('Could not find ' + histoname)
+  if (not h) :
     return values
 
   # code to check the histogram and find the status values
@@ -230,7 +225,6 @@ def sc_piminus_rf_time(rootfile, timemin=-0.1, timemax=0.1, low_limit=-0.5, high
   status = 1
   if mean < timemin or mean > timemax or mean_error > error_max:
       status=0
-
 
   values = [status, float('%.5f'%(peak)), float('%.5f'%(mean)), float('%.5f'%(sigma)) ]
   #print(values)
@@ -250,17 +244,11 @@ def sc_piplus_rf_time(rootfile, timemin=-0.1, timemax=0.1, low_limit=-0.5, high_
   histoname = 'DeltaTVsP_Pi+'      # monitoring histogram to check
   dirname = '/Independent/Hist_DetectorPID/SC'          # directory containing that histogram
 
+  min_counts = 1000
 
-  test = rootfile.cd(dirname)
+  h = get_histo(rootfile, dirname, histoname, min_counts)
 
-  if test == False: 
-    print('Could not find ' + dirname)
-    return values
-
-  h = gROOT.FindObject(histoname)
-
-  if (not not h) == False :
-    print('Could not find ' + histoname)
+  if (not h) :
     return values
 
   # code to check the histogram and find the status values
@@ -287,7 +275,6 @@ def sc_piplus_rf_time(rootfile, timemin=-0.1, timemax=0.1, low_limit=-0.5, high_
   status = 1
   if mean < timemin or mean > timemax or mean_error > error_max:
       status=0
-
 
   values = [status, float('%.5f'%(peak)), float('%.5f'%(mean)), float('%.5f'%(sigma)) ]
   #print(values)
@@ -308,16 +295,11 @@ def sc_proton_rf_time(rootfile, timemin=-0.1, timemax=0.1, low_limit=-0.5, high_
   dirname = '/Independent/Hist_DetectorPID/SC'          # directory containing that histogram
 
 
-  test = rootfile.cd(dirname)
+  min_counts = 1000
 
-  if test == False: 
-    print('Could not find ' + dirname)
-    return values
+  h = get_histo(rootfile, dirname, histoname, min_counts)
 
-  h = gROOT.FindObject(histoname)
-
-  if (not not h) == False :
-    print('Could not find ' + histoname)
+  if (not h) :
     return values
 
   # code to check the histogram and find the status values
@@ -344,7 +326,6 @@ def sc_proton_rf_time(rootfile, timemin=-0.1, timemax=0.1, low_limit=-0.5, high_
   status = 1
   if mean < timemin or mean > timemax or mean_error > error_max:
       status=0
-
 
   values = [status, float('%.5f'%(peak)), float('%.5f'%(mean)), float('%.5f'%(sigma)) ]
   #print(values)
@@ -364,17 +345,11 @@ def tof_piminus_rf_time(rootfile, timemin=-0.1, timemax=0.1, low_limit=-0.5, hig
   histoname = 'DeltaTVsP_Pi-'      # monitoring histogram to check
   dirname = '/Independent/Hist_DetectorPID/TOF'          # directory containing that histogram
 
+  min_counts = 1000
 
-  test = rootfile.cd(dirname)
+  h = get_histo(rootfile, dirname, histoname, min_counts)
 
-  if test == False: 
-    print('Could not find ' + dirname)
-    return values
-
-  h = gROOT.FindObject(histoname)
-
-  if (not not h) == False :
-    print('Could not find ' + histoname)
+  if (not h) :
     return values
 
   # code to check the histogram and find the status values
@@ -402,7 +377,6 @@ def tof_piminus_rf_time(rootfile, timemin=-0.1, timemax=0.1, low_limit=-0.5, hig
   if mean < timemin or mean > timemax or mean_error > error_max:
       status=0
 
-
   values = [status, float('%.5f'%(peak)), float('%.5f'%(mean)), float('%.5f'%(sigma)) ]
   #print(values)
   return values       # return array of values, status first
@@ -421,17 +395,11 @@ def tof_piplus_rf_time(rootfile, timemin=-0.1, timemax=0.1, low_limit=-0.5, high
   histoname = 'DeltaTVsP_Pi+'      # monitoring histogram to check
   dirname = '/Independent/Hist_DetectorPID/TOF'          # directory containing that histogram
 
+  min_counts = 1000
 
-  test = rootfile.cd(dirname)
+  h = get_histo(rootfile, dirname, histoname, min_counts)
 
-  if test == False: 
-    print('Could not find ' + dirname)
-    return values
-
-  h = gROOT.FindObject(histoname)
-
-  if (not not h) == False :
-    print('Could not find ' + histoname)
+  if (not h) :
     return values
 
   # code to check the histogram and find the status values
@@ -478,17 +446,11 @@ def tof_proton_rf_time(rootfile, timemin=-0.1, timemax=0.1, low_limit=-0.5, high
   histoname = 'DeltaTVsP_Proton'      # monitoring histogram to check
   dirname = '/Independent/Hist_DetectorPID/TOF'          # directory containing that histogram
 
+  min_counts = 1000
 
-  test = rootfile.cd(dirname)
+  h = get_histo(rootfile, dirname, histoname, min_counts)
 
-  if test == False: 
-    print('Could not find ' + dirname)
-    return values
-
-  h = gROOT.FindObject(histoname)
-
-  if (not not h) == False :
-    print('Could not find ' + histoname)
+  if (not h) :
     return values
 
   # code to check the histogram and find the status values
@@ -516,7 +478,6 @@ def tof_proton_rf_time(rootfile, timemin=-0.1, timemax=0.1, low_limit=-0.5, high
   if mean < timemin or mean > timemax or mean_error > error_max:
       status=0
 
-
   values = [status, float('%.5f'%(peak)), float('%.5f'%(mean)), float('%.5f'%(sigma)) ]
   #print(values)
   return values       # return array of values, status first
@@ -535,17 +496,11 @@ def bcal_photon_rf_time(rootfile, timemin=-0.1, timemax=0.1, low_limit=-0.5, hig
   histoname = 'BCALNeutralShowerDeltaTVsE'      # monitoring histogram to check
   dirname = '/Independent/Hist_Neutrals'          # directory containing that histogram
 
+  min_counts = 1000
 
-  test = rootfile.cd(dirname)
+  h = get_histo(rootfile, dirname, histoname, min_counts)
 
-  if test == False: 
-    print('Could not find ' + dirname)
-    return values
-
-  h = gROOT.FindObject(histoname)
-
-  if (not not h) == False :
-    print('Could not find ' + histoname)
+  if (not h) :
     return values
 
   # code to check the histogram and find the status values
@@ -573,7 +528,6 @@ def bcal_photon_rf_time(rootfile, timemin=-0.1, timemax=0.1, low_limit=-0.5, hig
   if mean < timemin or mean > timemax or mean_error > error_max:
       status=0
 
-
   values = [status, float('%.5f'%(peak)), float('%.5f'%(mean)), float('%.5f'%(sigma)) ]
   #print(values)
   return values       # return array of values, status first
@@ -592,17 +546,11 @@ def bcal_photon_nominE_rf_time(rootfile, timemin=-0.1, timemax=0.1, low_limit=-0
   histoname = 'BCALNeutralShowerDeltaTVsE'      # monitoring histogram to check
   dirname = '/Independent/Hist_Neutrals'          # directory containing that histogram
 
+  min_counts = 1000
 
-  test = rootfile.cd(dirname)
+  h = get_histo(rootfile, dirname, histoname, min_counts)
 
-  if test == False: 
-    print('Could not find ' + dirname)
-    return values
-
-  h = gROOT.FindObject(histoname)
-
-  if (not not h) == False :
-    print('Could not find ' + histoname)
+  if (not h) :
     return values
 
   # code to check the histogram and find the status values
@@ -630,7 +578,6 @@ def bcal_photon_nominE_rf_time(rootfile, timemin=-0.1, timemax=0.1, low_limit=-0
   if mean < timemin or mean > timemax or mean_error > error_max:
       status=0
 
-
   values = [status, float('%.5f'%(peak)), float('%.5f'%(mean)), float('%.5f'%(sigma)) ]
   #print(values)
   return values       # return array of values, status first
@@ -650,17 +597,11 @@ def bcal_photon_alt_rf_time(rootfile, timemin=-0.1, timemax=0.1, low_limit=-0.5,
   histoname = 'DeltaTVsShowerE_Photon'      # monitoring histogram to check
   dirname = '/Independent/Hist_DetectorPID/BCAL'          # directory containing that histogram
 
+  min_counts = 1000
 
-  test = rootfile.cd(dirname)
+  h = get_histo(rootfile, dirname, histoname, min_counts)
 
-  if test == False: 
-    print('Could not find ' + dirname)
-    return values
-
-  h = gROOT.FindObject(histoname)
-
-  if (not not h) == False :
-    print('Could not find ' + histoname)
+  if (not h) :
     return values
 
   # code to check the histogram and find the status values
@@ -692,7 +633,6 @@ def bcal_photon_alt_rf_time(rootfile, timemin=-0.1, timemax=0.1, low_limit=-0.5,
   if mean < timemin or mean > timemax or mean_error > error_max:
       status=0
 
-
   values = [status, float('%.5f'%(peak)), float('%.5f'%(mean)), float('%.5f'%(sigma)) ]
   #print(values)
   return values       # return array of values, status first
@@ -712,17 +652,11 @@ def bcal_piminus_rf_time(rootfile, timemin=-0.1, timemax=0.1, low_limit=-0.5, hi
   histoname = 'DeltaTVsP_Pi-'      # monitoring histogram to check
   dirname = '/Independent/Hist_DetectorPID/BCAL'          # directory containing that histogram
 
+  min_counts = 1000
 
-  test = rootfile.cd(dirname)
+  h = get_histo(rootfile, dirname, histoname, min_counts)
 
-  if test == False: 
-    print('Could not find ' + dirname)
-    return values
-
-  h = gROOT.FindObject(histoname)
-
-  if (not not h) == False :
-    print('Could not find ' + histoname)
+  if (not h) :
     return values
 
   # code to check the histogram and find the status values
@@ -749,7 +683,6 @@ def bcal_piminus_rf_time(rootfile, timemin=-0.1, timemax=0.1, low_limit=-0.5, hi
   status = 1
   if mean < timemin or mean > timemax or mean_error > error_max:
       status=0
-
 
   values = [status, float('%.5f'%(peak)), float('%.5f'%(mean)), float('%.5f'%(sigma)) ]
   #print(values)
@@ -769,17 +702,11 @@ def bcal_piplus_rf_time(rootfile, timemin=-0.1, timemax=0.1, low_limit=-0.5, hig
   histoname = 'DeltaTVsP_Pi+'      # monitoring histogram to check
   dirname = '/Independent/Hist_DetectorPID/BCAL'          # directory containing that histogram
 
+  min_counts = 1000
 
-  test = rootfile.cd(dirname)
+  h = get_histo(rootfile, dirname, histoname, min_counts)
 
-  if test == False: 
-    print('Could not find ' + dirname)
-    return values
-
-  h = gROOT.FindObject(histoname)
-
-  if (not not h) == False :
-    print('Could not find ' + histoname)
+  if (not h) :
     return values
 
   # code to check the histogram and find the status values
@@ -806,7 +733,6 @@ def bcal_piplus_rf_time(rootfile, timemin=-0.1, timemax=0.1, low_limit=-0.5, hig
   status = 1
   if mean < timemin or mean > timemax or mean_error > error_max:
       status=0
-
 
   values = [status, float('%.5f'%(peak)), float('%.5f'%(mean)), float('%.5f'%(sigma)) ]
   #print(values)
@@ -826,17 +752,11 @@ def bcal_proton_rf_time(rootfile, timemin=-0.1, timemax=0.1, low_limit=-0.5, hig
   histoname = 'DeltaTVsP_Proton'      # monitoring histogram to check
   dirname = '/Independent/Hist_DetectorPID/BCAL'          # directory containing that histogram
 
+  min_counts = 1000
 
-  test = rootfile.cd(dirname)
+  h = get_histo(rootfile, dirname, histoname, min_counts)
 
-  if test == False: 
-    print('Could not find ' + dirname)
-    return values
-
-  h = gROOT.FindObject(histoname)
-
-  if (not not h) == False :
-    print('Could not find ' + histoname)
+  if (not h) :
     return values
 
   # code to check the histogram and find the status values
@@ -863,7 +783,6 @@ def bcal_proton_rf_time(rootfile, timemin=-0.1, timemax=0.1, low_limit=-0.5, hig
   status = 1
   if mean < timemin or mean > timemax or mean_error > error_max:
       status=0
-
 
   values = [status, float('%.5f'%(peak)), float('%.5f'%(mean)), float('%.5f'%(sigma)) ]
   #print(values)
@@ -884,17 +803,11 @@ def fcal_photon_rf_time(rootfile, timemin=-0.1, timemax=0.1, low_limit=-0.5, hig
   histoname = 'FCALNeutralShowerDeltaTVsE'      # monitoring histogram to check
   dirname = '/Independent/Hist_Neutrals'          # directory containing that histogram
 
+  min_counts = 1000
 
-  test = rootfile.cd(dirname)
+  h = get_histo(rootfile, dirname, histoname, min_counts)
 
-  if test == False: 
-    print('Could not find ' + dirname)
-    return values
-
-  h = gROOT.FindObject(histoname)
-
-  if (not not h) == False :
-    print('Could not find ' + histoname)
+  if (not h) :
     return values
 
   # code to check the histogram and find the status values
@@ -921,7 +834,6 @@ def fcal_photon_rf_time(rootfile, timemin=-0.1, timemax=0.1, low_limit=-0.5, hig
   status = 1
   if mean < timemin or mean > timemax or mean_error > error_max:
       status=0
-
 
   values = [status, float('%.5f'%(peak)), float('%.5f'%(mean)), float('%.5f'%(sigma)) ]
   #print(values)
@@ -941,17 +853,11 @@ def fcal_photon_alt_rf_time(rootfile, timemin=-0.1, timemax=0.1, low_limit=-0.5,
   histoname = 'DeltaTVsShowerE_Photon'      # monitoring histogram to check
   dirname = '/Independent/Hist_DetectorPID/FCAL'          # directory containing that histogram
 
+  min_counts = 1000
 
-  test = rootfile.cd(dirname)
+  h = get_histo(rootfile, dirname, histoname, min_counts)
 
-  if test == False: 
-    print('Could not find ' + dirname)
-    return values
-
-  h = gROOT.FindObject(histoname)
-
-  if (not not h) == False :
-    print('Could not find ' + histoname)
+  if (not h) :
     return values
 
   # code to check the histogram and find the status values
@@ -978,7 +884,6 @@ def fcal_photon_alt_rf_time(rootfile, timemin=-0.1, timemax=0.1, low_limit=-0.5,
   status = 1
   if mean < timemin or mean > timemax or mean_error > error_max:
       status=0
-
 
   values = [status, float('%.5f'%(peak)), float('%.5f'%(mean)), float('%.5f'%(sigma)) ]
   #print(values)
@@ -999,17 +904,11 @@ def fcal_piminus_rf_time(rootfile, timemin=-0.1, timemax=0.1, low_limit=-0.5, hi
   histoname = 'DeltaTVsP_Pi-'      # monitoring histogram to check
   dirname = '/Independent/Hist_DetectorPID/FCAL'          # directory containing that histogram
 
+  min_counts = 1000
 
-  test = rootfile.cd(dirname)
+  h = get_histo(rootfile, dirname, histoname, min_counts)
 
-  if test == False: 
-    print('Could not find ' + dirname)
-    return values
-
-  h = gROOT.FindObject(histoname)
-
-  if (not not h) == False :
-    print('Could not find ' + histoname)
+  if (not h) :
     return values
 
   # code to check the histogram and find the status values
@@ -1036,7 +935,6 @@ def fcal_piminus_rf_time(rootfile, timemin=-0.1, timemax=0.1, low_limit=-0.5, hi
   status = 1
   if mean < timemin or mean > timemax or mean_error > error_max:
       status=0
-
 
   values = [status, float('%.5f'%(peak)), float('%.5f'%(mean)), float('%.5f'%(sigma)) ]
   #print(values)
@@ -1056,17 +954,11 @@ def fcal_piplus_rf_time(rootfile, timemin=-0.1, timemax=0.1, low_limit=-0.5, hig
   histoname = 'DeltaTVsP_Pi+'      # monitoring histogram to check
   dirname = '/Independent/Hist_DetectorPID/FCAL'          # directory containing that histogram
 
+  min_counts = 1000
 
-  test = rootfile.cd(dirname)
+  h = get_histo(rootfile, dirname, histoname, min_counts)
 
-  if test == False: 
-    print('Could not find ' + dirname)
-    return values
-
-  h = gROOT.FindObject(histoname)
-
-  if (not not h) == False :
-    print('Could not find ' + histoname)
+  if (not h) :
     return values
 
   # code to check the histogram and find the status values
@@ -1093,7 +985,6 @@ def fcal_piplus_rf_time(rootfile, timemin=-0.1, timemax=0.1, low_limit=-0.5, hig
   status = 1
   if mean < timemin or mean > timemax or mean_error > error_max:
       status=0
-
 
   values = [status, float('%.5f'%(peak)), float('%.5f'%(mean)), float('%.5f'%(sigma)) ]
   #print(values)
@@ -1113,17 +1004,11 @@ def fcal_proton_rf_time(rootfile, timemin=-0.1, timemax=0.1, low_limit=-0.5, hig
   histoname = 'DeltaTVsP_Proton'      # monitoring histogram to check
   dirname = '/Independent/Hist_DetectorPID/FCAL'          # directory containing that histogram
 
+  min_counts = 1000
 
-  test = rootfile.cd(dirname)
+  h = get_histo(rootfile, dirname, histoname, min_counts)
 
-  if test == False: 
-    print('Could not find ' + dirname)
-    return values
-
-  h = gROOT.FindObject(histoname)
-
-  if (not not h) == False :
-    print('Could not find ' + histoname)
+  if (not h) :
     return values
 
   # code to check the histogram and find the status values
@@ -1151,8 +1036,30 @@ def fcal_proton_rf_time(rootfile, timemin=-0.1, timemax=0.1, low_limit=-0.5, hig
   if mean < timemin or mean > timemax or mean_error > error_max:
       status=0
 
-
   values = [status, float('%.5f'%(peak)), float('%.5f'%(mean)), float('%.5f'%(sigma)) ]
   #print(values)
   return values       # return array of values, status first
 
+
+def get_histo(rootfile, dirname, histoname, min_counts) :
+
+  test = rootfile.GetDirectory(dirname) 
+
+  # file pointer contains tobj if dir exists, set false if not
+
+  if (not test):
+    #print('Could not find ' + dirname)
+    return False
+
+  rootfile.cd(dirname)
+
+  h = gROOT.FindObject(histoname)
+
+  if (not h) :
+    #print('Could not find ' + histoname)
+    return False
+
+  if h.GetEntries() < min_counts:
+    return False
+
+  return h

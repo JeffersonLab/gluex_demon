@@ -2,39 +2,23 @@ import csv
 
 from ROOT import gROOT
 
-#
-# This module contains two control functions, 'init' and 'check', and the custom functions which inspect the histograms (one custom function for each histogram).
-#
-# 'init' and 'check' call the custom functions.  'init' returns graph names and titles. 'check' returns the numbers to be graphed.
-#
-#
-# Change all instances of new_module to your module's name 
-#
-# Adapt the example custom functions (new_module_occupancy and new_module_e) to retrieve the metrics needed from their histogram.
-# Add more custom functions, or remove one if it is not required.
-#
-# Add the custom functions to the list of functions in 'init' and 'check'.
-#
-# In 'check', provide the set of limits for each metric, and adapt the code to use these. 
-#
-
+# ps pair e
 
 
 def init() : 
 
-  pagename = 'FMWPC'          # Title for the page of graphs
+  pagename = 'PS_E'          # Title for the page of graphs.  Best avoid spaces.
 
   # These lists are the headers for the overall status summary for this module
   # Do not add any more list elements here
 
-  names = ['fmwpc_status']    # Graph name, fmwpc_status 
-  titles = ['FMWPC status']   # Graph title
+  names = ['ps_pair_status']    # Graph name, ps_pair_status 
+  titles = ['ps_pair status']   # Graph title
   values = [-1]                 # Default status, keep it at -1
   
   # This is the list of custom functions, called with one argument: False
 
-  e = fmwpc_e(False)
-
+  e = ps_e(False)
 
   for thing in [ e ] :   # loop through the arrays returned from each function
 
@@ -55,20 +39,17 @@ def check(run, rootfile) :
   # Acceptable value limits, defined here for accessibility
 
 
-  emin = 500
-  emax = 600
-
   # List of custom functions, called with arguments rootfile followed by the value limits.
   # Each function checks one histogram and returns a list, its status code followed by the values to be graphed.
   # Add or remove custom functions from this list
 
-  e = fmwpc_e(rootfile, emin, emax)
+  e = ps_e(rootfile)
 
   # This finds the overall status, setting it to the min value of each histogram status
 
 
   statuslist = []
-  for thing in [ e ] :         # Add or remove the list names assigned above.  
+  for thing in [e] :         # Add or remove the list names assigned above.  
     statuslist.append(thing[0])   # status is the first value in the array
 
   status = min(statuslist)
@@ -77,7 +58,7 @@ def check(run, rootfile) :
 
   allvals = [status]
 
-  for thing in [ e ] :  # Add or remove the list names assigned above.  
+  for thing in [e] :  # Add or remove the list names assigned above.  
     allvals.extend(thing) 
 
   return allvals
@@ -85,15 +66,17 @@ def check(run, rootfile) :
 
 
 
-def fmwpc_e(rootfile, emin=500, emax=600) :
+def ps_e(rootfile) :
 
-  # Example custom function to check the occupancy histogram
+  # Example custom function to check another histogram
 
-  # Provide unique graph names, starting with 'fmwpc_'. The first must be the status code from this function.
+  #print('in ps_e()...')
 
-  names = ['fmwpc_e_status','fmwpc_e_1','fmwpc_e_2', 'fmwpc_e_3', 'fmwpc_e_4', 'fmwpc_e_5', 'fmwpc_e_6']  
-  titles = ['E status','E chamber 1 (GeV)','E chamber 2 (GeV)', 'E chamber 3 (GeV)', 'E chamber 4 (GeV)', 'E chamber 5 (GeV)', 'E chamber 6 (GeV)']         # These will be the graph titles
-  values = [-1,-1,-1, -1, -1, -1, -1]   # Default values, keep as -1
+  # Provide unique graph names, starting with 'ps_pair_'. The first must be the status code from this function.
+
+  names = ['ps_e_status','ps_e_peak','ps_e_q1','ps_e_q2','ps_e_q3']   
+  titles = ['PS pair E status','PS pair Epeak(GeV)','E quartile 1 (GeV)','E quartile 2 (GeV)','E quartile 3 (GeV)']      # These will be the graph titles
+  values = [-1,-1,-1,-1,-1]                    # Default values, keep as -1
 
   if not rootfile :  # called by init function
     return [names, titles, values]
@@ -102,43 +85,35 @@ def fmwpc_e(rootfile, emin=500, emax=600) :
   # Status codes are 1 (good), 0 (bad) or -1 (don't know/file problem/not enough data/some other error)
   # If you just want to plot a metric without comparing it to limits, set its status code to 1, so that it doesn't make the overall status look bad.
 
-  histoname = 'h2_fmwpc_pi_chamber'   # monitoring histogram to check
-  dirname = '/FMWPC'      # directory containing the histogram
+  histoname = 'PS_E'   # monitoring histogram to check
+  dirname = '/PS_flux/PSC_PS'      # directory containing the histogram
 
-  min_counts = 100
-
+  min_counts = 1000
   h = get_histo(rootfile, dirname, histoname, min_counts)
 
   if (not h) :
     return values
 
   # code to check the histogram and find the status values
+  
+  from array import array
 
-  myvals = []
-  status = 1   # combined status for all 4, assume good to start with
+  probsum = array('d',[0.25, 0.5, 0.75])
 
-  for bin in range(1,7):
+  q = array('d',[0,0,0])
 
-    p = h.ProjectionY("p1",bin,bin)
-
-    # find the bin with max content, histo looks like spike on gauss bg
-    # just plot the bin value for now
-
-    maxbin = p.GetMaximumBin()
-    epeak = p.GetXaxis().GetBinCenter(maxbin)
-
-    myvals.append(float('%.1f'%(epeak)))
-
-    if epeak < emin  or epeak > emax : 
-        status = 0
-
-  values = [status]
-
-  values.extend(myvals)
+  y=h.GetQuantiles(3,q,probsum)
 
   
-  return values       # return array of values, status first
 
+  max = h.GetBinCenter(h.GetMaximumBin())
+
+
+  status=1
+
+  values = [status, float('%.3f'%(max)), float('%.2f'%(q[0])), float('%.2f'%(q[1])), float('%.2f'%(q[2])) ]
+  
+  return values       # return array of values, status first
 
 
 def get_histo(rootfile, dirname, histoname, min_counts) :
@@ -159,7 +134,7 @@ def get_histo(rootfile, dirname, histoname, min_counts) :
     #print('Could not find ' + histoname)
     return False
 
-  if h.GetEntries() < min_counts:
+  if h.GetEntries() < min_counts :
     return False
 
   return h
