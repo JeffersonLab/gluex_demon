@@ -105,7 +105,7 @@ def check(run, rootfile) :
 
 def sc_rf_time(rootfile, timemin=-0.1, timemax=0.1) :
   #print("in sc_rf_time() ...")
-  names = ['timing_sc_rf_status','timing_sc_rf_mean','timing_sc_rf_sigma']     # These will be unique graph names, start with modulename_status
+  names = ['timing_sc_rf_status','timing_sc_rf_mean','timing_sc_rf_mean_err']     # These will be unique graph names, start with modulename_status
   titles = ['SC-RF time status','SC-RF time mean (ns)', 'SC-RF time width (ns)']  # Graph titles 
   values = [-1, -1, -1]   
 
@@ -135,21 +135,21 @@ def sc_rf_time(rootfile, timemin=-0.1, timemax=0.1) :
     return values 
 
   sc_time_mean = r.Parameter(1)
-  sc_time_sigma = r.Parameter(2)
+  sc_time_mean_err = r.Parameter(2)
 
   status = 1
   if sc_time_mean < timemin or sc_time_mean > timemax:
       status=0
 
 
-  values = [status, float('%.5f'%(sc_time_mean)), float('%.5f'%(sc_time_sigma)) ]
+  values = [status, float('%.5f'%(sc_time_mean)), float('%.5f'%(sc_time_mean_err)) ]
   #print(values)
   return values       # return array of values, status first
 
 
 def tof_rf_time(rootfile, timemin=-0.1, timemax=0.1) :
   #print("in tof_rf_time() ...")
-  names = ['timing_tof_rf_status','timing_tof_rf_mean','timing_tof_rf_sigma']     # These will be unique graph names, start with modulename_status
+  names = ['timing_tof_rf_status','timing_tof_rf_mean','timing_tof_rf_mean_err']     # These will be unique graph names, start with modulename_status
   titles = ['TOF-RF time status','TOF-RF time mean (ns)', 'TOF-RF time width (ns)']  # Graph titles 
   values = [-1, -1, -1]   
 
@@ -179,20 +179,20 @@ def tof_rf_time(rootfile, timemin=-0.1, timemax=0.1) :
     return values 
 
   tof_time_mean = r.Parameter(1)
-  tof_time_sigma = r.Parameter(2)
+  tof_time_mean_err = r.Parameter(2)
 
   status = 1
   if tof_time_mean < timemin or tof_time_mean > timemax:
       status=0
 
-  values = [status, float('%.5f'%(tof_time_mean)), float('%.5f'%(tof_time_sigma)) ]
+  values = [status, float('%.5f'%(tof_time_mean)), float('%.5f'%(tof_time_mean_err)) ]
   #print(values)
   return values       # return array of values, status first
 
 
 def bcal_neut_rf_time(rootfile, timemin=-0.1, timemax=0.1) :
   #print("in bcal_neut_rf_time() ...")
-  names = ['timing_bcal_neut_rf_status','timing_bcal_neut_rf_mean','timing_bcal_neut_rf_sigma']     # These will be unique graph names, start with modulename_status
+  names = ['timing_bcal_neut_rf_status','timing_bcal_neut_rf_mean','timing_bcal_neut_rf_mean_err']     # These will be unique graph names, start with modulename_status
   titles = ['BCAL (neutral)-RF time status','BCAL (neutral)-RF time mean (ns)', 'BCAL (neutral)-RF time width (ns)']  # Graph titles 
   values = [-1, -1, -1]   
 
@@ -222,20 +222,20 @@ def bcal_neut_rf_time(rootfile, timemin=-0.1, timemax=0.1) :
     return values 
 
   bcal_time_mean = r.Parameter(1)
-  bcal_time_sigma = r.Parameter(2)
+  bcal_time_mean_err = r.Parameter(2)
 
   status = 1
   if bcal_time_mean < timemin or bcal_time_mean > timemax:
       status=0
 
-  values = [status, float('%.5f'%(bcal_time_mean)), float('%.5f'%(bcal_time_sigma)) ]
+  values = [status, float('%.5f'%(bcal_time_mean)), float('%.5f'%(bcal_time_mean_err)) ]
   #print(values)
   return values       # return array of values, status first
 
 
 def bcal_chg_rf_time(rootfile, timemin=-0.1, timemax=0.1) :
   #print("in bcal_chg_rf_time() ...")
-  names = ['timing_bcal_chg_rf_status','timing_bcal_chg_rf_mean','timing_bcal_chg_rf_sigma']     # These will be unique graph names, start with modulename_status
+  names = ['timing_bcal_chg_rf_status','timing_bcal_chg_rf_mean','timing_bcal_chg_rf_mean_err']     # These will be unique graph names, start with modulename_status
   titles = ['BCAL (charged)-RF time status','BCAL (charged)-RF time mean (ns)', 'BCAL (charged)-RF time width (ns)']  # Graph titles 
   values = [-1, -1, -1]   
 
@@ -265,20 +265,20 @@ def bcal_chg_rf_time(rootfile, timemin=-0.1, timemax=0.1) :
     return values 
 
   bcal_time_mean = r.Parameter(1)
-  bcal_time_sigma = r.Parameter(2)
+  bcal_time_mean_err = r.Parameter(2)
 
   status = 1
   if bcal_time_mean < timemin or bcal_time_mean > timemax:
       status=0
 
-  values = [status, float('%.5f'%(bcal_time_mean)), float('%.5f'%(bcal_time_sigma)) ]
+  values = [status, float('%.5f'%(bcal_time_mean)), float('%.5f'%(bcal_time_mean_err)) ]
   #print(values)
   return values       # return array of values, status first
 
 
 def fcal_neut_rf_time(rootfile, timemin=-0.1, timemax=0.1) :
   #print("in fcal_neut_rf_time() ...")
-  names = ['timing_fcal_neut_rf_status','timing_fcal_neut_rf_mean','timing_fcal_neut_rf_sigma']     # These will be unique graph names, start with modulename_status
+  names = ['timing_fcal_neut_rf_status','timing_fcal_neut_rf_mean','timing_fcal_neut_rf_mean_err']     # These will be unique graph names, start with modulename_status
   titles = ['FCAL (neutral)-RF time status','FCAL (neutral)-RF time mean (ns)', 'FCAL (neutral)-RF time width (ns)']  # Graph titles 
   values = [-1, -1, -1]   
 
@@ -308,20 +308,20 @@ def fcal_neut_rf_time(rootfile, timemin=-0.1, timemax=0.1) :
     return values 
 
   fcal_time_mean = r.Parameter(1)
-  fcal_time_sigma = r.Parameter(2)
+  fcal_time_mean_err = r.Parameter(2)
 
   status = 1
   if fcal_time_mean < timemin or fcal_time_mean > timemax:
       status=0
 
-  values = [status, float('%.5f'%(fcal_time_mean)), float('%.5f'%(fcal_time_sigma)) ]
+  values = [status, float('%.5f'%(fcal_time_mean)), float('%.5f'%(fcal_time_mean_err)) ]
   #print(values)
   return values       # return array of values, status first
 
 
 def fcal_chg_rf_time(rootfile, timemin=-0.1, timemax=0.1) :
   #print("in fcal_chg_rf_time() ...")
-  names = ['timing_fcal_chg_rf_status','timing_fcal_chg_rf_mean','timing_fcal_chg_rf_sigma']     # These will be unique graph names, start with modulename_status
+  names = ['timing_fcal_chg_rf_status','timing_fcal_chg_rf_mean','timing_fcal_chg_rf_mean_err']     # These will be unique graph names, start with modulename_status
   titles = ['FCAL (charged)-RF time status','FCAL (charged)-RF time mean (ns)', 'FCAL (charged)-RF time width (ns)']  # Graph titles 
   values = [-1, -1, -1]   
 
@@ -351,20 +351,20 @@ def fcal_chg_rf_time(rootfile, timemin=-0.1, timemax=0.1) :
     return values 
 
   fcal_time_mean = r.Parameter(1)
-  fcal_time_sigma = r.Parameter(2)
+  fcal_time_mean_err = r.Parameter(2)
 
   status = 1
   if fcal_time_mean < timemin or fcal_time_mean > timemax:
       status=0
 
-  values = [status, float('%.5f'%(fcal_time_mean)), float('%.5f'%(fcal_time_sigma)) ]
+  values = [status, float('%.5f'%(fcal_time_mean)), float('%.5f'%(fcal_time_mean_err)) ]
   #print(values)
   return values       # return array of values, status first
 
 
 def cdc_rf_time(rootfile, timemin=-0.1, timemax=0.1) :
   #print("in cdc_rf_time() ...")
-  names = ['timing_cdc_sc_status','timing_cdc_sc_mean','timing_cdc_sc_sigma']     # These will be unique graph names, start with modulename_status
+  names = ['timing_cdc_sc_status','timing_cdc_sc_mean','timing_cdc_sc_mean_err']     # These will be unique graph names, start with modulename_status
   titles = ['CDC-SC time status','Earliest CDC - matched SC time mean (ns)', 'Earliest CDC - matched SC time width (ns)']  # Graph titles 
   values = [-1, -1, -1]   
 
@@ -394,21 +394,21 @@ def cdc_rf_time(rootfile, timemin=-0.1, timemax=0.1) :
     return values 
 
   cdc_time_mean = r.Parameter(1)
-  cdc_time_sigma = r.Parameter(2)
+  cdc_time_mean_err = r.Parameter(2)
 
   status = 1
   if cdc_time_mean < timemin or cdc_time_mean > timemax:
       status=0
 
 
-  values = [status, float('%.5f'%(cdc_time_mean)), float('%.5f'%(cdc_time_sigma)) ]
+  values = [status, float('%.5f'%(cdc_time_mean)), float('%.5f'%(cdc_time_mean_err)) ]
   #print(values)
   return values       # return array of values, status first
 
 
 def fdc_rf_time(rootfile, timemin=-0.1, timemax=0.1) :
   #print("in fdc_rf_time() ...")
-  names = ['timing_fdc_time_status','timing_fdc_time_mean','timing_fdc_time_sigma']     # These will be unique graph names, start with modulename_status
+  names = ['timing_fdc_time_status','timing_fdc_time_mean','timing_fdc_time_mean_err']     # These will be unique graph names, start with modulename_status
   titles = ['FDC time status','FDC earliest flight-corrected time mean (ns)', 'FDC earliest flight-corrected time width (ns)']  # Graph titles 
   values = [-1, -1, -1]   
 
@@ -438,21 +438,21 @@ def fdc_rf_time(rootfile, timemin=-0.1, timemax=0.1) :
     return values 
 
   fdc_time_mean = r.Parameter(1)
-  fdc_time_sigma = r.Parameter(2)
+  fdc_time_mean_err = r.Parameter(2)
 
   status = 1
   if fdc_time_mean < timemin or fdc_time_mean > timemax:
       status=0
 
 
-  values = [status, float('%.5f'%(fdc_time_mean)), float('%.5f'%(fdc_time_sigma)) ]
+  values = [status, float('%.5f'%(fdc_time_mean)), float('%.5f'%(fdc_time_mean_err)) ]
   #print(values)
   return values       # return array of values, status first
 
 
 def ps_rf_time(rootfile, timemin=-0.1, timemax=0.1) :
   #print("in ps_rf_time() ...")
-  names = ['timing_ps_rf_status','timing_ps_rf_mean','timing_ps_rf_sigma']     # These will be unique graph names, start with modulename_status
+  names = ['timing_ps_rf_status','timing_ps_rf_mean','timing_ps_rf_mean_err']     # These will be unique graph names, start with modulename_status
   titles = ['PS-TAGH time status','PS-TAGH time mean (ns)', 'PS-TAGH time width (ns)']  # Graph titles 
   values = [-1, -1, -1]   
 
@@ -482,21 +482,21 @@ def ps_rf_time(rootfile, timemin=-0.1, timemax=0.1) :
     return values 
 
   ps_time_mean = r.Parameter(1)
-  ps_time_sigma = r.Parameter(2)
+  ps_time_mean_err = r.Parameter(2)
 
   status = 1
   if ps_time_mean < timemin or ps_time_mean > timemax:
       status=0
 
 
-  values = [status, float('%.5f'%(ps_time_mean)), float('%.5f'%(ps_time_sigma)) ]
+  values = [status, float('%.5f'%(ps_time_mean)), float('%.5f'%(ps_time_mean_err)) ]
   #print(values)
   return values       # return array of values, status first
 
 
 def tagh_rf_time(rootfile, timemin=-0.1, timemax=0.1) :
   #print("in tagh_rf_time() ...")
-  names = ['timing_tagh_rf_status','timing_tagh_rf_mean','timing_tagh_rf_sigma']     # These will be unique graph names, start with modulename_status
+  names = ['timing_tagh_rf_status','timing_tagh_rf_mean','timing_tagh_rf_mean_err']     # These will be unique graph names, start with modulename_status
   titles = ['TAGH-RF time status','TAGH-RF time mean (ns)', 'TAGH-RF time width (ns)']  # Graph titles 
   values = [-1, -1, -1]   
 
@@ -526,21 +526,21 @@ def tagh_rf_time(rootfile, timemin=-0.1, timemax=0.1) :
     return values 
 
   tagh_time_mean = r.Parameter(1)
-  tagh_time_sigma = r.Parameter(2)
+  tagh_time_mean_err = r.Parameter(2)
 
   status = 1
   if tagh_time_mean < timemin or tagh_time_mean > timemax:
       status=0
 
 
-  values = [status, float('%.5f'%(tagh_time_mean)), float('%.5f'%(tagh_time_sigma)) ]
+  values = [status, float('%.5f'%(tagh_time_mean)), float('%.5f'%(tagh_time_mean_err)) ]
   #print(values)
   return values       # return array of values, status first
 
 
 def tagm_rf_time(rootfile, timemin=-0.1, timemax=0.1) :
   #print("in tagm_rf_time() ...")
-  names = ['timing_tagm_rf_status','timing_tagm_rf_mean','timing_tagm_rf_sigma']     # These will be unique graph names, start with modulename_status
+  names = ['timing_tagm_rf_status','timing_tagm_rf_mean','timing_tagm_rf_mean_err']     # These will be unique graph names, start with modulename_status
   titles = ['TAGM-RF time status','TAGM-RF time mean (ns)', 'TAGM-RF time width (ns)']  # Graph titles 
   values = [-1, -1, -1]   
 
@@ -570,14 +570,14 @@ def tagm_rf_time(rootfile, timemin=-0.1, timemax=0.1) :
     return values 
 
   tagm_time_mean = r.Parameter(1)
-  tagm_time_sigma = r.Parameter(2)
+  tagm_time_mean_err = r.Parameter(2)
 
   status = 1
   if tagm_time_mean < timemin or tagm_time_mean > timemax:
       status=0
 
 
-  values = [status, float('%.5f'%(tagm_time_mean)), float('%.5f'%(tagm_time_sigma)) ]
+  values = [status, float('%.5f'%(tagm_time_mean)), float('%.5f'%(tagm_time_mean_err)) ]
   #print(values)
   return values       # return array of values, status first
 
