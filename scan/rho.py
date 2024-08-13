@@ -152,9 +152,9 @@ def rho_ps_triggers(rootfile) :
   
   # Provide unique graph names, starting with 'rho_'. The first must be the status code from this function.
 
-  names = ['rho_ps_trig_status','ps_trigger_count']
-  titles = ['Rho PS trig status','PS trigger count']           # Graph titles
-  values = [-1,-1]                                             # Default values, keep as -1
+  names = ['rho_ps_trig_status','ps_trigger_count','rho_per_trigger']
+  titles = ['Rho PS trig status','PS trigger count','Rhos per 1000 PS triggers']           # Graph titles
+  values = [-1,-1,-1]                                             # Default values, keep as -1
 
   if not rootfile :  # called by init function
     return [names, titles, values]
@@ -174,12 +174,29 @@ def rho_ps_triggers(rootfile) :
 
   # code to check the histogram and find the status values
 
-  counts = h.Integral()
+  pscounts = h.Integral()
 
+  if (pscounts < 1):
+    return values
+
+  histoname = 'InvariantMass'                                      # monitoring histogram to check
+  dirname = 'p2pi_preco_kinfit/Hist_InvariantMass_Rho_PostKinFitCut'    # directory containing the histogram
+
+  min_counts = 100
+  h = get_histo(rootfile, dirname, histoname, min_counts)
+
+  if (not h) :
+    return values
+
+  # code to check the histogram and find the status values
+
+  rhocounts = h.Integral(200,700)
+
+  rateperktriggers = 1000*rhocounts/float(pscounts)
   
   status = 1
       
-  values = [status, float('%.0f'%(counts)) ] 
+  values = [status, float('%.0f'%(pscounts)), float('%.3f'%(rateperktriggers)) ] 
   
   return values       # return array of values, status first
 

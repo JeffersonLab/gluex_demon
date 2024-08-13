@@ -71,7 +71,7 @@ if not os.path.isdir(histdir):
 
 cwd = os.getcwd()
 os.chdir(histdir)
-histofilelist = glob.glob('*.root')
+histofilelist = sorted(glob.glob('*.root'))
 os.chdir(cwd)
 
 if len(histofilelist) == 0:
