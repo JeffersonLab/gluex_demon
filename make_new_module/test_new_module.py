@@ -5,7 +5,7 @@
 #   switch it to True in run_module 
 #
 # Run this script with one argument, the monitoring histogram directory
-# eg python3.6 test_new_module.py /work/halld/data_monitoring/RunPeriod-2022-05/mon_ver24/rootfiles/
+# eg python test_new_module.py /work/halld/data_monitoring/RunPeriod-2022-05/mon_ver24/rootfiles/
 #
 # It should create 4 files:
 #   filename_graphs = 'test_new_module_graphs.root'   # root file of graphs
@@ -26,10 +26,10 @@ from ROOT import TFile, TGraph
 from ROOT import gROOT
 gROOT.SetBatch(True)
 
-import new_module        # import new module 
+import new_module,rho        # import new module 
 
-modules = [new_module]   # list of function names
-run_module = [True]      # call the function if true
+modules = [new_module,rho]   # list of function names
+run_module = [True,True]      # call the function if true
 
 testing = 1  # stop after <runlimit> files, print diagnostics
 runlimit = 2 # process this number of runs if testing=1
@@ -42,7 +42,7 @@ script = sys.argv.pop(0)
 nargs = len(sys.argv)
 
 if nargs == 0 or nargs > 1 or sys.argv[0] == "-h" or sys.argv[0] == "--help":
-  exit("Usage: python3.6 test_new_module.py path_to_monitoring_histogram_directory")
+  exit("Usage: python test_new_module.py path_to_monitoring_histogram_directory")
 
 histdir = sys.argv.pop(0)
 nargs -= 1
@@ -64,12 +64,15 @@ for thisfile in [ filename_graphs, filename_csv, filename_badruns ] :
 
 # Make sure the monitoring histogram directory exists
 
-if not os.path.exists(histdir):
-  exit("Cannot find " + histdir)
+if not os.path.isdir(histdir):
+  exit("Cannot find directory " + histdir)
 
 # Make list of filenames
 
-histofilelist = subprocess.check_output(["ls", histdir], universal_newlines=True).splitlines()
+cwd = os.getcwd()
+os.chdir(histdir)
+histofilelist = glob.glob('*.root')
+os.chdir(cwd)
 
 if len(histofilelist) == 0:
   exit("No monitoring files found")
@@ -291,8 +294,10 @@ for filename in histofilelist:
 
 
 # skip the post-processing if all modules failed!
+print(len(gnames))
 
-if len(gnames) == 0:
+print(len(allruns_values))
+if len(gnames) == 1:
   exit('No runs were processed properly')
 
 

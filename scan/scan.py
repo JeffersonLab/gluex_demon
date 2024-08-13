@@ -106,10 +106,20 @@ print('Looking for monitoring histograms inside directory',histdir)
 
 # Make sure the monitoring histogram directory exists
 
-if not os.path.exists(histdir):
+if not os.path.isdir(histdir):
     exit('Cannot find ' + histdir + '\n  It might have been moved from /work/halld/data_monitoring to /cache/halld/offline_monitoring.')
 
+# Make list of filenames
 
+cwd = os.getcwd()
+os.chdir(histdir)
+histofilelist = glob.glob('*.root')
+os.chdir(cwd)
+
+if len(histofilelist) == 0:
+  exit("No monitoring files found")
+
+  
 # import ROOT now (after passing early checks), as the import is slow
 
 from ROOT import TFile, TGraph, TGraphErrors, TMultiGraph
@@ -146,14 +156,6 @@ for thisfile in [ filename_graphs, filename_csv, filename_badruns ] :
         os.remove(thisfile)
     except OSError:
         pass
-
-
-# Make list of filenames
-
-histofilelist = subprocess.check_output(["ls", histdir], universal_newlines=True).splitlines()
-
-if len(histofilelist) == 0:
-    exit("No monitoring files found")
 
 
 

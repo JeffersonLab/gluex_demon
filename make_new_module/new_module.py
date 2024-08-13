@@ -15,7 +15,6 @@ from ROOT import gROOT
 #
 # Add the custom functions to the list of functions in 'init' and 'check'.
 #
-# In 'check', provide the set of limits for each metric, and adapt the code to use these. 
 #
 
 
@@ -53,20 +52,13 @@ def check(run, rootfile) :
 
   # Status codes are 1 (good), 0 (bad) or -1 (don't know/file problem/not enough data/some other error)
 
-  # Acceptable value limits, defined here for accessibility
-
-  occmin = 99.8
-
-  emin = 3.1
-  emax = 3.3
-
-  # List of custom functions, called with arguments rootfile followed by the value limits.
+  # List of custom functions, called with argument rootfile
   # Each function checks one histogram and returns a list, its status code followed by the values to be graphed.
   # Add or remove custom functions from this list
 
-  occ = new_module_occupancy(rootfile, occmin)
+  occ = new_module_occupancy(rootfile)
 
-  e = new_module_e(rootfile, emin, emax)
+  e = new_module_e(rootfile)
 
   # This finds the overall status, setting it to the min value of each histogram status
 
@@ -94,7 +86,7 @@ def new_module_occupancy(rootfile, occmin=0.99) :
 
   print('in new_module_occupancy()...')
 
-  # Provide unique graph names, starting with 'new_module_'. The first must be the status code from this function.
+  # Provide unique graph names, starting with 'new_module_'. The first must be the status code from this function. Do not call it new_module_status - call it something else ending with _status, eg new_module_functionname_status.
 
   names = ['new_module_occ_status','new_module_occ_percent']            
   titles = ['New_Module occupancy status','New_Module occupancy (%)']   # Graph titles
@@ -110,6 +102,8 @@ def new_module_occupancy(rootfile, occmin=0.99) :
   histoname = 'an30_100ns'      # monitoring histogram to check
   dirname = '/CDC_amp'          # directory containing that histogram
 
+  occmax = 0.98                 # acceptability limit
+  
   min_counts = 1000
   h = get_histo(rootfile, dirname, histoname, min_counts)
 
@@ -168,15 +162,15 @@ def new_module_occupancy(rootfile, occmin=0.99) :
   
 
 
-def new_module_e(rootfile, emin=1.8, emax=2.3) :
+def new_module_e(rootfile) :
 
   # Example custom function to check another histogram
 
   print('in new_module_e()...')
 
-  # Provide unique graph names, starting with 'new_module_'. The first must be the status code from this function.
+# Provide unique graph names, starting with 'new_module_'. The first must be the status code from this function. Do not call it new_module_status - call it something else ending with _status, eg new_module_functionname_status.
 
-  names = ['new_module_e','new_module_e_mean','new_module_e_width']  
+  names = ['new_module_e_status','new_module_e_mean','new_module_e_width']  
   titles = ['E status','E mean (GeV)','E width (GeV)']      # These will be the graph titles
   values = [-1,-1,-1]                                       # Default values, keep as -1
 
@@ -190,6 +184,9 @@ def new_module_e(rootfile, emin=1.8, emax=2.3) :
   histoname = 'dedx_p_pos'   # monitoring histogram to check
   dirname = '/CDC_dedx'      # directory containing the histogram
 
+  emin=1.8    # acceptability limit
+  emax=2.3    # acceptability limit
+  
   min_counts = 1000
   h = get_histo(rootfile, dirname, histoname, min_counts)
 
