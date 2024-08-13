@@ -15,26 +15,17 @@ def init() :
 
   # list of functions to check, here they should be called with one argument: False, to return names, titles & defaults
 
-  sc_piminus_time = sc_piminus_rf_time(False)  # return names, titles, values
   sc_piplus_time = sc_piplus_rf_time(False)  # return names, titles, values
   sc_proton_time = sc_proton_rf_time(False)  # return names, titles, values
-  tof_piminus_time = tof_piminus_rf_time(False)  # return names, titles, values
   tof_piplus_time = tof_piplus_rf_time(False)  # return names, titles, values
   tof_proton_time = tof_proton_rf_time(False)  # return names, titles, values
-  bcal_photon_time = bcal_photon_rf_time(False)  # return names, titles, values
-  bcal_photon_nominE_time = bcal_photon_nominE_rf_time(False)  # return names, titles, values
-  bcal_photon_alt_time = bcal_photon_alt_rf_time(False)  # return names, titles, values
-  bcal_piminus_time = bcal_piminus_rf_time(False)  # return names, titles, values
   bcal_piplus_time = bcal_piplus_rf_time(False)  # return names, titles, values
   bcal_proton_time = bcal_proton_rf_time(False)  # return names, titles, values
-  fcal_photon_time = fcal_photon_rf_time(False)  # return names, titles, values
-  fcal_photon_alt_time = fcal_photon_alt_rf_time(False)  # return names, titles, values
-  fcal_piminus_time = fcal_piminus_rf_time(False)  # return names, titles, values
   fcal_piplus_time = fcal_piplus_rf_time(False)  # return names, titles, values
   fcal_proton_time = fcal_proton_rf_time(False)  # return names, titles, values
 
 
-  for thing in [ sc_piminus_time, sc_piplus_time, sc_proton_time, tof_piminus_time, tof_piplus_time, tof_proton_time, bcal_photon_time, bcal_photon_nominE_time, bcal_photon_alt_time, bcal_piminus_time, bcal_piplus_time, bcal_proton_time, fcal_photon_time, fcal_photon_alt_time, fcal_piminus_time, fcal_piplus_time, fcal_proton_time ] :   # loop through the arrays returned from each function
+  for thing in [ sc_piplus_time, sc_proton_time, tof_piplus_time, tof_proton_time, bcal_piplus_time, bcal_proton_time, fcal_piplus_time, fcal_proton_time ] :   # loop through the arrays returned from each function
 
     names.extend(thing[0])
     titles.extend(thing[1])
@@ -145,28 +136,19 @@ def check(run, rootfile) :
 
   # list of functions to check, here they should be called with rootfile, followed by the status limits, then the fit and momentum limits, then the error limit, and return an array of values
 
-  sc_piminus_time = sc_piminus_rf_time(rootfile, sc_time_min, sc_time_max, sc_fitmin_piminus, sc_fitmax_piminus, sc_pmin_piminus, sc_pmax_piminus, sc_error_max)
   sc_piplus_time = sc_piplus_rf_time(rootfile, sc_time_min, sc_time_max, sc_fitmin_piplus, sc_fitmax_piplus, sc_pmin_piplus, sc_pmax_piplus, sc_error_max)
   sc_proton_time = sc_proton_rf_time(rootfile, sc_time_min, sc_time_max, sc_fitmin_proton, sc_fitmax_proton, sc_pmin_proton, sc_pmax_proton, sc_error_max)
-  tof_piminus_time = tof_piminus_rf_time(rootfile, tof_time_min, tof_time_max, tof_fitmin_piminus, tof_fitmax_piminus, tof_pmin_piminus, tof_pmax_piminus, tof_error_max)
   tof_piplus_time = tof_piplus_rf_time(rootfile, tof_time_min, tof_time_max, tof_fitmin_piplus, tof_fitmax_piplus, tof_pmin_piplus, tof_pmax_piplus, tof_error_max)
   tof_proton_time = tof_proton_rf_time(rootfile, tof_time_min, tof_time_max, tof_fitmin_proton, tof_fitmax_proton, tof_pmin_proton, tof_pmax_proton, tof_error_max)
-  bcal_photon_time = bcal_photon_rf_time(rootfile, bcal_neut_time_min, bcal_neut_time_max, bcal_fitmin_photon, bcal_fitmax_photon, bcal_pmin_photon, bcal_pmax_photon, bcal_error_max)
-  bcal_photon_nominE_time = bcal_photon_nominE_rf_time(rootfile, bcal_neut_time_min, bcal_neut_time_max, bcal_fitmin_photon_nominE, bcal_fitmax_photon_nominE, bcal_pmin_photon_nominE, bcal_pmax_photon_nominE, bcal_error_max)
-  bcal_photon_alt_time = bcal_photon_alt_rf_time(rootfile, bcal_neut_time_min, bcal_neut_time_max, bcal_fitmin_photon_alt, bcal_fitmax_photon_alt, bcal_pmin_photon_alt, bcal_pmax_photon_alt, bcal_error_max)
-  bcal_piminus_time = bcal_piminus_rf_time(rootfile, bcal_chg_time_min, bcal_chg_time_max, bcal_fitmin_piminus, bcal_fitmax_piminus, bcal_pmin_piminus, bcal_pmax_piminus, bcal_error_max)
   bcal_piplus_time = bcal_piplus_rf_time(rootfile, bcal_chg_time_min, bcal_chg_time_max, bcal_fitmin_piplus, bcal_fitmax_piplus, bcal_pmin_piplus, bcal_pmax_piplus, bcal_error_max)
   bcal_proton_time = bcal_proton_rf_time(rootfile, bcal_chg_time_min, bcal_chg_time_max, bcal_fitmin_proton, bcal_fitmax_proton, bcal_pmin_proton, bcal_pmax_proton, bcal_error_max)
-  fcal_photon_time = fcal_photon_rf_time(rootfile, fcal_neut_time_min, fcal_neut_time_max, fcal_fitmin_photon, fcal_fitmax_photon, fcal_pmin_photon, fcal_pmax_photon, fcal_error_max)
-  fcal_photon_alt_time = fcal_photon_alt_rf_time(rootfile, fcal_neut_time_min, fcal_neut_time_max, fcal_fitmin_photon_alt, fcal_fitmax_photon_alt, fcal_pmin_photon_alt, fcal_pmax_photon_alt, fcal_error_max)
-  fcal_piminus_time = fcal_piminus_rf_time(rootfile, fcal_chg_time_min, fcal_chg_time_max, fcal_fitmin_piminus, fcal_fitmax_piminus, fcal_pmin_piminus, fcal_pmax_piminus, fcal_error_max)
   fcal_piplus_time = fcal_piplus_rf_time(rootfile, fcal_chg_time_min, fcal_chg_time_max, fcal_fitmin_piplus, fcal_fitmax_piplus, fcal_pmin_piplus, fcal_pmax_piplus, fcal_error_max)
   fcal_proton_time = fcal_proton_rf_time(rootfile, fcal_chg_time_min, fcal_chg_time_max, fcal_fitmin_proton, fcal_fitmax_proton, fcal_pmin_proton, fcal_pmax_proton, fcal_error_max)
 
   # set the overall status to the min value of each histogram status
 
   statuslist = []
-  for thing in [ sc_piminus_time, sc_piplus_time, sc_proton_time, tof_piminus_time, tof_piplus_time, tof_proton_time, bcal_photon_time, bcal_photon_nominE_time, bcal_photon_alt_time, bcal_piminus_time, bcal_piplus_time, bcal_proton_time, fcal_photon_time, fcal_photon_alt_time, fcal_piminus_time, fcal_piplus_time, fcal_proton_time ] : 
+  for thing in [ sc_piplus_time, sc_proton_time, tof_piplus_time, tof_proton_time, bcal_piplus_time, bcal_proton_time, fcal_piplus_time, fcal_proton_time ] : 
     statuslist.append(thing[0])   # status is the first value in the array
 
   status = min(statuslist)
@@ -174,61 +156,11 @@ def check(run, rootfile) :
   # add overall status to the start of the lists before concatenating & returning.
 
   allvals = [status]
-  for thing in [ sc_piminus_time, sc_piplus_time, sc_proton_time, tof_piminus_time, tof_piplus_time, tof_proton_time, bcal_photon_time, bcal_photon_nominE_time, bcal_photon_alt_time, bcal_piminus_time, bcal_piplus_time, bcal_proton_time, fcal_photon_time, fcal_photon_alt_time, fcal_piminus_time, fcal_piplus_time, fcal_proton_time ] : 
+  for thing in [ sc_piplus_time, sc_proton_time, tof_piplus_time, tof_proton_time, bcal_piplus_time, bcal_proton_time, fcal_piplus_time, fcal_proton_time ] : 
     allvals.extend(thing) 
 
   return allvals
 
-
-
-def sc_piminus_rf_time(rootfile, timemin=-0.1, timemax=0.1, low_limit=-0.5, high_limit=0.5, pmin=0.0, pmax=0.0, error_max=0.1) :
-  #print("in sc_piminus_rf_time() ...")
-  names = ['timing_MD_sc_rf_piminus_status','timing_MD_sc_rf_piminus_peak','timing_MD_sc_rf_piminus_mean','timing_MD_sc_rf_piminus_sigma']     # These will be unique graph names, start with modulename_status
-  titles = ['PiMinus SC-RF time status','PiMinus SC-RF time peak (ns)','PiMinus SC-RF time mean (ns)', 'PiMinus SC-RF time width (ns)']  # Graph titles 
-  values = [-1, -1, -1, -1]   
-
-  if not rootfile :  # called by init function
-    return [names, titles, values]
-
-  histoname = 'DeltaTVsP_Pi-'      # monitoring histogram to check
-  dirname = '/Independent/Hist_DetectorPID/SC'          # directory containing that histogram
-
-
-  min_counts = 1000
-
-  h = get_histo(rootfile, dirname, histoname, min_counts)
-
-  if (not h) :
-    return values
-
-  # code to check the histogram and find the status values
-  minbin = h.GetXaxis().FindBin(pmin)
-  if pmax == 0.0 :
-    maxbin = h.GetNbinsX()
-  else :
-    maxbin = h.GetXaxis().FindBin(pmax)
-  h1d = h.ProjectionY("DeltaTVsP_1D", minbin, maxbin)
-  if h1d.GetEntries() > 100 :
-    peak = h1d.GetBinCenter(h1d.GetMaximumBin())
-  else :
-    peak = 0.0
-
-  r = h1d.Fit("gaus", "0SQI", "", peak + low_limit, peak + high_limit)
-
-  if int(r) != 0 :  # bad fit
-    return values 
-
-  mean = r.Parameter(1)
-  mean_error = r.ParError(1)
-  sigma = r.Parameter(2)
-
-  status = 1
-  if mean < timemin or mean > timemax or mean_error > error_max:
-      status=0
-
-  values = [status, float('%.5f'%(peak)), float('%.5f'%(mean)), float('%.5f'%(sigma)) ]
-  #print(values)
-  return values       # return array of values, status first
 
 
 
@@ -333,55 +265,6 @@ def sc_proton_rf_time(rootfile, timemin=-0.1, timemax=0.1, low_limit=-0.5, high_
 
 
 
-def tof_piminus_rf_time(rootfile, timemin=-0.1, timemax=0.1, low_limit=-0.5, high_limit=0.5, pmin=0.0, pmax=0.0, error_max=0.1) :
-  #print("in tof_piminus_rf_time() ...")
-  names = ['timing_MD_tof_rf_piminus_status','timing_MD_tof_rf_piminus_peak','timing_MD_tof_rf_piminus_mean','timing_MD_tof_rf_piminus_sigma']     # These will be unique graph names, start with modulename_status
-  titles = ['PiMinus TOF-RF time status','PiMinus TOF-RF time peak (ns)','PiMinus TOF-RF time mean (ns)', 'PiMinus TOF-RF time width (ns)']  # Graph titles 
-  values = [-1, -1, -1, -1]   
-
-  if not rootfile :  # called by init function
-    return [names, titles, values]
-
-  histoname = 'DeltaTVsP_Pi-'      # monitoring histogram to check
-  dirname = '/Independent/Hist_DetectorPID/TOF'          # directory containing that histogram
-
-  min_counts = 1000
-
-  h = get_histo(rootfile, dirname, histoname, min_counts)
-
-  if (not h) :
-    return values
-
-  # code to check the histogram and find the status values
-  minbin = h.GetXaxis().FindBin(pmin)
-  if pmax == 0.0 :
-    maxbin = h.GetNbinsX()
-  else :
-    maxbin = h.GetXaxis().FindBin(pmax)
-  h1d = h.ProjectionY("DeltaTVsP_1D", minbin, maxbin)
-  if h1d.GetEntries() > 100 :
-    peak = h1d.GetBinCenter(h1d.GetMaximumBin())
-  else :
-    peak = 0.0
-
-  r = h1d.Fit("gaus", "0SQI", "", peak + low_limit, peak + high_limit)
-
-  if int(r) != 0 :  # bad fit
-    return values 
-
-  mean = r.Parameter(1)
-  mean_error = r.ParError(1)
-  sigma = r.Parameter(2)
-
-  status = 1
-  if mean < timemin or mean > timemax or mean_error > error_max:
-      status=0
-
-  values = [status, float('%.5f'%(peak)), float('%.5f'%(mean)), float('%.5f'%(sigma)) ]
-  #print(values)
-  return values       # return array of values, status first
-
-
 
 def tof_piplus_rf_time(rootfile, timemin=-0.1, timemax=0.1, low_limit=-0.5, high_limit=0.5, pmin=0.0, pmax=0.0, error_max=0.1) :
   #print("in tof_piplus_rf_time() ...")
@@ -484,210 +367,6 @@ def tof_proton_rf_time(rootfile, timemin=-0.1, timemax=0.1, low_limit=-0.5, high
 
 
 
-def bcal_photon_rf_time(rootfile, timemin=-0.1, timemax=0.1, low_limit=-0.5, high_limit=0.5, pmin=0.0, pmax=0.0, error_max=0.1) :
-  #print("in bcal_photon_rf_time() ...")
-  names = ['timing_MD_bcal_photon_rf_status','timing_MD_bcal_photon_rf_peak','timing_MD_bcal_photon_rf_mean','timing_MD_bcal_photon_rf_sigma']     # These will be unique graph names, start with modulename_status
-  titles = ['Photon BCAL-RF time status','Photon BCAL-RF time peak (ns)','Photon BCAL-RF time mean (ns)', 'Photon BCAL-RF time width (ns)']  # Graph titles 
-  values = [-1, -1, -1, -1]   
-
-  if not rootfile :  # called by init function
-    return [names, titles, values]
-
-  histoname = 'BCALNeutralShowerDeltaTVsE'      # monitoring histogram to check
-  dirname = '/Independent/Hist_Neutrals'          # directory containing that histogram
-
-  min_counts = 1000
-
-  h = get_histo(rootfile, dirname, histoname, min_counts)
-
-  if (not h) :
-    return values
-
-  # code to check the histogram and find the status values
-  minbin = h.GetXaxis().FindBin(pmin)
-  if pmax == 0.0 :
-    maxbin = h.GetNbinsX()
-  else :
-    maxbin = h.GetXaxis().FindBin(pmax)
-  h1d = h.ProjectionY("DeltaTVsP_1D", minbin, maxbin)
-  if h1d.GetEntries() > 20 :
-    peak = h1d.GetBinCenter(h1d.GetMaximumBin())
-  else :
-    peak = 0.0
-
-  r = h1d.Fit("gaus", "0SQI", "", peak + low_limit, peak + high_limit)
-
-  if int(r) != 0 :  # bad fit
-    return values 
-
-  mean = r.Parameter(1)
-  mean_error = r.ParError(1)
-  sigma = r.Parameter(2)
-
-  status = 1
-  if mean < timemin or mean > timemax or mean_error > error_max:
-      status=0
-
-  values = [status, float('%.5f'%(peak)), float('%.5f'%(mean)), float('%.5f'%(sigma)) ]
-  #print(values)
-  return values       # return array of values, status first
-
-
-
-def bcal_photon_nominE_rf_time(rootfile, timemin=-0.1, timemax=0.1, low_limit=-0.5, high_limit=0.5, pmin=0.0, pmax=0.0, error_max=0.1) :
-  #print("in bcal_photon_nominE_rf_time() ...")
-  names = ['timing_MD_bcal_photon_nominE_rf_status','timing_MD_bcal_photon_nominE_rf_peak','timing_MD_bcal_photon_nominE_rf_mean','timing_MD_bcal_photon_nominE_rf_sigma']     # These will be unique graph names, start with modulename_status
-  titles = ['Photon (nominE) BCAL-RF time status','Photon (nominE) BCAL-RF time peak (ns)','Photon (nominE) BCAL-RF time mean (ns)', 'Photon (nominE) BCAL-RF time width (ns)']  # Graph titles 
-  values = [-1, -1, -1, -1]   
-
-  if not rootfile :  # called by init function
-    return [names, titles, values]
-
-  histoname = 'BCALNeutralShowerDeltaTVsE'      # monitoring histogram to check
-  dirname = '/Independent/Hist_Neutrals'          # directory containing that histogram
-
-  min_counts = 1000
-
-  h = get_histo(rootfile, dirname, histoname, min_counts)
-
-  if (not h) :
-    return values
-
-  # code to check the histogram and find the status values
-  minbin = h.GetXaxis().FindBin(pmin)
-  if pmax == 0.0 :
-    maxbin = h.GetNbinsX()
-  else :
-    maxbin = h.GetXaxis().FindBin(pmax)
-  h1d = h.ProjectionY("DeltaTVsP_1D", minbin, maxbin)
-  if h1d.GetEntries() > 100 :
-    peak = h1d.GetBinCenter(h1d.GetMaximumBin())
-  else :
-    peak = 0.0
-
-  r = h1d.Fit("gaus", "0SQI", "", peak + low_limit, peak + high_limit)
-
-  if int(r) != 0 :  # bad fit
-    return values 
-
-  mean = r.Parameter(1)
-  mean_error = r.ParError(1)
-  sigma = r.Parameter(2)
-
-  status = 1
-  if mean < timemin or mean > timemax or mean_error > error_max:
-      status=0
-
-  values = [status, float('%.5f'%(peak)), float('%.5f'%(mean)), float('%.5f'%(sigma)) ]
-  #print(values)
-  return values       # return array of values, status first
-
-
-
-
-def bcal_photon_alt_rf_time(rootfile, timemin=-0.1, timemax=0.1, low_limit=-0.5, high_limit=0.5, pmin=0.0, pmax=0.0, error_max=0.1) :
-  #print("in bcal_photon_alt_rf_time() ...")
-  names = ['timing_MD_bcal_photon_alt_rf_status','timing_MD_bcal_photon_alt_rf_peak','timing_MD_bcal_photon_alt_rf_mean','timing_MD_bcal_photon_alt_rf_sigma']     # These will be unique graph names, start with modulename_status
-  titles = ['Photon (alt) BCAL-RF time status','Photon (alt) BCAL-RF time peak (ns)','Photon (alt) BCAL-RF time mean (ns)', 'Photon (alt) BCAL-RF time width (ns)']  # Graph titles 
-  values = [-1, -1, -1, -1]   
-
-  if not rootfile :  # called by init function
-    return [names, titles, values]
-
-  histoname = 'DeltaTVsShowerE_Photon'      # monitoring histogram to check
-  dirname = '/Independent/Hist_DetectorPID/BCAL'          # directory containing that histogram
-
-  min_counts = 1000
-
-  h = get_histo(rootfile, dirname, histoname, min_counts)
-
-  if (not h) :
-    return values
-
-  # code to check the histogram and find the status values
-  minbin = h.GetXaxis().FindBin(pmin)
-  if pmax == 0.0 :
-    maxbin = h.GetNbinsX()
-  else :
-    maxbin = h.GetXaxis().FindBin(pmax)
-  h1d = h.ProjectionY("DeltaTVsP_1D", minbin, maxbin)
-  if h1d.GetEntries() > 100 :
-    peak = h1d.GetBinCenter(h1d.GetMaximumBin())
-  else :
-    peak = 0.0
-
-  r = h1d.Fit("gaus", "0SQI", "", peak + low_limit, peak + high_limit)
-#  quad_vertix = TF1("quad_vertix","[0]*(x-[1])*(x-[1])+[2]")
-#  quad_vertix.SetParameters(-3000,peak,h1d.GetMaximum())
-#  r = h1d.Fit("quad_vertix", "0SQI", "", peak + low_limit, peak + high_limit) # when using this quadratic fit, we don't get a sigma... maybe just set sigma to zero
-
-  if int(r) != 0 :  # bad fit
-    return values 
-
-  mean = r.Parameter(1)
-  mean_error = r.ParError(1)
-  sigma = r.Parameter(2)
-#  sigma = 0.0 # quad_vertix fit
-
-  status = 1
-  if mean < timemin or mean > timemax or mean_error > error_max:
-      status=0
-
-  values = [status, float('%.5f'%(peak)), float('%.5f'%(mean)), float('%.5f'%(sigma)) ]
-  #print(values)
-  return values       # return array of values, status first
-
-
-
-
-def bcal_piminus_rf_time(rootfile, timemin=-0.1, timemax=0.1, low_limit=-0.5, high_limit=0.5, pmin=0.0, pmax=0.0, error_max=0.1) :
-  #print("in bcal_piminus_rf_time() ...")
-  names = ['timing_MD_bcal_piminus_rf_status','timing_MD_bcal_piminus_rf_peak','timing_MD_bcal_piminus_rf_mean','timing_MD_bcal_piminus_rf_sigma']     # These will be unique graph names, start with modulename_status
-  titles = ['PiMinus BCAL-RF time status','PiMinus BCAL-RF time peak (ns)','PiMinus BCAL-RF time mean (ns)','PiMinus BCAL-RF time width (ns)']  # Graph titles 
-  values = [-1, -1, -1, -1]   
-
-  if not rootfile :  # called by init function
-    return [names, titles, values]
-
-  histoname = 'DeltaTVsP_Pi-'      # monitoring histogram to check
-  dirname = '/Independent/Hist_DetectorPID/BCAL'          # directory containing that histogram
-
-  min_counts = 1000
-
-  h = get_histo(rootfile, dirname, histoname, min_counts)
-
-  if (not h) :
-    return values
-
-  # code to check the histogram and find the status values
-  minbin = h.GetXaxis().FindBin(pmin)
-  if pmax == 0.0 :
-    maxbin = h.GetNbinsX()
-  else :
-    maxbin = h.GetXaxis().FindBin(pmax)
-  h1d = h.ProjectionY("DeltaTVsP_1D", minbin, maxbin)
-  if h1d.GetEntries() > 100 :
-    peak = h1d.GetBinCenter(h1d.GetMaximumBin())
-  else :
-    peak = 0.0
-
-  r = h1d.Fit("gaus", "0SQI", "", peak + low_limit, peak + high_limit)
-
-  if int(r) != 0 :  # bad fit
-    return values 
-
-  mean = r.Parameter(1)
-  mean_error = r.ParError(1)
-  sigma = r.Parameter(2)
-
-  status = 1
-  if mean < timemin or mean > timemax or mean_error > error_max:
-      status=0
-
-  values = [status, float('%.5f'%(peak)), float('%.5f'%(mean)), float('%.5f'%(sigma)) ]
-  #print(values)
-  return values       # return array of values, status first
-
 
 
 def bcal_piplus_rf_time(rootfile, timemin=-0.1, timemax=0.1, low_limit=-0.5, high_limit=0.5, pmin=0.0, pmax=0.0, error_max=0.1) :
@@ -789,156 +468,6 @@ def bcal_proton_rf_time(rootfile, timemin=-0.1, timemax=0.1, low_limit=-0.5, hig
   return values       # return array of values, status first
 
 
-
-
-def fcal_photon_rf_time(rootfile, timemin=-0.1, timemax=0.1, low_limit=-0.5, high_limit=0.5, pmin=0.0, pmax=0.0, error_max=0.1) :
-  #print("in fcal_photon_rf_time() ...")
-  names = ['timing_MD_fcal_photon_rf_status','timing_MD_fcal_photon_rf_peak','timing_MD_fcal_photon_rf_mean','timing_MD_fcal_photon_rf_sigma']     # These will be unique graph names, start with modulename_status
-  titles = ['Photon FCAL-RF time status','Photon FCAL-RF time peak (ns)','Photon FCAL-RF time mean (ns)', 'Photon FCAL-RF time width (ns)']  # Graph titles 
-  values = [-1, -1, -1, -1]   
-
-  if not rootfile :  # called by init function
-    return [names, titles, values]
-
-  histoname = 'FCALNeutralShowerDeltaTVsE'      # monitoring histogram to check
-  dirname = '/Independent/Hist_Neutrals'          # directory containing that histogram
-
-  min_counts = 1000
-
-  h = get_histo(rootfile, dirname, histoname, min_counts)
-
-  if (not h) :
-    return values
-
-  # code to check the histogram and find the status values
-  minbin = h.GetXaxis().FindBin(pmin)
-  if pmax == 0.0 :
-    maxbin = h.GetNbinsX()
-  else :
-    maxbin = h.GetXaxis().FindBin(pmax)
-  h1d = h.ProjectionY("DeltaTVsP_1D", minbin, maxbin)
-  if h1d.GetEntries() > 100 :
-    peak = h1d.GetBinCenter(h1d.GetMaximumBin())
-  else :
-    peak = 0.0
-
-  r = h1d.Fit("gaus", "0SQI", "", peak + low_limit, peak + high_limit)
-
-  if int(r) != 0 :  # bad fit
-    return values 
-
-  mean = r.Parameter(1)
-  mean_error = r.ParError(1)
-  sigma = r.Parameter(2)
-
-  status = 1
-  if mean < timemin or mean > timemax or mean_error > error_max:
-      status=0
-
-  values = [status, float('%.5f'%(peak)), float('%.5f'%(mean)), float('%.5f'%(sigma)) ]
-  #print(values)
-  return values       # return array of values, status first
-
-
-
-def fcal_photon_alt_rf_time(rootfile, timemin=-0.1, timemax=0.1, low_limit=-0.5, high_limit=0.5, pmin=0.0, pmax=0.0, error_max=0.1) :
-  #print("in fcal_photon_alt_rf_time() ...")
-  names = ['timing_MD_fcal_photon_alt_rf_status','timing_MD_fcal_photon_alt_rf_peak','timing_MD_fcal_photon_alt_rf_mean','timing_MD_fcal_photon_alt_rf_sigma']     # These will be unique graph names, start with modulename_status
-  titles = ['Photon (alt) FCAL-RF time status','Photon (alt) FCAL-RF time peak (ns)','Photon (alt) FCAL-RF time mean (ns)', 'Photon (alt) FCAL-RF time width (ns)']  # Graph titles 
-  values = [-1, -1, -1, -1]   
-
-  if not rootfile :  # called by init function
-    return [names, titles, values]
-
-  histoname = 'DeltaTVsShowerE_Photon'      # monitoring histogram to check
-  dirname = '/Independent/Hist_DetectorPID/FCAL'          # directory containing that histogram
-
-  min_counts = 1000
-
-  h = get_histo(rootfile, dirname, histoname, min_counts)
-
-  if (not h) :
-    return values
-
-  # code to check the histogram and find the status values
-  minbin = h.GetXaxis().FindBin(pmin)
-  if pmax == 0.0 :
-    maxbin = h.GetNbinsX()
-  else :
-    maxbin = h.GetXaxis().FindBin(pmax)
-  h1d = h.ProjectionY("DeltaTVsP_1D", minbin, maxbin)
-  if h1d.GetEntries() > 100 :
-    peak = h1d.GetBinCenter(h1d.GetMaximumBin())
-  else :
-    peak = 0.0
-
-  r = h1d.Fit("gaus", "0SQI", "", peak + low_limit, peak + high_limit)
-
-  if int(r) != 0 :  # bad fit
-    return values 
-
-  mean = r.Parameter(1)
-  mean_error = r.ParError(1)
-  sigma = r.Parameter(2)
-
-  status = 1
-  if mean < timemin or mean > timemax or mean_error > error_max:
-      status=0
-
-  values = [status, float('%.5f'%(peak)), float('%.5f'%(mean)), float('%.5f'%(sigma)) ]
-  #print(values)
-  return values       # return array of values, status first
-
-
-
-
-def fcal_piminus_rf_time(rootfile, timemin=-0.1, timemax=0.1, low_limit=-0.5, high_limit=0.5, pmin=0.0, pmax=0.0, error_max=0.1) :
-  #print("in fcal_piminus_rf_time() ...")
-  names = ['timing_MD_fcal_piminus_rf_status','timing_MD_fcal_piminus_rf_peak','timing_MD_fcal_piminus_rf_mean','timing_MD_fcal_piminus_rf_sigma']     # These will be unique graph names, start with modulename_status
-  titles = ['PiMinus FCAL-RF time status','PiMinus FCAL-RF time peak (ns)','PiMinus FCAL-RF time mean (ns)','PiMinus FCAL-RF time width (ns)']  # Graph titles 
-  values = [-1, -1, -1, -1]   
-
-  if not rootfile :  # called by init function
-    return [names, titles, values]
-
-  histoname = 'DeltaTVsP_Pi-'      # monitoring histogram to check
-  dirname = '/Independent/Hist_DetectorPID/FCAL'          # directory containing that histogram
-
-  min_counts = 1000
-
-  h = get_histo(rootfile, dirname, histoname, min_counts)
-
-  if (not h) :
-    return values
-
-  # code to check the histogram and find the status values
-  minbin = h.GetXaxis().FindBin(pmin)
-  if pmax == 0.0 :
-    maxbin = h.GetNbinsX()
-  else :
-    maxbin = h.GetXaxis().FindBin(pmax)
-  h1d = h.ProjectionY("DeltaTVsP_1D", minbin, maxbin)
-  if h1d.GetEntries() > 100 :
-    peak = h1d.GetBinCenter(h1d.GetMaximumBin())
-  else :
-    peak = 0.0
-
-  r = h1d.Fit("gaus", "0SQI", "", peak + low_limit, peak + high_limit)
-
-  if int(r) != 0 :  # bad fit
-    return values 
-
-  mean = r.Parameter(1)
-  mean_error = r.ParError(1)
-  sigma = r.Parameter(2)
-
-  status = 1
-  if mean < timemin or mean > timemax or mean_error > error_max:
-      status=0
-
-  values = [status, float('%.5f'%(peak)), float('%.5f'%(mean)), float('%.5f'%(sigma)) ]
-  #print(values)
-  return values       # return array of values, status first
 
 
 
