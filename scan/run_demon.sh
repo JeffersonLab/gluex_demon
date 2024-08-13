@@ -18,7 +18,7 @@ verbose=1
 demon_web_home=/group/halld/www/halldweb/html/gluex_demon    # web files live here
 
 #scan_path=/home/njarvis/tests/scan.py   # path to demon code scan.py
-scan_path = ${demon_web_home}/scan.py
+scan_path=${demon_web_home}/scan.py
 
 histo_dir=/work/halld/data_monitoring/RunPeriod-${run_period}/mon_ver${version}/rootfiles
 
@@ -51,7 +51,7 @@ cd $temp_dir
 
 
 echo Running demon 
-python3.6 ${scan_path} -r ${run_period} -v $version 
+python ${scan_path} -r ${run_period} -v $version 
 echo Demon run complete
 echo Output files:
 ls monitoring_*

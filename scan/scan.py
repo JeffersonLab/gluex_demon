@@ -71,8 +71,10 @@ import fmwpc
 import ctof
 import rf
 import ps_e
+import rho
+import omega
 
-modules_def = [rf, ps_e, cdc, fdc, timing, timing_MD, tof_1]       # default list of modules
+modules_def = [rf, ps_e, cdc, fdc, timing, timing_MD, tof_1, rho, omega]       # default list of modules
 modules_cpp = [rf, ps_e, cdc_cpp,fdc,timing,timing_MD,tof_1,fmwpc,ctof]   # modules for CPP
 
 testing = 0  # stop after <runlimit> files, print diagnostics
