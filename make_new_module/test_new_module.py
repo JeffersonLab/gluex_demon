@@ -26,10 +26,10 @@ from ROOT import TFile, TGraph
 from ROOT import gROOT
 gROOT.SetBatch(True)
 
-import new_module,rho        # import new module 
+import new_module        # import new module 
 
-modules = [new_module,rho]   # list of function names
-run_module = [True,True]      # call the function if true
+modules = [new_module]   # list of function names
+run_module = [True]      # call the function if true
 
 testing = 1  # stop after <runlimit> files, print diagnostics
 runlimit = 2 # process this number of runs if testing=1
