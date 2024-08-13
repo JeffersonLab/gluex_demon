@@ -294,9 +294,7 @@ for filename in histofilelist:
 
 
 # skip the post-processing if all modules failed!
-print(len(gnames))
 
-print(len(allruns_values))
 if len(gnames) == 1:
   exit('No runs were processed properly')
 

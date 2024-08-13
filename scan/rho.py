@@ -35,8 +35,9 @@ def init() :
 
 
   m = rho_mass_yield(False)
-
-  for thing in [ m ] :   # loop through the arrays returned from each function
+  ps = rho_ps_triggers(False)
+  
+  for thing in [ m, ps ] :   # loop through the arrays returned from each function
 
     names.extend(thing[0])
     titles.extend(thing[1])
@@ -57,12 +58,13 @@ def check(run, rootfile) :
   # Add or remove custom functions from this list
 
   m_y = rho_mass_yield(rootfile) 
-
+  ps = rho_ps_triggers(rootfile)
+  
   # This finds the overall status, setting it to the min value of each histogram status
 
 
   statuslist = []
-  for thing in [ m_y ] :         # Add or remove the list names assigned above.  
+  for thing in [ m_y, ps ] :         # Add or remove the list names assigned above.  
     statuslist.append(thing[0])   # status is the first value in the array
 
   status = min(statuslist)
@@ -71,7 +73,7 @@ def check(run, rootfile) :
 
   allvals = [status]
 
-  for thing in [ m_y ] :  # Add or remove the list names assigned above.  
+  for thing in [ m_y, ps ] :  # Add or remove the list names assigned above.  
     allvals.extend(thing) 
 
   return allvals
@@ -138,6 +140,51 @@ def rho_mass_yield(rootfile) :
   values = [status, float('%.3f'%(mass)), float('%.0f'%(counts)) ] 
   
   return values       # return array of values, status first
+
+
+def rho_ps_triggers(rootfile) : 
+
+  # Example custom function to check another histogram
+
+  # Acceptable value limits, defined here for accessibility
+
+  # not using these here, just set it to 1. 
+  
+  # Provide unique graph names, starting with 'rho_'. The first must be the status code from this function.
+
+  names = ['rho_ps_trig_status','ps_trigger_count']
+  titles = ['Rho PS trig status','PS trigger count']           # Graph titles
+  values = [-1,-1]                                             # Default values, keep as -1
+
+  if not rootfile :  # called by init function
+    return [names, titles, values]
+
+  # The following code finds the histogram, extracts metrics, checks them against the limits provided, assigns a status code and then returns a list of status code followed by the metrics. 
+  # Status codes are 1 (good), 0 (bad) or -1 (don't know/file problem/not enough data/some other error)
+  # If you just want to plot a metric without comparing it to limits, set its status code to 1, so that it doesn't make the overall status look bad.
+
+  histoname = 'psflux_num_events'            # monitoring histogram to check
+  dirname = 'PS_flux'                        # directory containing the histogram
+
+  min_counts = 100
+  h = get_histo(rootfile, dirname, histoname, min_counts)
+
+  if (not h) :
+    return values
+
+  # code to check the histogram and find the status values
+
+  counts = h.Integral()
+
+  
+  status = 1
+      
+  values = [status, float('%.0f'%(counts)) ] 
+  
+  return values       # return array of values, status first
+
+
+
 
 
 def get_histo(rootfile, dirname, histoname, min_counts) :
