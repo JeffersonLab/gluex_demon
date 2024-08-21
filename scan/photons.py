@@ -228,7 +228,7 @@ def rho_psigma_pse(rootfile) :
     # bin 1 : filled with (maxbin-9) - (maxbin-10) : maxbin - 9.5 : has bin center 0.5  
 
     f = TF1('f','gaus')
-    fitstat=hdiff.Fit(f)
+    fitstat=hdiff.Fit(f,'Q')
     if (int(fitstat)==0) :
       max = max + (f.GetParameter(1)- 10)*binwidth
       errors = f.GetParErrors()

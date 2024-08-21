@@ -50,10 +50,10 @@ def make_multigraph(gname,gtitle) :
 
 import sys
 import os
-import glob
 import subprocess
 import re
 import csv
+from glob import glob
 
 script = sys.argv.pop(0)
 nargs = len(sys.argv)
@@ -71,6 +71,7 @@ import tof_1
 import fmwpc
 import ctof
 import rf
+import ps_e
 import photons
 import rho
 import omega
@@ -116,7 +117,7 @@ if not os.path.isdir(histdir):
 
 cwd = os.getcwd()
 os.chdir(histdir)
-histofilelist = sorted(glob.glob('*.root'))
+histofilelist = sorted(glob('*.root'))
 os.chdir(cwd)
 
 if len(histofilelist) == 0:
