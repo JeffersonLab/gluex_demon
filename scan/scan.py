@@ -5,9 +5,9 @@
 #   add it to the lists of modules, modules_def etc
 #
 # Run this script with arguments -r Year-Month -v Version and (optionally) a non-standard monitoring histogram directory.
-# eg python3.6 scan.py -r 2022-05 -v 23 cpphists
+# eg python scan.py -r 2022-05 -v 23 cpphists
 #
-# It should create 4 files, where X is like 2022-05_ver23
+# It should create 4 files, with the suffix X denoting Year-Month_Version, eg 2022-05_ver23
 #
 #   filename_graphs = 'monitoring_graphs_X.root'   # root file of graphs
 #   filename_csv = 'monitoring_data_X.csv'         # csv file of metrics
@@ -59,7 +59,7 @@ script = sys.argv.pop(0)
 nargs = len(sys.argv)
 
 if nargs<4 or nargs>6 or sys.argv[0] == "-h" or sys.argv[0] == "--h" or sys.argv[0] == "--help":
-    exit("This script scans GlueX/Hall D detector monitoring histograms to create graphs.\nUsage: python3.6 scan.py -r Year-Month -v VersionNumber [path_to_monitoring_histogram_directory] [checkstatus]\n    eg python3.6 scan.py -r 2022-05 -v 06\nThe histogram directory is optional if it is the usual one. If the arg checkstatus is supplied, only the runs with RCDB status nonzero are checked.")
+    exit("This script scans GlueX/Hall D detector monitoring histograms to create graphs.\nUsage: python scan.py -r Year-Month -v VersionNumber [path_to_monitoring_histogram_directory] [checkstatus]\n    eg python scan.py -r 2022-05 -v 06\nThe histogram directory is optional if it is the usual one. If the arg checkstatus is supplied, only the runs with RCDB status nonzero are checked.")
 
 # detector monitoring modules
 import cdc 
@@ -71,11 +71,11 @@ import tof_1
 import fmwpc
 import ctof
 import rf
-import ps_e
+import photons
 import rho
 import omega
 
-modules_def = [rf, ps_e, cdc, fdc, timing, timing_MD, tof_1, rho, omega]       # default list of modules
+modules_def = [rf, cdc, fdc, timing, timing_MD, tof_1, photons, rho, omega]       # default list of modules
 modules_cpp = [rf, ps_e, cdc_cpp,fdc,timing,timing_MD,tof_1,fmwpc,ctof]   # modules for CPP
 
 testing = 0  # stop after <runlimit> files, print diagnostics

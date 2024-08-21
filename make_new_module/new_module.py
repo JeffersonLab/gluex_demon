@@ -1,4 +1,5 @@
 import csv
+from utils import get_histo     # demon's helper functions
 
 from ROOT import gROOT
 
@@ -7,16 +8,15 @@ from ROOT import gROOT
 #
 # 'init' and 'check' call the custom functions.  'init' returns graph names and titles. 'check' returns the numbers to be graphed.
 #
-#
-# Change all instances of new_module to your module's name 
+# Copy and rename new_module.py and test_new_module.py, and change all instances of new_module to your module's name  
 #
 # Adapt the example custom functions (new_module_occupancy and new_module_e) to retrieve the metrics needed from their histogram.
 # Add more custom functions, or remove one if it is not required.
 #
 # Add the custom functions to the list of functions in 'init' and 'check'.
 #
-#
-
+# To show a pair of quantities together in a TGraphErr, give them names like x and x_err, eg rho_mass and rho_mass_err
+# At present, test_new_module makes these into separate graphs, but scan makes them into TGraphErr
 
 
 def init() : 
@@ -214,25 +214,3 @@ def new_module_e(rootfile) :
   return values       # return array of values, status first
 
 
-def get_histo(rootfile, dirname, histoname, min_counts) :
-
-  test = rootfile.GetDirectory(dirname) 
-
-  # file pointer contains tobj if dir exists, set false if not
-
-  if (not test):
-    #print('Could not find ' + dirname)
-    return False
-
-  rootfile.cd(dirname)
-
-  h = gROOT.FindObject(histoname)
-
-  if (not h) :
-    #print('Could not find ' + histoname)
-    return False
-
-  if h.GetEntries() < min_counts :
-    return False
-
-  return h

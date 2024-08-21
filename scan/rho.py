@@ -1,4 +1,5 @@
 import csv
+from utils import get_histo     # demon's helper functions
 
 from ROOT import gROOT, TF1
 
@@ -36,8 +37,11 @@ def init() :
 
   m = rho_mass_yield(False)
   ps = rho_ps_triggers(False)
+
+  things = [ m, ps ]
+
   
-  for thing in [ m, ps ] :   # loop through the arrays returned from each function
+  for thing in things :   # loop through the arrays returned from each function
 
     names.extend(thing[0])
     titles.extend(thing[1])
@@ -57,14 +61,16 @@ def check(run, rootfile) :
   # Each function checks one histogram and returns a list, its status code followed by the values to be graphed.
   # Add or remove custom functions from this list
 
-  m_y = rho_mass_yield(rootfile) 
+  m = rho_mass_yield(rootfile) 
   ps = rho_ps_triggers(rootfile)
   
+  things = [m, ps]
+
   # This finds the overall status, setting it to the min value of each histogram status
 
 
   statuslist = []
-  for thing in [ m_y, ps ] :         # Add or remove the list names assigned above.  
+  for thing in things :         # Add or remove the list names assigned above.  
     statuslist.append(thing[0])   # status is the first value in the array
 
   status = min(statuslist)
@@ -73,7 +79,7 @@ def check(run, rootfile) :
 
   allvals = [status]
 
-  for thing in [ m_y, ps ] :  # Add or remove the list names assigned above.  
+  for thing in things :  # Add or remove the list names assigned above.  
     allvals.extend(thing) 
 
   return allvals
@@ -89,14 +95,14 @@ def rho_mass_yield(rootfile) :
   mmin = 0.766
   mmax = 0.774
   ymin = 1e3
-  ymax=1e6
+  ymax = 1e6
 
   
   # Provide unique graph names, starting with 'rho_'. The first must be the status code from this function.
 
-  names = ['rho_mass_and_yield_status','rho_mass','rho_yield']
-  titles = ['Rho status','Rho mass (GeV/c^{2})','Rho yield (counts, post kinfit)']   # Graph titles
-  values = [-1,-1,-1]                                          # Default values, keep as -1
+  names = ['rho_mass_and_yield_status','rho_yield','rho_mass','rho_mass_err','rho_width', 'rho_width_err']
+  titles = ['Rho status','Rho yield (counts, post kinfit)','Rho mass (GeV/c^{2})','Rho mass std dev','Rho width (GeV/c^{2})','Rho width std dev']   # Graph titles
+  values = [-1,-1,-1,-1, -1, -1]                                          # Default values, keep as -1
 
   if not rootfile :  # called by init function
     return [names, titles, values]
@@ -118,37 +124,40 @@ def rho_mass_yield(rootfile) :
 
   counts = h.Integral(200,700)
 
-  h.Rebin(4)
-  
+  values[1] = float('%.0f'%(counts))
+   
   frho = TF1("frho", "[0] / ((x*x - [1]*[1])*(x*x- [1]*[1]) + x*x*x*x*[2]*[2]/[1]/[1])", 0.6, 0.9)
   frho.SetParameter(0,10)
   frho.SetParameter(1,0.770)
   frho.SetParameter(2,0.1)
 
-  h.Fit("frho", "RQ0")
-  
-  mass = frho.GetParameter(1)
-  
-  status = 1
-  if counts < ymin or counts > ymax:
-      status=0
+  fitstat = h.Fit("frho", "RQ0")
 
-  if mass < mmin or mass > mmax:
-      status=0
+  status = 0
+  
+  if int(fitstat) == 0:
+    mass = frho.GetParameter(1)
+    width = frho.GetParameter(2)    # FWHM
+    errors = frho.GetParErrors()
+    err_mass = errors[1]
+    err_width = errors[2]  
+  
+    if counts >= ymin and counts <= ymax and mass >= mmin and mass <= mmax:
+      status=1
 
+    x = 2  
+    for thing in [ mass, err_mass, width, err_width ] :
+      values[x] = float('%.3f'%(thing))
+      x = x+1
       
-  values = [status, float('%.3f'%(mass)), float('%.0f'%(counts)) ] 
-  
+  values[0] = status  
+
   return values       # return array of values, status first
 
 
 def rho_ps_triggers(rootfile) : 
 
-  # Example custom function to check another histogram
-
-  # Acceptable value limits, defined here for accessibility
-
-  # not using these here, just set it to 1. 
+  # not using acceptability limits here, just set it to 1. 
   
   # Provide unique graph names, starting with 'rho_'. The first must be the status code from this function.
 
@@ -199,30 +208,3 @@ def rho_ps_triggers(rootfile) :
   values = [status, float('%.0f'%(pscounts)), float('%.3f'%(rateperktriggers)) ] 
   
   return values       # return array of values, status first
-
-
-
-
-
-def get_histo(rootfile, dirname, histoname, min_counts) :
-
-  test = rootfile.GetDirectory(dirname) 
-
-  # file pointer contains tobj if dir exists, set false if not
-
-  if (not test):
-    #print('Could not find ' + dirname)
-    return False
-
-  rootfile.cd(dirname)
-
-  h = gROOT.FindObject(histoname)
-
-  if (not h) :
-    #print('Could not find ' + histoname)
-    return False
-
-  if h.GetEntries() < min_counts :
-    return False
-
-  return h
