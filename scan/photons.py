@@ -98,7 +98,7 @@ def rho_psigma_pse(rootfile) :
   # Provide unique graph names, starting with 'rho_'. The first must be the status code from this function.
 
   names = ['photons_psigma_pse_status', 'photons_ps_e', 'photons_ps_e_err', 'photons_rho_psigma',  'photons_rho_psigma_err', 'photons_rho_psigma_0', 'photons_rho_psigma_0_err', 'photons_rho_psigma_90', 'photons_rho_psigma_90_err', 'photons_rho_psigma_135', 'photons_rho_psigma_135_err', 'photons_rho_psigma_45', 'photons_rho_psigma_45_err', 'photons_rho_phi0_diamond', 'photons_rho_phi0_diamond_err', 'photons_rho_phi0_amo', 'photons_rho_phi0_amo_err' ]
-  titles = ['PS E and Rho P#Sigma status', 'Photon beam energy from PS pair E (GeV)', 'PS E err','Abs(P#Sigma) from #rho(770) production', 'Abs(P#Sigma)_err', 'P#Sigma (0) - ignore values set to -2', 'P#Sigma(0)err', 'P#Sigma (90) - ignore values set to -2', 'P#Sigma(90)err', 'P#Sigma (135) - ignore values set to -2', 'P#Sigma(135)err', 'P#Sigma (45) - ignore values set to -2', 'P#Sigma(45)err','#phi_{0} diamond - ignore -200', '#phi_{0} diamond err', '#phi_{0} amo - ignore -200', '#phi_{0} amo err' ]   # Graph titles
+  titles = ['PS E and Rho P#Sigma status', 'Photon beam energy (edge or endpoint) from PS pair E (GeV)', 'PS E err','Abs(P#Sigma) from #rho(770) production', 'Abs(P#Sigma)_err', 'P#Sigma (0) - ignore values set to -2', 'P#Sigma(0)err', 'P#Sigma (90) - ignore values set to -2', 'P#Sigma(90)err', 'P#Sigma (135) - ignore values set to -2', 'P#Sigma(135)err', 'P#Sigma (45) - ignore values set to -2', 'P#Sigma(45)err','#phi_{0} diamond - ignore -200', '#phi_{0} diamond err', '#phi_{0} amo - ignore -200', '#phi_{0} amo err' ]   # Graph titles
   values = [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1]                      # Default values, keep as -1
 
   if not rootfile :  # called by init function
@@ -160,11 +160,11 @@ def rho_psigma_pse(rootfile) :
     Phi0Amo = Phi0
     Phi0ErrAmo = Phi0Err
     Phi0D = -200
-    Phi0ErrD = -200
+    Phi0ErrD = 0
   else:
     amo = False
     Phi0Amo = -200
-    Phi0ErrAmo = -200
+    Phi0ErrAmo = 0
     Phi0D = Phi0
     Phi0ErrD = Phi0Err
 
@@ -202,40 +202,38 @@ def rho_psigma_pse(rootfile) :
   
   if amo:
 
-    h2.Rebin(4)
-    max = h2.GetBinCenter(h2.GetMaximumBin())
-    errmax = 0 #temporary
-
-    values[1] = float('%.2f'%(max))
-    values[2] = float('%.2f'%(errmax))
+    maxbin = h2.FindLastBinAbove(5)
+    max = h2.GetBinCenter(maxbin)
 
   else:
 
     maxbin = h2.GetMaximumBin()
     max = h2.GetBinCenter(maxbin)
-    binwidth = h2.GetBinWidth(1)
     
-    hdiff = TH1I('hdiff','hdiff',20,0,20)      # find negative values in derivative, fit to find where slope is max  
 
-    nprev = h2.GetBinContent(maxbin-10)
-    for i in range(1,20):
-      nnext = h2.GetBinContent(maxbin-10 + i)
-      diff = nnext - nprev
-      if (diff < 0) :
-        hdiff.SetBinContent(i,-1*diff)
-      nprev = nnext
-
-    # bin 1 : filled with (maxbin-9) - (maxbin-10) : maxbin - 9.5 : has bin center 0.5  
-
-    f = TF1('f','gaus')
-    fitstat=hdiff.Fit(f,'Q')
-    if (int(fitstat)==0) :
-      max = max + (f.GetParameter(1)- 10)*binwidth
-      errors = f.GetParErrors()
-      errmax = errors[1]*binwidth
+  binwidth = h2.GetBinWidth(1)
   
-      values[1] = float('%.2f'%(max))
-      values[2] = float('%.2f'%(errmax))
+  hdiff = TH1I('hdiff','hdiff',20,0,20)      # find negative values in derivative, fit to find where slope is max  
+
+  nprev = h2.GetBinContent(maxbin-10)
+  for i in range(1,20):
+    nnext = h2.GetBinContent(maxbin-10 + i)
+    diff = nnext - nprev
+    if (diff < 0) :
+      hdiff.SetBinContent(i,-1*diff)
+    nprev = nnext
+
+  # bin 1 : filled with (maxbin-9) - (maxbin-10) : maxbin - 9.5 : has bin center 0.5  
+
+  f = TF1('f','gaus')
+  fitstat=hdiff.Fit(f,'Q')
+  if (int(fitstat)==0) :
+    max = max + (f.GetParameter(1)- 10)*binwidth
+    errors = f.GetParErrors()
+    errmax = errors[1]*binwidth
+
+    values[1] = float('%.2f'%(max))
+    values[2] = float('%.2f'%(errmax))
 
 
   return values       # return array of values, status first
