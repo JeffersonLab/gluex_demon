@@ -16,7 +16,20 @@
 #
 
 def make_graph(gname,gtitle,nruns,x,y) :
-    gr = TGraph( nruns, x, y )
+
+    xx, yy = array( 'd' ), array( 'd' )
+    nn = 0
+  
+    for i in range(nruns) :
+      if y[i] != None :
+        xx.append(x[i])
+        yy.append(y[i])
+        nn = nn + 1
+
+    if nn == 0 :
+        return None
+    
+    gr = TGraph( nn, xx, yy )
     gr.SetName(gname)
     gr.SetTitle(gtitle)
     gr.GetXaxis().SetTitle( 'Run number' )
@@ -26,7 +39,22 @@ def make_graph(gname,gtitle,nruns,x,y) :
 
 
 def make_graph_errs(gname,gtitle,nruns,x,y,dx,dy) :
-    gr = TGraphErrors( nruns, x, y, dx, dy )
+
+    xx, yy, dxx, dyy = array( 'd' ), array( 'd' ), array( 'd' ), array( 'd' )
+    nn = 0
+  
+    for i in range(nruns) :
+      if y[i] != None :
+        xx.append(x[i])
+        yy.append(y[i])
+        dxx.append(dx[i])
+        dyy.append(dy[i])
+        nn = nn + 1
+        
+    if nn == 0 :
+        return None
+
+    gr = TGraphErrors( nn, xx, yy, dxx, dyy )
     gr.SetName(gname)
     gr.SetTitle(gtitle)
     gr.GetXaxis().SetTitle( 'Run number' )
@@ -76,11 +104,12 @@ import photons
 import rho
 import omega
 
+modules_new = [photons]
 modules_def = [rf, cdc, fdc, timing, timing_MD, tof_1, photons, rho, omega]       # default list of modules
 modules_cpp = [rf, ps_e, cdc_cpp,fdc,timing,timing_MD,tof_1,fmwpc,ctof]   # modules for CPP
 
 testing = 0  # stop after <runlimit> files, print diagnostics
-runlimit = 13 # process this number of runs if testing=1
+runlimit = 20 # process this number of runs if testing=1
 checkstatus = 0  # skip RCDB check
 
 RunPeriod=""
@@ -453,7 +482,8 @@ gr = make_graph('readiness','Run readiness',nruns,x,y)
 #gr.GetXaxis().SetTitle( 'Run number' )
 #gr.GetYaxis().SetTitle( 'Readiness' )
 #gr.SetMarkerStyle( 21 )
-gr.Write()
+if gr != None :
+    gr.Write()
 
 
 # separate the tgrapherrors pairs of thing & thing_err from the tgraphs
@@ -519,14 +549,21 @@ for i in range(len(pagenames)):
 
     for thing in graphs:   # graphs is a dict
 
-        y = array( 'd' )        
+        y = []
         igraph=int(graphs[thing]) # column number in giant array
 
         for ii in range(nruns) :
-            y.append(allruns_values[ii][igraph]) 
+            z = allruns_values[ii][igraph]
+            if z == None :
+                y.append(None)
+            else : 
+                y.append(z)
 
         gr = make_graph(thing,gtitles[igraph],nruns,x,y)   
 
+        if gr == None :
+            continue
+        
         gr.Write()
 
         if first_graph :
@@ -540,22 +577,33 @@ for i in range(len(pagenames)):
             mg.Add(gr)
             mg_n = mg_n + 1
 
-    mg.Write()
+    if not first_graph:    # will be set true if there aren't any graphs
+            
+        mg.Write()
+        newlistofgraphs[i].insert(0,mg_name)
 
-    newlistofgraphs[i].insert(0,mg_name)
-
+        
     for ething in egraphs:     # egraphs is an array name, col-y, col-dy
 
-        y, dy = array( 'd' ), array( 'd' )  
+        y = []
+        dy = []
         igraph = int(ething[1]) # column number in giant array
 
         for ii in range(nruns) :
-            y.append(allruns_values[ii][ething[1]])
-            dy.append(allruns_values[ii][ething[2]])
+            z = allruns_values[ii][ething[1]]
+            dz = allruns_values[ii][ething[2]]      
+            if z == None :
+                y.append(None)
+                dy.append(None)                
+            else : 
+                y.append(z)
+                dy.append(dz)                
       
-        gr = make_graph_errs(gnames[igraph],gtitles[igraph],nruns,x,y,dx,dy) 
-        gr.SetLineColor(17);
-        gr.Write()
+        gr = make_graph_errs(gnames[igraph],gtitles[igraph],nruns,x,y,dx,dy)
+
+        if gr != None :
+            gr.SetLineColor(17);
+            gr.Write()
 
     f.cd("../")
 

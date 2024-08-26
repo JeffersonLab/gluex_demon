@@ -98,7 +98,7 @@ def rho_psigma_pse(rootfile) :
   # Provide unique graph names, starting with 'rho_'. The first must be the status code from this function.
 
   names = ['photons_psigma_pse_status', 'photons_ps_e', 'photons_ps_e_err', 'photons_rho_psigma',  'photons_rho_psigma_err', 'photons_rho_psigma_0', 'photons_rho_psigma_0_err', 'photons_rho_psigma_90', 'photons_rho_psigma_90_err', 'photons_rho_psigma_135', 'photons_rho_psigma_135_err', 'photons_rho_psigma_45', 'photons_rho_psigma_45_err', 'photons_rho_phi0_diamond', 'photons_rho_phi0_diamond_err', 'photons_rho_phi0_amo', 'photons_rho_phi0_amo_err' ]
-  titles = ['PS E and Rho P#Sigma status', 'Photon beam energy (edge or endpoint) from PS pair E (GeV)', 'PS E err','Abs(P#Sigma) from #rho(770) production', 'Abs(P#Sigma)_err', 'P#Sigma (0) - ignore values set to -2', 'P#Sigma(0)err', 'P#Sigma (90) - ignore values set to -2', 'P#Sigma(90)err', 'P#Sigma (135) - ignore values set to -2', 'P#Sigma(135)err', 'P#Sigma (45) - ignore values set to -2', 'P#Sigma(45)err','#phi_{0} diamond - ignore -200', '#phi_{0} diamond err', '#phi_{0} amo - ignore -200', '#phi_{0} amo err' ]   # Graph titles
+  titles = ['PS E and Rho P#Sigma status', 'Photon beam energy (diamond edge, amo peak) from PS pair E (GeV)', 'PS E err','Abs(P#Sigma) from #rho(770) production', 'Abs(P#Sigma)_err', 'P#Sigma (0)', 'P#Sigma(0)err', 'P#Sigma (90)', 'P#Sigma(90)err', 'P#Sigma (135)', 'P#Sigma(135)err', 'P#Sigma (45)', 'P#Sigma(45)err','#phi_{0} diamond', '#phi_{0} diamond err', '#phi_{0} amo', '#phi_{0} amo err' ]   # Graph titles
   values = [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1]                      # Default values, keep as -1
 
   if not rootfile :  # called by init function
@@ -112,141 +112,168 @@ def rho_psigma_pse(rootfile) :
   dirname = '/p2pi_preco/Custom_p2pi_hists/'      # directory containing the histogram
 
   min_counts = 100
-  h = get_histo(rootfile, dirname, histoname, min_counts)
+  hpsit = get_histo(rootfile, dirname, histoname, min_counts)
 
   histoname = 'PS_E'   # monitoring histogram to check
   dirname = '/PS_flux/PSC_PS'      # directory containing the histogram
 
   min_counts = 1000
-  h2 = get_histo(rootfile, dirname, histoname, min_counts)
+  hps = get_histo(rootfile, dirname, histoname, min_counts)
 
-  if (not (h and h2)) :
+  if (not (hpsit and hps)) :
     return values
 
+  # find out if this has a sharp peak (diamond) or broad peak (amo)
+  # diamond coh peak is about 1 GeV wide
   
-  # code to check the histogram and find the status values
+  # See if counts exceed half max at 1 GeV either side of maximum, yes = amo.
+  
+  psmaxbin = hps.GetMaximumBin()
+  psmaxe = hps.GetBinCenter(psmaxbin)
 
+  halfmaxcounts = 0.5*hps.GetMaximum()
+  
+  counts_before = hps.GetBinContent(hps.FindBin(psmaxe-1.0))
+  counts_after = hps.GetBinContent(hps.FindBin(psmaxe+1.0))   
+
+  amo = False
+
+  if counts_before > halfmaxcounts and counts_after > halfmaxcounts :
+    amo = True
+
+
+  if amo :     # for amo, just take fitted peak,  # for diamond, find steepest part of edge
+
+    g = TF1('g','gaus',psmaxe-0.5, psmaxe+0.5) 
+
+    fitstat = hps.Fit('g','RQ')
+  
+    if int(fitstat) != 0 :
+      return values
+
+    epeak = g.GetParameter(1)
+    errors = g.GetParErrors()    
+    epeakerr = errors[1]     
+
+  else : 
+  
+    hdiff = TH1I('hdiff','hdiff',20,0,20)      # find negative values in derivative, fit to find where slope is max  
+
+    nprev = hps.GetBinContent(psmaxbin-10)
+    for i in range(1,20):
+      nnext = hps.GetBinContent(psmaxbin-10 + i)
+      diff = nnext - nprev
+      if (diff < 0) :
+        hdiff.SetBinContent(i,-1*diff)
+      nprev = nnext
+
+    # bin 1 : filled with (maxbin-9) - (maxbin-10) : maxbin - 9.5 : has bin center 0.5  
+
+    f = TF1('f','gaus')
+    fitstat=hdiff.Fit(f,'Q')
+
+    if int(fitstat) != 0 :
+      return values
+
+    binwidth = hps.GetBinWidth(1)    
+    epeak = psmaxe + (f.GetParameter(1)- 10)*binwidth
+    errors = f.GetParErrors()
+    epeakerr = errors[1]*binwidth
+
+      
+  values[0] = 0    # status, update later on
+  values[1] = float('%.2f'%(epeak))
+  values[2] = float('%.2f'%(epeakerr))
+
+
+  # --- p2pi hists psi histo ---
+
+  hp = hpsit.ProjectionY()
+    
   #  #psi_{#pi^{+}}");
 
-  p = h.ProjectionY()
-  p.Rebin(4) 
-		
   f = TF1('f','[0]*(1.0 + [1]*cos(2*(x + [2])/180.*3.14159))',-180.,180.)
-  fitstat = p.Fit('f','Q')
+  fitstat = hp.Fit('f','Q')
   
   if int(fitstat) != 0 :
     return values
-    
+  
   PSigma = f.GetParameter(1)
   PSigmaErr = f.GetParError(1)
   
   Phi0 = f.GetParameter(2)
   Phi0Err = f.GetParError(2)
 
-  PSigma0 =-2
-  PSigma0Err = -2
-  PSigma90 = -2
-  PSigma90Err = -2
-  PSigma135 = -2
-  PSigma135Err = -2
-  PSigma45 = -2
-  PSigma45Err = -2
+  if Phi0 > 360:
+    Phi0 = Phi0%360.0   # deal with few extra rotations
 
-  for x in [PSigma0, PSigma0Err, PSigma90, PSigma90Err, PSigma135, PSigma135Err, PSigma45, PSigma45Err] :
-     x = 0
+    
+  PSigma0 =None
+  PSigma0Err = None
+  PSigma90 = None
+  PSigma90Err = None
+  PSigma135 = None
+  PSigma135Err = None
+  PSigma45 = None
+  PSigma45Err = None
 
-  if abs(PSigma) < 10*PSigmaErr :
-    amo = True
+  if amo : 
     Phi0Amo = Phi0
     Phi0ErrAmo = Phi0Err
-    Phi0D = -200
-    Phi0ErrD = 0
+    Phi0D = None
+    Phi0ErrD = None
+
   else:
-    amo = False
-    Phi0Amo = -200
-    Phi0ErrAmo = 0
+
+    Phi0Amo = None
+    Phi0ErrAmo = None
     Phi0D = Phi0
     Phi0ErrD = Phi0Err
 
+    
   if not amo:
     if PSigma>0 and abs(Phi0)<22 : # 0 para
+      pol=0
       PSigma0 = PSigma
       PSigma0Err = PSigmaErr
-    elif PSigma<0 and abs(Phi0)<22 : # 0 perp
+    elif PSigma<0 and abs(Phi0)<22 : # 90 perp
+      pol=90
       PSigma90 = PSigma
       PSigma90Err = PSigmaErr
-    elif PSigma>0 and abs(Phi0)>22 : # 0 para
+    elif PSigma>0 and abs(Phi0)>22 : # 135 para
+      pol=135
       PSigma135 = PSigma
       PSigma135Err = PSigmaErr
-    elif PSigma<0 and abs(Phi0)>22 : # 0 perp
+    elif PSigma<0 and abs(Phi0)>22 : # 45 perp
+      pol=45
       PSigma45 = PSigma
       PSigma45Err = PSigmaErr
+
+#  if not amo:
+#    print(PSigma,Phi0,pol)
       
   PSigma = abs(PSigma)    # report abs value for overall graph to make it simpler
-  
-  values = [status, -1, -1]   # leave 2 spots for PS_E
+
+  values[0] = 1    # status
+  index = 3
 
   for x in [PSigma, PSigmaErr, PSigma0, PSigma0Err, PSigma90, PSigma90Err, PSigma135, PSigma135Err, PSigma45, PSigma45Err, Phi0D, Phi0ErrD, Phi0Amo, Phi0ErrAmo] :
-    values.append(float('%.2f'%(x)))
+    if x == None :
+      values[index] = x
+    else : 
+      values[index] = float('%.2f'%(x))
+    index = index + 1
 
-    
-  ########  now check the PS E
-
-  # could actually fit it now i know diamond/amo => likely peak width
-    
-#  from array import array
-#  probsum = array('d',[0.25, 0.5, 0.75])
-#  q = array('d',[0,0,0])
-#  y=h.GetQuantiles(3,q,probsum)
-
-  
-  if amo:
-
-    maxbin = h2.FindLastBinAbove(5)
-    max = h2.GetBinCenter(maxbin)
-
-  else:
-
-    maxbin = h2.GetMaximumBin()
-    max = h2.GetBinCenter(maxbin)
-    
-
-  binwidth = h2.GetBinWidth(1)
-  
-  hdiff = TH1I('hdiff','hdiff',20,0,20)      # find negative values in derivative, fit to find where slope is max  
-
-  nprev = h2.GetBinContent(maxbin-10)
-  for i in range(1,20):
-    nnext = h2.GetBinContent(maxbin-10 + i)
-    diff = nnext - nprev
-    if (diff < 0) :
-      hdiff.SetBinContent(i,-1*diff)
-    nprev = nnext
-
-  # bin 1 : filled with (maxbin-9) - (maxbin-10) : maxbin - 9.5 : has bin center 0.5  
-
-  f = TF1('f','gaus')
-  fitstat=hdiff.Fit(f,'Q')
-  if (int(fitstat)==0) :
-    max = max + (f.GetParameter(1)- 10)*binwidth
-    errors = f.GetParErrors()
-    errmax = errors[1]*binwidth
-
-    values[1] = float('%.2f'%(max))
-    values[2] = float('%.2f'%(errmax))
-
-
+      
   return values       # return array of values, status first
 
 
-  # quantiles code
-  
+
+
+#  Quantiles code  
 #  from array import array
-
 #  probsum = array('d',[0.25, 0.5, 0.75])
-
 #  q = array('d',[0,0,0])
-
 #  y=h.GetQuantiles(3,q,probsum)
 
 
