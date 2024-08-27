@@ -22,11 +22,13 @@ When the histogram-inspection functions are called by _check_ (with a valid poin
 
 The quantities and their assigned status ratings are used to compile root graphs which will appear on the module's web page.  A combined status graph for each  module is concocted from the status ratings of all of that module's quantities.  The combined status graph is shown on the module's page and also on the overview page.  An overall status is derived from all of these combined status values and shown as 'readiness' on the overview page. 
 
-For graphs with error bars, link the measurement with its uncertainty by giving the uncertainty the same name with the suffix '_err', eg yourmodule_thing for the measurement and yourmodule_thing_err for the std deviation. 
-
-
 # How to make your own module
 
 Download the two scripts.  Rename _new\_module.py_ to suit your detector or purpose, and follow the instructions inside to customize it.  Then follow the instructions inside _test\_new\_module.py_ to test it.  
 
-The overvew web page contains links to the root file containing all of the graphs and a csv file containing all of the quantities used to create the graphs.  The csv file might be useful for recalibration.
+The overvew web page shows links to download the root file containing all of the graphs and a csv file containing all of the quantities used to create the graphs.  The csv file might be useful for recalibration.
+
+For graphs with error bars, link the measurement with its uncertainty by giving the uncertainty graph the same name as the measurement graph with the suffix '_err' added, eg yourmodule_thing for the measurement and yourmodule_thing_err for the std deviation. 
+
+To omit points from the graph, set their value to None (eg in photons.py to make separate graphs for different radiators). For failed fits it's probably more useful to show the 'undefined' value on the graph to indicate that there was a problem for that run. The example module uses -1 as a default to indicate undefined, but if this is a terrible choice for the quantity that you want to plot, feel free to choose a different value. However, the status should still be set to -1 for problem runs. 
+

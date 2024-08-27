@@ -105,8 +105,8 @@ import rho
 import omega
 
 modules_new = [photons]
-modules_def = [rf, cdc, fdc, timing, timing_MD, tof_1, photons, rho, omega]       # default list of modules
-modules_cpp = [rf, ps_e, cdc_cpp,fdc,timing,timing_MD,tof_1,fmwpc,ctof]   # modules for CPP
+modules_def = [photons, rf, cdc, fdc, timing, tof_1, rho, omega]       # default list of modules
+modules_cpp = [photons, rf, ps_e, cdc_cpp, fdc, timing, tof_1, fmwpc, ctof]   # modules for CPP
 
 testing = 0  # stop after <runlimit> files, print diagnostics
 runlimit = 20 # process this number of runs if testing=1

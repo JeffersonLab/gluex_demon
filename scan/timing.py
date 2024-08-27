@@ -166,7 +166,7 @@ def check(run, rootfile) :
 
 def sc_piminus_rf_time(rootfile, timemin=-0.1, timemax=0.1, low_limit=-0.5, high_limit=0.5, pmin=0.0, pmax=0.0, error_max=0.1) :
   #print("in sc_piminus_rf_time() ...")
-  names = ['timing_MD_sc_rf_piminus_status','timing_MD_sc_rf_piminus_peak','timing_MD_sc_rf_piminus_mean','timing_MD_sc_rf_piminus_sigma']     # These will be unique graph names, start with modulename_status
+  names = ['timing_sc_rf_piminus_status','timing_sc_rf_piminus_peak','timing_sc_rf_piminus_mean','timing_sc_rf_piminus_sigma']     # These will be unique graph names, start with modulename_status
   titles = ['PiMinus SC-RF time status','PiMinus SC-RF time peak (ns)','PiMinus SC-RF time mean (ns)', 'PiMinus SC-RF time width (ns)']  # Graph titles 
   values = [-1, -1, -1, -1]   
 
@@ -216,7 +216,7 @@ def sc_piminus_rf_time(rootfile, timemin=-0.1, timemax=0.1, low_limit=-0.5, high
 
 def tof_piminus_rf_time(rootfile, timemin=-0.1, timemax=0.1, low_limit=-0.5, high_limit=0.5, pmin=0.0, pmax=0.0, error_max=0.1) :
   #print("in tof_piminus_rf_time() ...")
-  names = ['timing_MD_tof_rf_piminus_status','timing_MD_tof_rf_piminus_peak','timing_MD_tof_rf_piminus_mean','timing_MD_tof_rf_piminus_sigma']     # These will be unique graph names, start with modulename_status
+  names = ['timing_tof_rf_piminus_status','timing_tof_rf_piminus_peak','timing_tof_rf_piminus_mean','timing_tof_rf_piminus_sigma']     # These will be unique graph names, start with modulename_status
   titles = ['PiMinus TOF-RF time status','PiMinus TOF-RF time peak (ns)','PiMinus TOF-RF time mean (ns)', 'PiMinus TOF-RF time width (ns)']  # Graph titles 
   values = [-1, -1, -1, -1]   
 
@@ -264,7 +264,7 @@ def tof_piminus_rf_time(rootfile, timemin=-0.1, timemax=0.1, low_limit=-0.5, hig
 
 def bcal_photon_rf_time(rootfile, timemin=-0.1, timemax=0.1, low_limit=-0.5, high_limit=0.5, pmin=0.0, pmax=0.0, error_max=0.1) :
   #print("in bcal_photon_rf_time() ...")
-  names = ['timing_MD_bcal_photon_rf_status','timing_MD_bcal_photon_rf_peak','timing_MD_bcal_photon_rf_mean','timing_MD_bcal_photon_rf_sigma']     # These will be unique graph names, start with modulename_status
+  names = ['timing_bcal_photon_rf_status','timing_bcal_photon_rf_peak','timing_bcal_photon_rf_mean','timing_bcal_photon_rf_sigma']     # These will be unique graph names, start with modulename_status
   titles = ['Photon BCAL-RF time status','Photon BCAL-RF time peak (ns)','Photon BCAL-RF time mean (ns)', 'Photon BCAL-RF time width (ns)']  # Graph titles 
   values = [-1, -1, -1, -1]   
 
@@ -314,7 +314,7 @@ def bcal_photon_rf_time(rootfile, timemin=-0.1, timemax=0.1, low_limit=-0.5, hig
 
 def bcal_photon_nominE_rf_time(rootfile, timemin=-0.1, timemax=0.1, low_limit=-0.5, high_limit=0.5, pmin=0.0, pmax=0.0, error_max=0.1) :
   #print("in bcal_photon_nominE_rf_time() ...")
-  names = ['timing_MD_bcal_photon_nominE_rf_status','timing_MD_bcal_photon_nominE_rf_peak','timing_MD_bcal_photon_nominE_rf_mean','timing_MD_bcal_photon_nominE_rf_sigma']     # These will be unique graph names, start with modulename_status
+  names = ['timing_bcal_photon_nominE_rf_status','timing_bcal_photon_nominE_rf_peak','timing_bcal_photon_nominE_rf_mean','timing_bcal_photon_nominE_rf_sigma']     # These will be unique graph names, start with modulename_status
   titles = ['Photon (nominE) BCAL-RF time status','Photon (nominE) BCAL-RF time peak (ns)','Photon (nominE) BCAL-RF time mean (ns)', 'Photon (nominE) BCAL-RF time width (ns)']  # Graph titles 
   values = [-1, -1, -1, -1]   
 
@@ -365,7 +365,7 @@ def bcal_photon_nominE_rf_time(rootfile, timemin=-0.1, timemax=0.1, low_limit=-0
 
 def bcal_photon_alt_rf_time(rootfile, timemin=-0.1, timemax=0.1, low_limit=-0.5, high_limit=0.5, pmin=0.0, pmax=0.0, error_max=0.1) :
   #print("in bcal_photon_alt_rf_time() ...")
-  names = ['timing_MD_bcal_photon_alt_rf_status','timing_MD_bcal_photon_alt_rf_peak','timing_MD_bcal_photon_alt_rf_mean','timing_MD_bcal_photon_alt_rf_sigma']     # These will be unique graph names, start with modulename_status
+  names = ['timing_bcal_photon_alt_rf_status','timing_bcal_photon_alt_rf_peak','timing_bcal_photon_alt_rf_mean','timing_bcal_photon_alt_rf_sigma']     # These will be unique graph names, start with modulename_status
   titles = ['Photon (alt) BCAL-RF time status','Photon (alt) BCAL-RF time peak (ns)','Photon (alt) BCAL-RF time mean (ns)', 'Photon (alt) BCAL-RF time width (ns)']  # Graph titles 
   values = [-1, -1, -1, -1]   
 
@@ -419,7 +419,7 @@ def bcal_photon_alt_rf_time(rootfile, timemin=-0.1, timemax=0.1, low_limit=-0.5,
 
 def bcal_piminus_rf_time(rootfile, timemin=-0.1, timemax=0.1, low_limit=-0.5, high_limit=0.5, pmin=0.0, pmax=0.0, error_max=0.1) :
   #print("in bcal_piminus_rf_time() ...")
-  names = ['timing_MD_bcal_piminus_rf_status','timing_MD_bcal_piminus_rf_peak','timing_MD_bcal_piminus_rf_mean','timing_MD_bcal_piminus_rf_sigma']     # These will be unique graph names, start with modulename_status
+  names = ['timing_bcal_piminus_rf_status','timing_bcal_piminus_rf_peak','timing_bcal_piminus_rf_mean','timing_bcal_piminus_rf_sigma']     # These will be unique graph names, start with modulename_status
   titles = ['PiMinus BCAL-RF time status','PiMinus BCAL-RF time peak (ns)','PiMinus BCAL-RF time mean (ns)','PiMinus BCAL-RF time width (ns)']  # Graph titles 
   values = [-1, -1, -1, -1]   
 
@@ -468,7 +468,7 @@ def bcal_piminus_rf_time(rootfile, timemin=-0.1, timemax=0.1, low_limit=-0.5, hi
 
 def fcal_photon_rf_time(rootfile, timemin=-0.1, timemax=0.1, low_limit=-0.5, high_limit=0.5, pmin=0.0, pmax=0.0, error_max=0.1) :
   #print("in fcal_photon_rf_time() ...")
-  names = ['timing_MD_fcal_photon_rf_status','timing_MD_fcal_photon_rf_peak','timing_MD_fcal_photon_rf_mean','timing_MD_fcal_photon_rf_sigma']     # These will be unique graph names, start with modulename_status
+  names = ['timing_fcal_photon_rf_status','timing_fcal_photon_rf_peak','timing_fcal_photon_rf_mean','timing_fcal_photon_rf_sigma']     # These will be unique graph names, start with modulename_status
   titles = ['Photon FCAL-RF time status','Photon FCAL-RF time peak (ns)','Photon FCAL-RF time mean (ns)', 'Photon FCAL-RF time width (ns)']  # Graph titles 
   values = [-1, -1, -1, -1]   
 
@@ -518,7 +518,7 @@ def fcal_photon_rf_time(rootfile, timemin=-0.1, timemax=0.1, low_limit=-0.5, hig
 
 def fcal_photon_alt_rf_time(rootfile, timemin=-0.1, timemax=0.1, low_limit=-0.5, high_limit=0.5, pmin=0.0, pmax=0.0, error_max=0.1) :
   #print("in fcal_photon_alt_rf_time() ...")
-  names = ['timing_MD_fcal_photon_alt_rf_status','timing_MD_fcal_photon_alt_rf_peak','timing_MD_fcal_photon_alt_rf_mean','timing_MD_fcal_photon_alt_rf_sigma']     # These will be unique graph names, start with modulename_status
+  names = ['timing_fcal_photon_alt_rf_status','timing_fcal_photon_alt_rf_peak','timing_fcal_photon_alt_rf_mean','timing_fcal_photon_alt_rf_sigma']     # These will be unique graph names, start with modulename_status
   titles = ['Photon (alt) FCAL-RF time status','Photon (alt) FCAL-RF time peak (ns)','Photon (alt) FCAL-RF time mean (ns)', 'Photon (alt) FCAL-RF time width (ns)']  # Graph titles 
   values = [-1, -1, -1, -1]   
 
@@ -569,7 +569,7 @@ def fcal_photon_alt_rf_time(rootfile, timemin=-0.1, timemax=0.1, low_limit=-0.5,
 
 def fcal_piminus_rf_time(rootfile, timemin=-0.1, timemax=0.1, low_limit=-0.5, high_limit=0.5, pmin=0.0, pmax=0.0, error_max=0.1) :
   #print("in fcal_piminus_rf_time() ...")
-  names = ['timing_MD_fcal_piminus_rf_status','timing_MD_fcal_piminus_rf_peak','timing_MD_fcal_piminus_rf_mean','timing_MD_fcal_piminus_rf_sigma']     # These will be unique graph names, start with modulename_status
+  names = ['timing_fcal_piminus_rf_status','timing_fcal_piminus_rf_peak','timing_fcal_piminus_rf_mean','timing_fcal_piminus_rf_sigma']     # These will be unique graph names, start with modulename_status
   titles = ['PiMinus FCAL-RF time status','PiMinus FCAL-RF time peak (ns)','PiMinus FCAL-RF time mean (ns)','PiMinus FCAL-RF time width (ns)']  # Graph titles 
   values = [-1, -1, -1, -1]   
 
