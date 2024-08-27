@@ -10,8 +10,7 @@ fi
 
 run_period=$1
 version=$2
-
-
+ 
 home_dir=$PWD
 verbose=1
 

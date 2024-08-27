@@ -87,7 +87,7 @@ script = sys.argv.pop(0)
 nargs = len(sys.argv)
 
 if nargs<4 or nargs>6 or sys.argv[0] == "-h" or sys.argv[0] == "--h" or sys.argv[0] == "--help":
-    exit("This script scans GlueX/Hall D detector monitoring histograms to create graphs.\nUsage: python scan.py -r Year-Month -v VersionNumber [path_to_monitoring_histogram_directory] [checkstatus]\n    eg python scan.py -r 2022-05 -v 06\nThe histogram directory is optional if it is the usual one. If the arg checkstatus is supplied, only the runs with RCDB status nonzero are checked.")
+    exit("This script scans GlueX/Hall D detector monitoring histograms to create graphs.\nUsage: python scan.py -r Year-Month -v VersionNumber [path_to_monitoring_histogram_directory] [anystatus]\n    eg python scan.py -r 2022-05 -v 06\nThe histogram directory is optional if it is the usual one. \nBy default, only runs with RCDB status >0 are checked. If the arg anystatus is supplied, the RCDB status check is skipped. ")
 
 # detector monitoring modules
 import cdc 
@@ -110,7 +110,7 @@ modules_cpp = [rf, ps_e, cdc_cpp,fdc,timing,timing_MD,tof_1,fmwpc,ctof]   # modu
 
 testing = 0  # stop after <runlimit> files, print diagnostics
 runlimit = 20 # process this number of runs if testing=1
-checkstatus = 0  # skip RCDB check
+checkstatus = 1  # process runs with RCDB status>0
 
 RunPeriod=""
 VersionNumber=""
@@ -118,12 +118,13 @@ histdir = ""
 
 while len(sys.argv) > 0 :
     x = sys.argv.pop(0)
+    
     if x == "-r" :
         RunPeriod = sys.argv.pop(0)
     elif x == "-v" :
         VersionNumber = sys.argv.pop(0)
-    elif x == "checkstatus" :
-        checkstatus = 1
+    elif x == "anystatus" :
+        checkstatus = 0
     else :
         histdir = x
   
@@ -273,7 +274,7 @@ for imod in range(len(modules)) :
        active_modules.append(modules[imod])
 
 
-if checkstatus == 1 :
+if checkstatus != 0 :
     import rcdb
     db = rcdb.RCDBProvider("mysql://rcdb@hallddb/rcdb")
 
@@ -300,9 +301,9 @@ for filename in histofilelist:
     
         skiprun = 0
 
-        if checkstatus == 1 :
+        if checkstatus != 0 :
             condition = db.get_condition(run, "status")
-            if condition.value == 0:
+            if condition.value <= 0:
                 skiprun = 1
 
         if skiprun:
