@@ -141,7 +141,6 @@ def rho_psigma_pse(rootfile) :
   if counts_before > halfmaxcounts and counts_after > halfmaxcounts :
     amo = True
 
-
   if amo :     # for amo, just take fitted peak,  # for diamond, find steepest part of edge
 
     g = TF1('g','gaus',psmaxe-0.5, psmaxe+0.5) 
@@ -189,12 +188,13 @@ def rho_psigma_pse(rootfile) :
   # --- p2pi hists psi histo ---
 
   hp = hpsit.ProjectionY()
-    
+
+  hp.Rebin(4)
   #  #psi_{#pi^{+}}");
 
   f = TF1('f','[0]*(1.0 + [1]*cos(2*(x + [2])/180.*3.14159))',-180.,180.)
   fitstat = hp.Fit('f','Q')
-  
+
   if int(fitstat) != 0 :
     return values
   
@@ -249,8 +249,6 @@ def rho_psigma_pse(rootfile) :
       PSigma45 = PSigma
       PSigma45Err = PSigmaErr
 
-#  if not amo:
-#    print(PSigma,Phi0,pol)
       
   PSigma = abs(PSigma)    # report abs value for overall graph to make it simpler
 
