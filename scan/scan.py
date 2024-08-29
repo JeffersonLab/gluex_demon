@@ -94,7 +94,7 @@ import cdc
 import cdc_cpp   
 import fdc
 import timing
-import timing_MD
+#import timing2
 import tof_1
 import fmwpc
 import ctof
@@ -103,11 +103,12 @@ import ps_e
 import photons
 import rho
 import omega
+import altrho
 
-modules_new = [photons]
+#modules_ndef = [timing2, cdc]
 modules_def = [photons, rf, cdc, fdc, timing, tof_1, rho, omega]       # default list of modules
 modules_cpp = [photons, rf, ps_e, cdc_cpp, fdc, timing, tof_1, fmwpc, ctof]   # modules for CPP
-
+    
 testing = 0  # stop after <runlimit> files, print diagnostics
 runlimit = 20 # process this number of runs if testing=1
 checkstatus = 1  # process runs with RCDB status>0
@@ -135,8 +136,8 @@ if VersionNumber == "" :
 if histdir == "" : 
     histdir = '/work/halld/data_monitoring/RunPeriod-' + RunPeriod + '/mon_ver' + VersionNumber + '/rootfiles'
 
-
-print('Looking for monitoring histograms inside directory',histdir)
+if testing:
+    print('Looking for monitoring histograms inside directory',histdir)
 
 # Make sure the monitoring histogram directory exists
 
@@ -421,6 +422,7 @@ if len(gnames) == 0:
 
 ############################## write output files ##############################
 
+print('Compiling graphs')
 
 nruns = len(allruns_values)  # number of runs
 
@@ -477,17 +479,10 @@ for ii in range(nruns) :
     y.append(allruns_values[ii][igraph]) 
 
 gr = make_graph('readiness','Run readiness',nruns,x,y)      
-#gr = TGraph( nruns, x, y )
-#gr.SetName( 'readiness' )
-#gr.SetTitle( 'Readiness' )
-#gr.GetXaxis().SetTitle( 'Run number' )
-#gr.GetYaxis().SetTitle( 'Readiness' )
-#gr.SetMarkerStyle( 21 )
+
 if gr != None :
     gr.Write()
 
-
-# separate the tgrapherrors pairs of thing & thing_err from the tgraphs
 
 
 
@@ -505,49 +500,77 @@ for i in range(len(pagenames)):
 
     newlist = [] # eventual list of graph names for this page
 
+    graphstomg = [] # graphs to put onto multigraphs
+    mgnames = []  # multigraph names
+
+    compositestatusgraphname = pagenames[i]+'_status_composite'
+
+    
     for j in range(gstart,gstart+gcount[i]) : # use gcount to find the page titles to save
         graphs.update({gnames[j]:j})
 
-        if "_err" in gnames[j] :
+        if "_err" in gnames[j] :                 # list of tgrapherrors
             enames.append(gnames[j])
+        
+
+        if gnames[j].endswith("_mg") :         # multigraph components
+
+            graphstomg.append(gnames[j])
+            mgname = gnames[j].rsplit("_",2)[1]
+
+            if not mgname in mgnames :
+                mgnames.append(mgname)
+
+            
+        if j>gstart and gnames[j].endswith("_status") :    # don't put overall status in status composite
+
+            graphstomg.append(gnames[j])
+            mgname = compositestatusgraphname
+
+            if not mgname in mgnames :
+                mgnames.append(mgname)
+
+
+    
+    # create the list of graphs to show on this page, it will be written into the pagenames file
+    
+    # put combined status at the front, other mgs at the back (later)
+    newlist.append(mgnames[0])
+        
+    for thing in graphs:      ###### this is a good place to put the status graphs first. Nb they won't have errs!
+        if thing.endswith("_status"):
+            newlist.append(thing)
+
+    for thing in graphs:      # everything else in the original order except _err
+        if thing.endswith("_status") :
+            continue
+        if thing.endswith("_err") :
+            continue
+        newlist.append(thing)
+
+    #put  tgrapherrors and tgraphs into separate lists
 
     for err in enames:
         thing = err.split("_err")[0]
         if thing in graphs:
             egraphs.append([thing,graphs[thing],graphs[err]])   # hopefully name, col-y, col-dy
 
+        # remove tgrapherrs from tgraph list    
     for ething in egraphs:
         graphs.pop(ething[0])
         graphs.pop(ething[0]+'_err')
-
-
-
-    for thing in graphs:      ###### this is a good place to put the status graphs first. Nb they won't have errs!
-        if "_status" in thing:
-            newlist.append(thing)
-
-    for thing in graphs:      ###### this is a good place to put the status graphs first. Nb they won't have errs!
-        if "_status" not in thing:
-            newlist.append(thing)
-
-    for ething in egraphs:
-        newlist.append(ething[0])
-   
+    
     newlistofgraphs.append(newlist)
-  
-    gstart = gstart + gcount[i]
 
+    gstart = gstart + gcount[i]     #incrementing here because not used again until the next iteration
+    
 
-    # put status graphs onto a multigraph, except the overall status which is first in the list
+    # save graphs if they're to be reused later for the multigraphs
+    graph_store = [] # use this to save graphs
+    graphname_store = [] # names of above graphs
+    # it might be better to use a dict for these?  do it later
 
-    first_graph = True
-    mg_colours = [63, 887, 907, 807, 801]
-    mg_symbols = [107, 108, 109, 113]
-
-    mg_name = pagenames[i]+"_status_composite"
-
-    mg = make_multigraph(mg_name,pagenames[i]+" status composite") 
-
+    
     for thing in graphs:   # graphs is a dict
 
         y = []
@@ -567,23 +590,11 @@ for i in range(len(pagenames)):
         
         gr.Write()
 
-        if first_graph :
-            mg_n = 0
-            first_graph = False
+        if thing in graphstomg:
+            graph_store.append(gr)
+            graphname_store.append(thing)                        
 
-        elif "_status" in thing:
-
-            gr.SetMarkerColor(mg_colours[mg_n % 5])
-            gr.SetMarkerStyle(mg_symbols[int(mg_n/5) % 4])
-            mg.Add(gr)
-            mg_n = mg_n + 1
-
-    if not first_graph:    # will be set true if there aren't any graphs
             
-        mg.Write()
-        newlistofgraphs[i].insert(0,mg_name)
-
-        
     for ething in egraphs:     # egraphs is an array name, col-y, col-dy
 
         y = []
@@ -606,6 +617,49 @@ for i in range(len(pagenames)):
             gr.SetLineColor(17);
             gr.Write()
 
+        if gnames[igraph] in graphstomg:
+            graph_store.append(gr)
+            graphname_store.append(gnames[igraph])            
+
+            
+   # now construct the multigraphs
+        
+    mg_colours = [63, 887, 907, 807, 801]
+    mg_symbols = [107, 108, 109, 113]
+
+    for mg_name in mgnames:
+        
+        thismg = make_multigraph(mg_name,mg_name)
+        n_g = 0
+        
+        for graphname in graphname_store:
+            
+            if graphname.endswith("_mg") :
+                keystring = graphname.rsplit('_',2)[1]
+            else :
+                keystring = compositestatusgraphname
+                
+            if not mg_name == keystring :
+                continue
+
+            gindex = graphname_store.index(graphname)            
+            gr = graph_store[gindex]
+                
+            gr.SetMarkerColor(mg_colours[n_g % 5])
+            gr.SetMarkerStyle(mg_symbols[int(n_g/5) % 4])            
+                
+            thismg.Add(gr)
+            n_g = n_g + 1
+               
+        if n_g == 0 :
+            continue
+        
+        thismg.Write()
+
+        if not mg_name == compositestatusgraphname : 
+            newlistofgraphs[i].append(mg_name)
+                
+            
     f.cd("../")
 
 f.Close()
