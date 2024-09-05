@@ -705,7 +705,7 @@ def fdc_rf_time(rootfile, timemin=-0.1, timemax=0.1, low_limit = 15., high_limit
 
 
 # TODO: check size of resolution or error as well?
-def ps_rf_time(rootfile, timemin=-0.1, timemax=0.1, low_limit = 0.3, high_limit = 0.3) :
+def ps_rf_time(rootfile, timemin=-0.1, timemax=0.1, low_limit = -0.3, high_limit = 0.3) :
   #print("in ps_rf_time() ...")
   names = ['timing_ps_rf_status','timing_ps_rf_mean','timing_ps_rf_mean_err']     # These will be unique graph names, start with modulename_status
   titles = ['PS-TAGH time status','PS-TAGH time mean (ns)', 'PS-TAGH time width (ns)']  # Graph titles 
@@ -729,7 +729,7 @@ def ps_rf_time(rootfile, timemin=-0.1, timemax=0.1, low_limit = 0.3, high_limit 
   h1d = h.ProjectionY("tdiffVsEdiff_1D")
   max = h1d.GetBinCenter(h1d.GetMaximumBin())
 
-  r = h1d.Fit("gaus", "0SQ", "", max - low_limit, max + high_limit)
+  r = h1d.Fit("gaus", "0SQ", "", max + low_limit, max + high_limit)
 
   if int(r) != 0 :  # bad fit
     return values 
@@ -748,7 +748,7 @@ def ps_rf_time(rootfile, timemin=-0.1, timemax=0.1, low_limit = 0.3, high_limit 
 
 
 # TODO: check size of resolution or error as well?
-def tagh_rf_time(rootfile, timemin=-0.1, timemax=0.1, low_limit = 0.3, high_limit = 0.3) :
+def tagh_rf_time(rootfile, timemin=-0.1, timemax=0.1, low_limit = -0.3, high_limit = 0.3) :
   #print("in tagh_rf_time() ...")
   names = ['timing_tagh_rf_status','timing_tagh_rf_mean','timing_tagh_rf_mean_err']     # These will be unique graph names, start with modulename_status
   titles = ['TAGH-RF time status','TAGH-RF time mean (ns)', 'TAGH-RF time width (ns)']  # Graph titles 
@@ -791,7 +791,7 @@ def tagh_rf_time(rootfile, timemin=-0.1, timemax=0.1, low_limit = 0.3, high_limi
 
 
 # TODO: check size of resolution or error as well?
-def tagm_rf_time(rootfile, timemin=-0.1, timemax=0.1, low_limit = 0.3, high_limit = 0.3) :
+def tagm_rf_time(rootfile, timemin=-0.1, timemax=0.1, low_limit = -0.3, high_limit = 0.3) :
   #print("in tagm_rf_time() ...")
   names = ['timing_tagm_rf_status','timing_tagm_rf_mean','timing_tagm_rf_mean_err']     # These will be unique graph names, start with modulename_status
   titles = ['TAGM-RF time status','TAGM-RF time mean (ns)', 'TAGM-RF time width (ns)']  # Graph titles 
