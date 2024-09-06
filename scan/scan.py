@@ -661,8 +661,6 @@ for i in range(len(pagenames)):
 
             gindex = graphname_store.index(graphname)            
             gr = graph_store[gindex]
-            print(gr.GetN())
-            print(graphname)    
             gr.SetMarkerColor(mg_colours[n_g % 5])
             gr.SetMarkerStyle(mg_symbols[int(n_g/5) % 4])
             gr.SetMarkerSize(0.5)
