@@ -109,10 +109,10 @@ import altrho
 
 modules_xdef = [sc]
 modules_def = [photons, timing, rf, cdc, fdc, sc, tof_1, rho, omega]       # default list of modules
-modules_cpp = [photons, rf, ps_e, cdc_cpp, fdc, timing, tof_1, fmwpc, ctof]   # modules for CPP
+modules_cpp = [photons, timing, rf, ps_e, cdc_cpp, fdc, tof_1, fmwpc, ctof]   # modules for CPP
     
-testing = 1  # stop after <runlimit> files, print diagnostics
-runlimit = 3 # process this number of runs if testing=1
+testing = 0  # stop after <runlimit> files, print diagnostics
+runlimit = 10 # process this number of runs if testing=1
 checkstatus = 1  # process runs with RCDB status>0
 
 RunPeriod=""
