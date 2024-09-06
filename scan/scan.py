@@ -35,6 +35,7 @@ def make_graph(gname,gtitle,nruns,x,y) :
     gr.GetXaxis().SetTitle( 'Run number' )
     gr.GetYaxis().SetTitle( gtitle )
     gr.SetMarkerStyle( 21 )
+    gr.SetMarkerSize( 0.5 )    
     return gr
 
 
@@ -60,6 +61,7 @@ def make_graph_errs(gname,gtitle,nruns,x,y,dx,dy) :
     gr.GetXaxis().SetTitle( 'Run number' )
     gr.GetYaxis().SetTitle( gtitle )
     gr.SetMarkerStyle( 21 )
+    gr.SetMarkerSize( 0.5 )    
     return gr
 
 
@@ -94,7 +96,7 @@ import cdc
 import cdc_cpp   
 import fdc
 import timing
-#import timing2
+import sc
 import tof_1
 import fmwpc
 import ctof
@@ -105,12 +107,12 @@ import rho
 import omega
 import altrho
 
-#modules_ndef = [timing2, cdc]
-modules_def = [photons, rf, cdc, fdc, timing, tof_1, rho, omega]       # default list of modules
+modules_xdef = [sc]
+modules_def = [photons, timing, rf, cdc, fdc, sc, tof_1, rho, omega]       # default list of modules
 modules_cpp = [photons, rf, ps_e, cdc_cpp, fdc, timing, tof_1, fmwpc, ctof]   # modules for CPP
     
 testing = 0  # stop after <runlimit> files, print diagnostics
-runlimit = 20 # process this number of runs if testing=1
+runlimit = 30 # process this number of runs if testing=1
 checkstatus = 1  # process runs with RCDB status>0
 
 RunPeriod=""
@@ -394,7 +396,7 @@ for filename in histofilelist:
         if badcount > 0 :
             badruns.append(run)
         
-        thisrun_values.append(readiness)
+        thisrun_values.append(float('%.2f'%(readiness)))
 
         # append list of values from this run to the collection
         allruns_values.append(thisrun_values)
@@ -432,6 +434,20 @@ f = open(filename_csv,"w")
 writer = csv.writer(f)
 
 writer.writerow(gnames)
+
+# prefix graph name with page/ 
+fullnames = ['Run']
+
+n = 1
+
+for i in range(len(pagenames)):
+  for j in range(gcount[i]) :
+    fullnames.append(pagenames[i] + '/' + gnames[n])
+    n=n+1
+
+fullnames.append('Readiness')
+
+writer.writerow(fullnames)
 
 for i in range(nruns):
     writer.writerow(allruns_values[i])
@@ -646,8 +662,9 @@ for i in range(len(pagenames)):
             gr = graph_store[gindex]
                 
             gr.SetMarkerColor(mg_colours[n_g % 5])
-            gr.SetMarkerStyle(mg_symbols[int(n_g/5) % 4])            
-                
+            gr.SetMarkerStyle(mg_symbols[int(n_g/5) % 4])
+            gr.SetMarkerSize(0.5)
+            gr.SetLineWidth(0)      # Hide the errorbars on tgrapherror multigraphs    
             thismg.Add(gr)
             n_g = n_g + 1
                
@@ -678,6 +695,7 @@ for i in range(len(pagenames)):
     line = []
     line.append(pagenames[i])
     line.append(len(newlistofgraphs[i]))
+
     line.extend(newlistofgraphs[i])
     
     writer.writerow(line)

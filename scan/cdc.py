@@ -1,4 +1,4 @@
-import csv
+from utils import get_histo
 
 from ROOT import gROOT,TF1
 
@@ -11,13 +11,13 @@ def init() :
   names = ['cdc_status']
   values = [-1]
 
-  occ = cdc_occupancy(False)  # return names, titles, values
-  eff = cdc_efficiency(False)
-  dedx = cdc_dedx(False)
-  dedxmean = cdc_dedx_mean(False)
-  ttod = cdc_ttod(False)
+  occ = occupancy(False)  # return names, titles, values
+  eff = efficiency(False)
+  d = dedx(False)
+  dmean = dedx_mean(False)
+  t = ttod(False)
 
-  for thing in [ occ, eff, dedx, dedxmean, ttod ] : 
+  for thing in [ occ, eff, d, dmean, t ] : 
 
     names.extend(thing[0])
     titles.extend(thing[1])
@@ -34,6 +34,8 @@ def check(run, rootfile) :
 
   # status codes: 1 (good), 0 (bad) or -1 (some other problem, eg histogram missing or not enough data)
 
+  # If the histogram is missing or the hit fails, status is set to -1 and data are set to None
+  
   # acceptable value limits, defined here for accessibility
 
   occmax = 25 # expect 9 dead but more look dead in ET runs
@@ -58,16 +60,16 @@ def check(run, rootfile) :
 
   # these return an array [names, values] 
 
-  occ = cdc_occupancy(rootfile, occmax)
-  eff = cdc_efficiency(rootfile, e0min, e5min, e6min)
-  dedx = cdc_dedx(rootfile, dedxmin, dedxmax, dedxresmin, dedxresmax)
-  dedxmean = cdc_dedx_mean(rootfile, dedxmeanmin, dedxmeanmax, dedxsigmin, dedxsigmax)
-  ttod = cdc_ttod(rootfile, ttodmeanmax, ttodsigmamax)
+  occ = occupancy(rootfile, occmax)
+  eff = efficiency(rootfile, e0min, e5min, e6min)
+  d = dedx(rootfile, dedxmin, dedxmax, dedxresmin, dedxresmax)
+  dmean = dedx_mean(rootfile, dedxmeanmin, dedxmeanmax, dedxsigmin, dedxsigmax)
+  t = ttod(rootfile, ttodmeanmax, ttodsigmamax)
 
   # set the overall status to the min value of each histogram status
 
   statuslist = []
-  for thing in [ occ, eff, dedx, dedxmean, ttod ] : 
+  for thing in [ occ, eff, d, dmean, t ] : 
     statuslist.append(thing[0])   # status is the first value in the array
 
   cdc_status = min(statuslist)
@@ -75,17 +77,17 @@ def check(run, rootfile) :
   # add overall status to the start of the lists before concatenating & returning.
 
   allvals = [cdc_status]
-  for thing in [ occ, eff, dedx, dedxmean, ttod ] : 
+  for thing in [ occ, eff, d, dmean, t ] :   
     allvals.extend(thing) 
 
   return allvals
 
 
-def cdc_occupancy(rootfile, occmax=9) :
+def occupancy(rootfile, occmax=9) :
 
   titles = ['Occupancy status','Missing straw count']
-  names = ['cdc_occ_status','cdc_missing']
-  values = [-1, -1]
+  names = ['occ_status','n_missing']
+  values = [-1, None]
 
   if not rootfile :  # called by init function
     return [names, titles, values]
@@ -155,11 +157,11 @@ def cdc_occupancy(rootfile, occmax=9) :
   
 
 
-def cdc_efficiency(rootfile, e0min=0.97, e5min=0.96, e6min=0.89) :
+def efficiency(rootfile, e0min=0.97, e5min=0.96, e6min=0.89) :
 
-  titles = ['Efficiency status','Hit efficiency at 0.04mm','Hit efficiency at 5mm','Hit efficiency at 6.4mm']
-  names = ['cdc_eff_status','cdc_eff0','cdc_eff5','cdc_eff6']
-  values = [-1,-1,-1,-1]
+  titles = ['Efficiency status', 'Hit efficiency at 0.04mm', 'Hit efficiency at 0.04mm error', 'Hit efficiency at 5mm', 'Hit efficiency at 5mm error', 'Hit efficiency at 6.4mm', 'Hit efficiency at 6.4mm error']
+  names = ['eff_status', 'eff0_hitefficiency_mg', 'eff0_hitefficiency_mg_err', 'eff5_hitefficiency_mg', 'eff5_hitefficiency_mg_err', 'eff6_hitefficiency_mg', 'eff6_hitefficiency_mg_err']
+  values = [-1, None, None, None, None, None, None]
 
   if not rootfile :  # called by init function
     return [names, titles, values]
@@ -180,86 +182,117 @@ def cdc_efficiency(rootfile, e0min=0.97, e5min=0.96, e6min=0.89) :
     e5 = h.GetBinContent(65) # // 5 mm 
     e6 = h.GetBinContent(83) # // 6.4 mm
 
-    e0 = float('%.6f'%(e0))
-    e5 = float('%.6f'%(e5))
-    e6 = float('%.6f'%(e6))
-
+    e0err = h.GetBinError(1)*100
+    e5err = h.GetBinError(65)*100
+    e6err = h.GetBinError(83)*100    
+    
     status = 1
 
     if e0 < e0min or e5 < e5min or e6 < e6min:
       status = 0
 
-    values = [status, float('%.2f'%(e0)), float('%.2f'%(e5)), float('%.2f'%(e6))]
+    values = [status, float('%.2f'%(e0)), float('%.3f'%(e0err)),float('%.2f'%(e5)), float('%.3f'%(e5err)), float('%.2f'%(e6)), float('%.3f'%(e6err))]
 
     return values
 
 
 
-def cdc_dedx(rootfile, dedxmin=1.9998, dedxmax=2.0402, dedxresmin=0.25, dedxresmax=0.37) :
+def dedx(rootfile, dedxmin=1.9998, dedxmax=2.0402, resmin=0.25, resmax=0.37) :
 
-  titles = ['dE/dx status','dE/dx mean at 1.5 GeV/c (keV/cm)','dE/dx resolution at 1.5 GeV/c']
-  names = ['cdc_dedx_status','cdc_dedxmean','cdc_dedxres']
-  values = [-1,-1,-1]
+  titles = ['dE/dx status', 'dE/dx q+ mean at 1.5 GeV/c (keV/cm)', 'dE/dx q+ resolution at 1.5 GeV/c', 'dE/dx q- mean at 1.5 GeV/c (keV/cm)', 'dE/dx q- resolution at 1.5 GeV/c', 'dE/dx q+ overall mean (keV/cm)', 'dE/dx q+ overall width']
+  names = ['dedx_status', 'qp_dedx_mean', 'qp_dedx_res', 'qm_dedx_mean', 'qm_dedx_res', 'qp_dedx_allmean', 'qp_dedx_allsig']
+  values = [-1, None, None, None, None, None, None]
 
   if not rootfile :  # called by init function
     return [names, titles, values]
 
   dirname = '/CDC_dedx'
+  min_counts = 100
+  fitoptions = "0QWERS"
+  
   histoname = 'dedx_p_pos'
 
-  min_counts = 5e4
-
+  qpstatus = 1
+  qnstatus = 1
+  
   h = get_histo(rootfile, dirname, histoname, min_counts)
+  
+  if h:
 
-  if (not h) :
-    return values
+    # find the overall mean dedx first
 
-  ntracks = h.GetEntries()
-  scale = 1.0
+    pp = h.ProjectionY("p1",0,10)
+    oamean = pp.GetMean()
+    oasig = pp.GetRMS()
 
-  if ntracks > 1e6: 
-    pbin1 = 38  # h.GetXaxis().FindBin(pcut)
-    pbin2 = pbin1
-  elif ntracks < 1000:
-    return values
-  else :
-    pbin1 = 38
-    pbin2 = 48
-    scale = 1.0214     #scales 10bin q+ result to match 1bin q+ result
+    values[5] = float('%.5f'%(oamean))
+    values[6] = float('%.5f'%(oasig)) 
     
-  p = h.ProjectionY("p1",pbin1,pbin2)
-
-  if p.GetEntries()<1000 :
-    return values 
-
-  g = TF1('g','gaus',0,12)
-
-  p.GetXaxis().SetRangeUser(0,5)
-
-  fitstat = p.Fit('g','0qwers')
+    ntracks = h.GetEntries()    
+    
+    if ntracks > 1e6: 
+      pbin1 = 38  # h.GetXaxis().FindBin(pcut)
+      pbin2 = pbin1
+      scale = 1.0
+    elif ntracks >= 1000:
+      pbin1 = 38
+      pbin2 = 48
+      scale = 1.0214     #scales 10bin q+ result to match 1bin q+ result
+    else:
+      scale = 0
   
-  #print 'fit status ',fitstat.IsValid(), fitstat.Status()
+    if scale > 0:
+      mincounts1D = 1000      
+      qp = check_dedx(h, mincounts1D, fitoptions, pbin1, pbin2, scale, dedxmin, dedxmax, resmin, resmax)
+      qpstatus =  qp[0]
+      values[1] = qp[1]
+      values[2] = qp[2]
+      
+  else:
+    qpstatus = -1   #unknown, no histo
 
-  if int(fitstat) == 0:
-    mean = scale*g.GetParameter(1)
-    res = 2.0*g.GetParameter(2)/mean
 
-    status = 1
-    if mean < dedxmin or mean > dedxmax:
-      status=0
-    if res < dedxresmin or res > dedxresmax:
-      status=0
-
-    values = [status, float('%.5f'%(mean)), float('%.5f'%(res)) ]
+    
+  min_counts = 1e4
+  histoname = 'dedx_p_neg'
   
+  h = get_histo(rootfile, dirname, histoname, min_counts)
+  
+  if h:
+
+    ntracks = h.GetEntries()    
+    
+    if ntracks > 1e6: 
+      pbin1 = 38  # h.GetXaxis().FindBin(pcut)
+      pbin2 = pbin1
+      scale = 1.0
+    elif ntracks >= 1000:
+      pbin1 = 38
+      pbin2 = 48
+      scale = 1.0214     #scales 10bin q+ result to match 1bin q+ result
+    else:
+      scale = 0
+  
+    if scale > 0:
+      mincounts1D = 1000      
+      qn = check_dedx(h, mincounts1D, fitoptions, pbin1, pbin2, scale, dedxmin, dedxmax, resmin, resmax)
+      qnstatus =  qp[0]
+      values[3] = qn[1]
+      values[4] = qn[2]
+
+  else:
+    qnstatus = -1   #unknown, no histo
+      
+  values[0] = min(qpstatus,qnstatus)
+    
   return values
 
 
 
-def cdc_dedx_mean(rootfile, dedxmeanmin=1.5, dedxmeanmax=2.5, dedxsigmin=0.2, dedxsigmax=3.0) :
+def dedx_mean(rootfile, dedxmeanmin=1.5, dedxmeanmax=2.5, dedxsigmin=0.2, dedxsigmax=3.0) :
 
   titles = ['dE/dx (overall mean, 0-10 GeV/c) status','dE/dx mean (keV/cm)','dE/dx RMS (keV/cm)']
-  names = ['cdc_dedx_overallmean_status','cdc_dedx_overallmean','cdc_dedx_sigma']
+  names = ['dedx_overallmean_status','dedx_overallmean','dedx_overallsigma']
   values = [-1,-1,-1]
 
   if not rootfile :  # called by init function
@@ -292,10 +325,10 @@ def cdc_dedx_mean(rootfile, dedxmeanmin=1.5, dedxmeanmax=2.5, dedxsigmin=0.2, de
 
 
 
-def cdc_ttod(rootfile, ttodmeanmax=15.0, ttodsigmamax=150.0) :
+def ttod(rootfile, ttodmeanmax=15.0, ttodsigmamax=150.0) :
 
   titles = ['TTOD status','TTOD residual mean (#mum)','TTOD residual width (#mum)']
-  names = ['cdc_ttod_status','cdc_ttodmean','cdc_ttodres']
+  names = ['ttod_status','ttod_mean','ttod_res']
   values = [-1,-1,-1]
 
   if not rootfile :  # called by init function
@@ -325,26 +358,34 @@ def cdc_ttod(rootfile, ttodmeanmax=15.0, ttodsigmamax=150.0) :
 
 
 
-def get_histo(rootfile, dirname, histoname, min_counts) :
 
-  test = rootfile.GetDirectory(dirname) 
+def check_dedx(h, mincounts1D, fitoptions, bmin, bmax, scale, dedxmin, dedxmax, resmin, resmax) :
 
-  # file pointer contains tobj if dir exists, set false if not
+  values = [ -1, None, None ]   # defaults in case fit fails
 
-  if (not test):
-    #print('Could not find ' + dirname)
-    return False
+  p = h.ProjectionY("p1", bmin, bmax) 
 
-  rootfile.cd(dirname)
+  if p.GetEntries()<1000 :
+    return values 
 
-  h = gROOT.FindObject(histoname)
+  p.GetXaxis().SetRangeUser(0,5)
+  
+  g = TF1('g','gaus',0,12)
 
-  if (not h) :
-    #print('Could not find ' + histoname)
-    return False
+  fitstat = p.Fit('g',fitoptions)
+  
+  #print 'fit status ',fitstat.IsValid(), fitstat.Status()
 
-  if h.GetEntries() < min_counts:
-    return False
+  if int(fitstat) == 0:
+    mean = scale*g.GetParameter(1)
+    res = 2.0*g.GetParameter(2)/mean
 
+    status = 1
+    if mean < dedxmin or mean > dedxmax:
+      status=0
+    if res < resmin or res > resmax:
+      status=0
 
-  return h
+    values = [status, float('%.5f'%(mean)), float('%.5f'%(res)) ]
+    
+  return values
