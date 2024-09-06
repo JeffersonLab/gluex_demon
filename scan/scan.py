@@ -111,8 +111,8 @@ modules_xdef = [sc]
 modules_def = [photons, timing, rf, cdc, fdc, sc, tof_1, rho, omega]       # default list of modules
 modules_cpp = [photons, rf, ps_e, cdc_cpp, fdc, timing, tof_1, fmwpc, ctof]   # modules for CPP
     
-testing = 0  # stop after <runlimit> files, print diagnostics
-runlimit = 30 # process this number of runs if testing=1
+testing = 1  # stop after <runlimit> files, print diagnostics
+runlimit = 3 # process this number of runs if testing=1
 checkstatus = 1  # process runs with RCDB status>0
 
 RunPeriod=""
@@ -433,7 +433,7 @@ nruns = len(allruns_values)  # number of runs
 f = open(filename_csv,"w")
 writer = csv.writer(f)
 
-writer.writerow(gnames)
+#writer.writerow(gnames)
 
 # prefix graph name with page/ 
 fullnames = ['Run']
@@ -634,8 +634,9 @@ for i in range(len(pagenames)):
             gr.Write()
 
         if gnames[igraph] in graphstomg:
-            graph_store.append(gr)
-            graphname_store.append(gnames[igraph])            
+            if gr != None:
+                graph_store.append(gr)
+                graphname_store.append(gnames[igraph])            
 
             
    # now construct the multigraphs
@@ -660,7 +661,8 @@ for i in range(len(pagenames)):
 
             gindex = graphname_store.index(graphname)            
             gr = graph_store[gindex]
-                
+            print(gr.GetN())
+            print(graphname)    
             gr.SetMarkerColor(mg_colours[n_g % 5])
             gr.SetMarkerStyle(mg_symbols[int(n_g/5) % 4])
             gr.SetMarkerSize(0.5)
