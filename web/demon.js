@@ -19,7 +19,7 @@ var csv_filename = "";
 var pagenames = "";  // file containing lists of graphs
 
 
-import { openFile, draw } from 'https://root.cern/js/latest/modules/main.mjs';
+import { openFile, draw, create, settings } from 'https://root.cern/js/latest/modules/main.mjs';
 
 
 $(document).ready(async function () {
@@ -111,7 +111,7 @@ $(document).ready(async function () {
 
     drawGraphs().then(
        function(text) { 
-           console.log(Graph);
+           //console.log(Graph);
            if (Graph != "") {
                 document.getElementById(Graph).scrollIntoView();
            }
@@ -239,6 +239,7 @@ async function getgraphnames() {
 
             divtext += '<div id=g_' + thisgraph + style + '>';
             divtext += '</div>';
+
             divtext += `<div class="graph_names"><a href="#${thisgraph}">${thisgraph}</a>&nbsp;&nbsp;<a href="#selectors">Top of page</a></div>`;
             listoflinks += `<a href = "#${thisgraph}">${thisgraph}</a> `;
 
@@ -351,7 +352,10 @@ function show_problem(message) {
     document.getElementById("problems").innerHTML = message;
 }
 
-    
+
+
+
+
 async function drawGraphs() {
 
     let file = await openFile(graphs_filename);//'./RunPeriod-2023-01/v6/monitoring_graphs.root');
@@ -362,7 +366,7 @@ async function drawGraphs() {
         //console.log(graphs_this_page);
             
         const obj = [];
-
+        const leg = [];
             // this makes an object named after the graph, which populates the div with the same name
 
         for (let i = 0; i < graphs_this_page.length; i++) {
@@ -378,6 +382,9 @@ async function drawGraphs() {
             obj[i].fMarkerColor=890;
             obj[i].fEditable=0;
 
+//            console.log(obj[i]);
+//	    settings.XValuesFormat = '.0f';
+	    
             if (gname.includes('composite')) {
                 obj[i].fMinimum = -1.5;
                 obj[i].fMaximum = 1.5;
@@ -388,8 +395,68 @@ async function drawGraphs() {
                 gname = gname.split('/')[1];      // the divname doesnt include the directory
             }
 
-            let divname = 'g_' + gname;             
-            draw(divname, obj[i], 'ap;gridx;gridy;');
+            const divname = 'g_' + gname;
+
+            let drawlegend = false;
+   	    leg[i] = await create('TLegend');    
+	    
+	    if (obj[i]._typename == 'TMultiGraph') { // && !gname.includes('composite')) {
+		if (obj[i].fGraphs) {
+		    if (obj[i].fGraphs.arr) {
+			if (obj[i].fGraphs.arr.length>1 ) drawlegend = true;      // don't draw legend on the status composite multigraph made in JS bc it kills the graph
+		    }
+		}
+	    }
+		    
+	    if (drawlegend) {
+		
+		const garr = obj[i].fGraphs.arr;
+
+		let y1 = 0.9 - 0.1*garr.length;
+
+		if (y1<0.18) y1=0.18;
+		
+                Object.assign(leg[i], { fX1NDC: 0.91, fY1NDC: y1, fX2NDC: 1.0, fY2NDC: 0.9, fColumnSeparation:0, fMargin:0.15 });
+
+	        const entry = []
+
+		for (let j=0; j < garr.length; j++) {
+		
+		    entry[j] = await create('TLegendEntry');
+		    Object.assign(entry[j], {fObject: garr[j], fLabel: garr[j].fName, fOption: 'p'});
+			
+   		    await leg[i].fPrimitives.Add(entry[j]);
+
+		}
+            }
+
+
+            let gpainter = await draw(divname, obj[i], 'ap;gridx;gridy;');     // draw the graph first, otherwise xmin gets reset to 0  !
+            if (drawlegend) await draw(divname,leg[i]);
+	   	    
+//	    console.log(obj[i]);
+//	    console.log(gpainter);
+
+           // TMultiGraphPainter has array of Painters with xmin and xmax set to range   autorange set to true
+	    // data are in arrays fX  fY
+	    
+/*
+      let h2painter = await draw('drawth2', obj2, 'col');
+ 
+      // zooming handled in the frame painter now
+      let fp = h2painter.getFramePainter();
+ 
+      // keep old function to be able invoke it again
+      fp.oldZoom = fp.zoom;
+ 
+      // redefine zoom function of TH2 painter to make synchronous zooming of TH1 object
+      fp.zoom = function(xmin,xmax,ymin,ymax,zmin,zmax) {
+          h1painter.getFramePainter().zoom(xmin, xmax);
+          return this.oldZoom(xmin,xmax,ymin,ymax,zmin,zmax);
+      }	    
+*/
+		//		debugger;
+           
         }
 
         console.log('drawing completed');
