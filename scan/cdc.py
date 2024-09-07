@@ -14,10 +14,9 @@ def init() :
   occ = occupancy(False)  # return names, titles, values
   eff = efficiency(False)
   d = dedx(False)
-  dmean = dedx_mean(False)
   t = ttod(False)
 
-  for thing in [ occ, eff, d, dmean, t ] : 
+  for thing in [ occ, eff, d,  t ] : 
 
     names.extend(thing[0])
     titles.extend(thing[1])
@@ -45,12 +44,6 @@ def check(run, rootfile) :
   dedxresmin = 0.25
   dedxresmax = 0.37
 
-  dedxmeanmin = 2.5  # for overall dedx, 0 to 10 GeV
-  dedxmeanmax = 4.5
-  dedxsigmin = 1.0
-  dedxsigmax = 4.0
-
-
   e0min = 0.97
   e5min = 0.96
   e6min = 0.89
@@ -63,13 +56,12 @@ def check(run, rootfile) :
   occ = occupancy(rootfile, occmax)
   eff = efficiency(rootfile, e0min, e5min, e6min)
   d = dedx(rootfile, dedxmin, dedxmax, dedxresmin, dedxresmax)
-  dmean = dedx_mean(rootfile, dedxmeanmin, dedxmeanmax, dedxsigmin, dedxsigmax)
   t = ttod(rootfile, ttodmeanmax, ttodsigmamax)
 
   # set the overall status to the min value of each histogram status
 
   statuslist = []
-  for thing in [ occ, eff, d, dmean, t ] : 
+  for thing in [ occ, eff, d, t ] : 
     statuslist.append(thing[0])   # status is the first value in the array
 
   cdc_status = min(statuslist)
@@ -77,7 +69,7 @@ def check(run, rootfile) :
   # add overall status to the start of the lists before concatenating & returning.
 
   allvals = [cdc_status]
-  for thing in [ occ, eff, d, dmean, t ] :   
+  for thing in [ occ, eff, d, t ] :   
     allvals.extend(thing) 
 
   return allvals
@@ -206,14 +198,27 @@ def dedx(rootfile, dedxmin=1.9998, dedxmax=2.0402, resmin=0.25, resmax=0.37) :
   if not rootfile :  # called by init function
     return [names, titles, values]
 
-  dirname = '/CDC_dedx'
+  # find out if CDC_dedx was run.  If not, use the monitoring_hists instead
+
+  test = rootfile.GetDirectory('/CDC_dedx') 
+
+  if test:
+    dirname = '/CDC_dedx'    
+    histo_qp = 'dedx_p_pos'
+    histo_qn = 'dedx_p_neg'  
+  else:
+    dirname = '/Independent/Hist_DetectorPID/CDC'
+    histo_qp = 'dEdXVsP_Amp_q+'
+    histo_qn = 'dEdXVsP_Amp_q-'
+
+
   min_counts = 100
   fitoptions = "0QWERS"
   
-  histoname = 'dedx_p_pos'
-
   qpstatus = 1
   qnstatus = 1
+  
+  histoname = histo_qp
   
   h = get_histo(rootfile, dirname, histoname, min_counts)
   
@@ -250,11 +255,9 @@ def dedx(rootfile, dedxmin=1.9998, dedxmax=2.0402, resmin=0.25, resmax=0.37) :
       
   else:
     qpstatus = -1   #unknown, no histo
-
-
     
   min_counts = 1e4
-  histoname = 'dedx_p_neg'
+  histoname = histo_qn
   
   h = get_histo(rootfile, dirname, histoname, min_counts)
   
@@ -287,41 +290,6 @@ def dedx(rootfile, dedxmin=1.9998, dedxmax=2.0402, resmin=0.25, resmax=0.37) :
     
   return values
 
-
-
-def dedx_mean(rootfile, dedxmeanmin=1.5, dedxmeanmax=2.5, dedxsigmin=0.2, dedxsigmax=3.0) :
-
-  titles = ['dE/dx (overall mean, 0-10 GeV/c) status','dE/dx mean (keV/cm)','dE/dx RMS (keV/cm)']
-  names = ['dedx_overallmean_status','dedx_overallmean','dedx_overallsigma']
-  values = [-1,-1,-1]
-
-  if not rootfile :  # called by init function
-    return [names, titles, values]
-
-  dirname = '/CDC_dedx'
-  histoname = 'dedx_p'
-
-  min_counts = 100
-
-  h = get_histo(rootfile, dirname, histoname, min_counts)
-
-  if (not h) :
-    return values
-
-  pp = h.ProjectionY("p1",0,10)
-
-  mean = pp.GetMean()
-  sig = pp.GetRMS()
-    
-  status = 1
-  if mean < dedxmeanmin or mean > dedxmeanmax:
-      status=0
-  if sig < dedxsigmin or sig > dedxsigmax:
-      status=0
-
-  values = [status, float('%.5f'%(mean)), float('%.5f'%(sig)) ]
-  
-  return values
 
 
 
