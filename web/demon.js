@@ -370,19 +370,30 @@ async function drawGraphs() {
             // this makes an object named after the graph, which populates the div with the same name
 
         for (let i = 0; i < graphs_this_page.length; i++) {
-            let gname = graphs_this_page[i];  //graphnames[i]
 
+            const gname = graphs_this_page[i];  //graphnames[i]
+
+            const divname = 'g_' + gname.split('/')[1];      // the divname doesnt include the directory
+	    
             // only show composite status graphs, hide the others
             if (gname.includes('status') && !gname.includes('composite')) continue;
-
+	    
             //console.log('looking for graph called ',gname);
-            obj[i] = await file.readObject(gname);
-            obj[i].fMarkerSize=0.7;
-            obj[i].fMarkerStyle=8;
-            obj[i].fMarkerColor=890;
-            obj[i].fEditable=0;
+            obj[i] = await file.readObject(gname).catch((err) => {       
+                //console.error(err);
+		return null;     // graph not found
+            });
+	    
+	    if (obj[i] == null) {  
+                const thisdiv = document.getElementById(divname);
+	        thisdiv.innerHTML = 'Graph ' + gname + ' is not in the root file.';
+		thisdiv.classList.remove("graphpanel"); 
+		thisdiv.classList.add("graphmissing"); 
+		continue;  
+	    }
 
-//            console.log(obj[i]);
+	    Object.assign(obj[i], {fMarkerSize: 0.5, fMarkerStyle: 8, fMarkerColor: 890, fEditable: 0});
+
 //	    settings.XValuesFormat = '.0f';
 	    
             if (gname.includes('composite')) {
@@ -391,11 +402,6 @@ async function drawGraphs() {
 		// obj[i].fYaxis.fNdivisions = 1;  // gives an error
             }
 
-            if (gname.includes('/')) {
-                gname = gname.split('/')[1];      // the divname doesnt include the directory
-            }
-
-            const divname = 'g_' + gname;
 
             let drawlegend = false;
    	    leg[i] = await create('TLegend');    
