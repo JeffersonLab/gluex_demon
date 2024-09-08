@@ -155,9 +155,7 @@ function get_url_args() {
 
 async function fetchfiledata(filename) {
 
-
-    const response = await fetch(filename);
-    // waits until the request completes...
+    const response = await fetch(filename+'?'+Math.random());   // requesting filename?random avoids the data being cached
 
     let text = await response.text();
     // this will be 404 if the file doesn't exist
