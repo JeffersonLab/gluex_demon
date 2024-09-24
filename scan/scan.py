@@ -32,6 +32,7 @@ def make_graph(gname,gtitle,nruns,x,y) :
     gr = TGraph( nn, xx, yy )
     gr.SetName(gname)
     gr.SetTitle(gtitle)
+    gr.GetXaxis().SetNoExponent(True)
     gr.GetXaxis().SetTitle( 'Run number' )
     gr.GetYaxis().SetTitle( gtitle )
     gr.SetMarkerStyle( 21 )
@@ -58,6 +59,7 @@ def make_graph_errs(gname,gtitle,nruns,x,y,dx,dy) :
     gr = TGraphErrors( nn, xx, yy, dxx, dyy )
     gr.SetName(gname)
     gr.SetTitle(gtitle)
+    gr.GetXaxis().SetNoExponent(True)    
     gr.GetXaxis().SetTitle( 'Run number' )
     gr.GetYaxis().SetTitle( gtitle )
     gr.SetMarkerStyle( 21 )
@@ -69,6 +71,7 @@ def make_multigraph(gname,gtitle) :
     gr = TMultiGraph()
     gr.SetName(gname)
     gr.SetTitle(gtitle)
+#    gr.GetXaxis().SetNoExponent(True)    # This empties the multigraph!
 #    gr.GetXaxis().SetTitle( 'Run number' ) # This empties the multigraph!
     return gr
 
@@ -105,10 +108,11 @@ import ps_e
 import photons
 import rho
 import omega
-import altrho
 
-modules_xdef = [sc]
-modules_def = [photons, timing, rf, cdc, fdc, sc, tof_1, rho, omega]       # default list of modules
+import triggers
+
+modules_xdef = [triggers]
+modules_def = [triggers, photons, timing, rf, cdc, fdc, sc, tof_1, rho, omega]       # default list of modules
 modules_cpp = [photons, timing, rf, ps_e, cdc_cpp, fdc, tof_1, fmwpc, ctof]   # modules for CPP
     
 testing = 0  # stop after <runlimit> files, print diagnostics
@@ -497,6 +501,7 @@ for ii in range(nruns) :
 gr = make_graph('readiness','Run readiness',nruns,x,y)      
 
 if gr != None :
+    gr.GetXaxis().SetRangeUser(x[0],x[nruns-1])
     gr.Write()
 
 
@@ -604,6 +609,7 @@ for i in range(len(pagenames)):
         if gr == None :
             continue
         
+        gr.GetXaxis().SetRangeUser(x[0],x[nruns-1])        
         gr.Write()
 
         if thing in graphstomg:
@@ -631,6 +637,7 @@ for i in range(len(pagenames)):
 
         if gr != None :
             gr.SetLineColor(17);
+            gr.GetXaxis().SetRangeUser(x[0],x[nruns-1])            
             gr.Write()
 
         if gnames[igraph] in graphstomg:
