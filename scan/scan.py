@@ -113,7 +113,7 @@ import triggers
 
 modules_xdef = [triggers]
 modules_def = [triggers, photons, timing, rf, cdc, fdc, sc, tof_1, rho, omega]       # default list of modules
-modules_cpp = [photons, timing, rf, ps_e, cdc_cpp, fdc, tof_1, fmwpc, ctof]   # modules for CPP
+modules_cpp = [triggers, photons, timing, rf, ps_e, cdc_cpp, fdc, tof_1, fmwpc, ctof]   # modules for CPP
     
 testing = 0  # stop after <runlimit> files, print diagnostics
 runlimit = 10 # process this number of runs if testing=1

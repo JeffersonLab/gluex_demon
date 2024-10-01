@@ -135,14 +135,22 @@ def triggers(rootfile) :
 
   status = 1
 
-  bcalpercent = 100*nbcal/nmain
-  pspercent = 100*nps/nmain
-  randompercent = 100*nrandom/nmain
+  if nmain > 0 :
+    bcalpercent = 100*nbcal/nmain
+    bcalpercent = float('%.1f'%(bcalpercent))
+    pspercent = 100*nps/nmain
+    pspercent = float('%.1f'%(pspercent))    
+    randompercent = 100*nrandom/nmain
+    randompercent = float('%.3f'%(randompercent))    
+  else :
+    bcalpercent = None
+    pspercent = None
+    randompercent = None
 
   if nmain == 0 or nbcal == 0 or nps == 0 or nrandom == 0:
     status = 0
   
-  values = [status, int(nmain), int(nbcal),float('%.1f'%(bcalpercent)), int(nps), float('%.1f'%(pspercent)), int(nrandom), float('%.3f'%(randompercent)) ]
+  values = [status, int(nmain), int(nbcal), bcalpercent, int(nps), pspercent, int(nrandom), randompercent ]
 
   return values       # return array of values, status first
   
