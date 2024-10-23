@@ -283,7 +283,7 @@ for imod in range(len(modules)) :
 
 if checkstatus != 0 :
     import rcdb
-    db = rcdb.RCDBProvider("mysql://rcdb@hallddb/rcdb")
+    db = rcdb.RCDBProvider("mysql://rcdb@hallddb/rcdb2")
 
 
 # loop through the runs, running the module check functions to gather status and other metrics
