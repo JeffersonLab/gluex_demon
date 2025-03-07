@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+ 
+<head>
+    <title>CDC inspector</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="canonical" href="https://getbootstrap.com/docs/5.3/examples/sidebars/">
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.1/jquery-ui.min.js"
+        integrity="sha256-eTyxS0rkjpLEo16uXTS0uVCS4815lc40K2iVpWDvdSY=" crossorigin="anonymous"></script>
+    <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
+    <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
+    <script src="https://root.cern/js/latest/build/jsroot.js"></script>
+    <script src="https://root.cern/js/latest/scripts/JSRoot.core.js"></script>
+    <script src="https://root.cern/js/latest/scripts/JSRoot.core.min.js"></script>
+    <style>
+        body {margin:1em 5em 1em 5em;}  
+
+        #selectors {margin-top: 1em; margin-bottom: 1em;}
+        #titles {}
+        #titles2 {margin-top: 1em; margin-bottom: 2em;}
+        #links span {margin-right: 0.5em;}
+        #under-dev {margin-top:10px;}
+        #under-dev hr {border: 2px solid #505050;}
+        .red {color:red;}
+        .graphpanel {width:1200px; height:400px; margin-top: 10px;}
+        .legendpanel {width:1200px; height:800px; margin-top: 20px; }
+	        .plot {width:1000px; height:1000px; margin-top: 20px; }
+
+		.tooltip-inner, .toolTip, .tooltip {font-size: 150%;}
+        .root_canvas {padding-top: 0px; preserveAspectRatio="true";}
+    </style>
+</head>
+
+
+<body>
+
+  <div id="under-dev">
+<p class="red">This page needs an on-site connection to access the root files!</p>
+
+    <p style="font-size:80%;">  
+	    Change the filename in the url, eg <a href="https://halldweb.jlab.org/gluex_demon/cdc/cdc.html?file=/work/halld/data_monitoring/RunPeriod-2023-01/mon_ver12/rootfiles/hd_root_121168.root">https://halldweb.jlab.org/gluex_demon/cdc/cdc.html?file=/work/halld/data_monitoring/RunPeriod-2023-01/mon_ver12/rootfiles/hd_root_121168.root</a>. If the plot is not drawn (it can take as much as a minute), check that the file exists.</p><p>&nbsp;</p>
+
+<p>This shows the occupancy viewed from the ELECTRONICS end of the CDC, looking downstream.  The regular monitoring plots are viewed as if looking upstream. Move the mouse over the plot to see channel information.</p> <p>&nbsp;</p>
+	  
+        </div>
+
+        <!--div id ="selectors">
+            <hr/>
+            <select name="select_rp" id="select_rp">Loading
+            </select>
+            <select name="select_ver" id="select_ver">
+            </select>
+            <button type="button" id="reload" style="display:none">Go</button>&nbsp;&nbsp;
+            <hr/>
+        </div>
+
+
+        <div id="titles"><h1><span id="RunPeriod"></span>&nbsp;&nbsp;<span id="Version"></span></h1>
+        </div>
+
+        <div id="titles2">
+            <div id="list_graphs">
+                <span id="sel_gr_text"></span><select name="select_gr" id="select_gr" size="5" multiple></select> 
+            </div>
+        </div-->
+
+        <div id="filename" >
+        </div>
+
+	  
+        <div id="problems" class="red">
+        </div>
+
+
+	<div id="tooltip">
+	</div>  
+        <div id="plot" class="plot">
+
+The plot should go here. It could take up to a minute to load.  If it's not drawn, check that the filename is correct.
+	  <!--h1 id="loading" style="margin-left:10em;"></h1-->
+        </div>
+
+
+
+
+    <script src="cdc.js" type="module"></script>
+
+</body>
+
+</html>
