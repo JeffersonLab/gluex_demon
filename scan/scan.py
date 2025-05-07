@@ -143,6 +143,10 @@ if VersionNumber == "" :
 if histdir == "" : 
     histdir = '/work/halld/data_monitoring/RunPeriod-' + RunPeriod + '/mon_ver' + VersionNumber + '/rootfiles'
 
+if RunPeriod == "2025-01" and VersionNumber == "01":
+    checkstatus = 2025
+    print('Starting from 131305, runs with at least 10M events, not checking RCDB status')
+    
 if testing:
     print('Looking for monitoring histograms inside directory',histdir)
 
@@ -309,7 +313,17 @@ for filename in histofilelist:
     
         skiprun = 0
 
-        if checkstatus != 0 :
+        if checkstatus == 2025 :
+            if run < 131405 :
+                skiprun = 1
+            else :
+                condition = db.get_condition(run, "event_count")
+                if condition == None :
+                    skiprun = 1
+                elif condition.value <= 10000000:
+                    skiprun = 1
+                
+        elif checkstatus != 0 :
             condition = db.get_condition(run, "status")
             if condition.value <= 0:
                 skiprun = 1
