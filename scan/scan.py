@@ -118,7 +118,7 @@ modules_cpp = [triggers, photons_cpp, timing, rf, ps_e, cdc_cpp, fdc, tof_1, fmw
     
 testing = 0  # stop after <runlimit> files, print diagnostics
 runlimit = 10 # process this number of runs if testing=1
-checkstatus = 1  # process runs with RCDB status>0
+checkstatus = 0  # process runs with RCDB status>0
 
 RunPeriod=""
 VersionNumber=""

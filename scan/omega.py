@@ -137,7 +137,7 @@ def omega_mass(rootfile) :
       status=0
 
       
-  values = [status, float('%.3f'%(mass)), float('%.0f'%(1000.*float(counts)/(float(n_ps)))), float('%.3f'%(sigma)) ] 
+  values = [status, float('%.3f'%(mass)), float('%.2f'%(1000.*float(counts)/(float(n_ps)))), float('%.3f'%(sigma)) ] 
   
   return values       # return array of values, status first
 

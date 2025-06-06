@@ -172,8 +172,8 @@ def rho_ps_triggers(rootfile) :
   # Status codes are 1 (good), 0 (bad) or -1 (don't know/file problem/not enough data/some other error)
   # If you just want to plot a metric without comparing it to limits, set its status code to 1, so that it doesn't make the overall status look bad.
 
-  histoname = 'psflux_num_events'            # monitoring histogram to check
-  dirname = 'PS_flux'                        # directory containing the histogram
+  histoname = 'PS_E'            # monitoring histogram to check
+  dirname = 'PS_flux/PSC_PS'                        # directory containing the histogram
 
   min_counts = 100
   h = get_histo(rootfile, dirname, histoname, min_counts)
