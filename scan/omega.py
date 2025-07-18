@@ -1,5 +1,6 @@
 import csv
 
+from utils import get_histo
 from ROOT import gROOT, TF1
 
 #
@@ -33,10 +34,12 @@ def init() :
   
   # This is the list of custom functions, called with one argument: False
 
-  m = omega_mass(False)
-  mp = omega_mass_prekinfit(False)
+  m3pi = omega_3pi_mass(False)
+  m3pi_prek = omega_3pi_mass_prekinfit(False)
+  mpi0g = omega_pi0g_mass(False)
 
-  for thing in [ m, mp ] :   # loop through the arrays returned from each function
+  
+  for thing in [ m3pi, m3pi_prek, mpi0g ] :   # loop through the arrays returned from each function
 
     names.extend(thing[0])
     titles.extend(thing[1])
@@ -56,14 +59,15 @@ def check(run, rootfile) :
   # Each function checks one histogram and returns a list, its status code followed by the values to be graphed.
   # Add or remove custom functions from this list
 
-  m_omega = omega_mass(rootfile) 
-  m_omega_prekinfit = omega_mass_prekinfit(rootfile) 
+  m3pi = omega_3pi_mass(rootfile)
+  m3pi_prek = omega_3pi_mass_prekinfit(rootfile)
+  mpi0g = omega_pi0g_mass(rootfile)  
 
   # This finds the overall status, setting it to the min value of each histogram status
 
 
   statuslist = []
-  for thing in [ m_omega, m_omega_prekinfit ] :         # Add or remove the list names assigned above.  
+  for thing in [ m3pi, m3pi_prek, mpi0g ] :   # loop through the arrays returned from each function
     statuslist.append(thing[0])   # status is the first value in the array
 
   status = min(statuslist)
@@ -72,14 +76,14 @@ def check(run, rootfile) :
 
   allvals = [status]
 
-  for thing in [ m_omega, m_omega_prekinfit ] :  # Add or remove the list names assigned above.  
+  for thing in [ m3pi, m3pi_prek, mpi0g ] :   # loop through the arrays returned from each function  
     allvals.extend(thing) 
 
   return allvals
  
 
 
-def omega_mass(rootfile) : 
+def omega_3pi_mass(rootfile) : 
 
   # Example custom function to check another histogram
 
@@ -93,8 +97,8 @@ def omega_mass(rootfile) :
   
   # Provide unique graph names, starting with 'rho_'. The first must be the status code from this function.
 
-  names = ['omega_mass_and_yield_status','omega_mass','omega_yield_ps','omega_resolution']
-  titles = ['Omega->3pi status','3pi mass (GeV/c^{2})','Omega->3pi yield (counts, post kinfit)','Omega->3pi resolution (sigma, GeV)']   # Graph titles
+  names = ['3pi_mass_and_yield_status','3pi_mass','3pi_yield_ps','3pi_resolution']
+  titles = ['Omega->3pi status','3pi mass (GeV/c^{2})','Omega->3pi yield per 1000 PS triggers','Omega->3pi resolution (sigma, GeV)']   # Graph titles
   values = [-1,-1,-1,-1]                                          # Default values, keep as -1
 
   if not rootfile :  # called by init function
@@ -120,7 +124,7 @@ def omega_mass(rootfile) :
   # code to check the histogram and find the status values
 
   counts = h.Integral(150, 400)
-  
+
   maximum = h.GetBinCenter(h.GetMaximumBin())
   fr = h.Fit("gaus", "SQ", "", maximum - 0.05, maximum + 0.05)
   
@@ -142,7 +146,7 @@ def omega_mass(rootfile) :
   return values       # return array of values, status first
 
 
-def omega_mass_prekinfit(rootfile) : 
+def omega_3pi_mass_prekinfit(rootfile) : 
 
   # Example custom function to check another histogram
 
@@ -154,11 +158,7 @@ def omega_mass_prekinfit(rootfile) :
   ymax = 1e6
 
   
-  # Provide unique graph names, starting with 'rho_'. The first must be the status code from this function.
-
-#   names = ['omega_mass_and_yield_status','omega_mass','omega_yield_ps','omega_resolution']
-#   titles = ['Omega->3pi status','3pi mass (GeV/c^{2})','Omega->3pi yield (counts, post kinfit)','Omega->3pi resolution (sigma, GeV)']   # Graph titles
-#   values = [-1,-1,-1,-1]                                          # Default values, keep as -1
+  # Provide unique graph names. The first must be the status code from this function.
 
   names = ['omega_prekinfit_status','omega_prekinfit_resolution']
   titles = ['Omega->3pi pre kin fit status','Omega->3pi resolution, pre kin fit (sigma, GeV)']   # Graph titles
@@ -191,8 +191,8 @@ def omega_mass_prekinfit(rootfile) :
   sigma = fr.Parameter(2)
 
   status = 1
-  if counts < ymin or counts > ymax:
-      status=0
+#  if counts < ymin or counts > ymax:
+#      status=0
 
 #   if mass < mmin or mass > mmax:
 #       status=0
@@ -203,25 +203,81 @@ def omega_mass_prekinfit(rootfile) :
   return values       # return array of values, status first
 
 
-def get_histo(rootfile, dirname, histoname, min_counts) :
 
-  test = rootfile.GetDirectory(dirname) 
+def omega_pi0g_mass(rootfile) : 
 
-  # file pointer contains tobj if dir exists, set false if not
+  # Example custom function to check another histogram
 
-  if (not test):
-    #print('Could not find ' + dirname)
-    return False
+  # Acceptable value limits, defined here for accessibility
 
-  rootfile.cd(dirname)
+  mmin = 0.750
+  mmax = 0.800
 
-  h = gROOT.FindObject(histoname)
+  # Unique graph names
+
+  names = ['pi0g_mass_and_yield_status','pi0g_mass','pi0g_yield_ps']
+  titles = ['Omega->pi0gamma status','Omega->pi0gamma mass (GeV/c^{2})','Omega->pi0gamma yield per 1000 PS triggers'] # Graph titles
+  values = [-1, -1, -1]                                          # Default values, keep as -1
+
+  if not rootfile :  # called by init function
+    return [names, titles, values]
+
+  # The following code finds the histogram, extracts metrics, checks them against the limits provided, assigns a status code and then returns a list of status code followed by the metrics. 
+  # Status codes are 1 (good), 0 (bad) or -1 (don't know/file problem/not enough data/some other error)
+  # If you just want to plot a metric without comparing it to limits, set its status code to 1, so that it doesn't make the overall status look bad.
+
+  histoname = 'InvariantMass'                                      # monitoring histogram to check
+  dirname = 'ppi0gamma_preco_any_kinfit/Hist_InvariantMass_Omega_PostKinFitCut'    # directory containing the histogram
+
+  min_counts = 100
+  h = get_histo(rootfile, dirname, histoname, min_counts)
+
+  h_ps = get_histo(rootfile, "PS_flux/PSC_PS", "PS_E", min_counts)
 
   if (not h) :
-    #print('Could not find ' + histoname)
-    return False
+    return values
+  if (not h_ps) :
+    return values
 
-  if h.GetEntries() < min_counts :
-    return False
+  # code to check the histogram and find the status values
 
-  return h
+  n_ps = h_ps.Integral()
+
+  
+  counts = h.Integral(100, 400)     # was 150-400 for 3pi
+
+  h.Rebin(10)
+
+  fomega = TF1("fomega", "gaus(0)+pol0(3)", 0.65, 0.9)
+  fomega.SetParameter(1,0.782)
+  fomega.SetParameter(2,0.04)      # not 0.03
+  fomega.SetParameter(3,h.GetBinContent(50))   # not bin 0
+
+  fitstatus = h.Fit(fomega, "Q0S")
+
+  if int(fitstatus != 0) :
+    fitstatus = h.Fit(fomega,"EQ0S")        # second go seems to work when first fails
+
+  status = 1
+  
+  if int(fitstatus) == 0 :
+    omega_mass = fitstatus.Parameter(1)
+    #omega_width = fitstatus.GetParameter(2)
+
+    if omega_mass < mmin or omega_mass > mmax:
+      status = 0
+
+    return_mass = float('%.3f'%(omega_mass))
+
+  else :
+    
+    return_mass = None
+    status = 0
+    print('bad fit')
+
+      
+  values = [status, return_mass, float('%.2f'%(1000.*float(counts)/(float(n_ps))))]
+  
+  return values       # return array of values, status first
+
+

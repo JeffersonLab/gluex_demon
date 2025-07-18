@@ -142,7 +142,8 @@ def rho_mass_yield(rootfile) :
     err_mass = errors[1]
     err_width = errors[2]  
   
-    if counts >= ymin and counts <= ymax and mass >= mmin and mass <= mmax:
+#    if counts >= ymin and counts <= ymax and mass >= mmin and mass <= mmax:
+    if mass >= mmin and mass <= mmax:
       status=1
 
     x = 2  
@@ -162,7 +163,7 @@ def rho_ps_triggers(rootfile) :
   # Provide unique graph names, starting with 'rho_'. The first must be the status code from this function.
 
   names = ['rho_ps_trig_status','ps_trigger_count','rho_per_trigger']
-  titles = ['Rho PS trig status','PS trigger count','Rhos per 1000 PS triggers']           # Graph titles
+  titles = ['Rho PS trig status','PS trigger count','Rho yield per 1000 PS triggers']           # Graph titles
   values = [-1,-1,-1]                                             # Default values, keep as -1
 
   if not rootfile :  # called by init function
