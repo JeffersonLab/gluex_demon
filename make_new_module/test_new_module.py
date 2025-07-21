@@ -313,13 +313,17 @@ for igraph in range(1,len(gnames)) : # skip element 0, run number
 
   #print igraph,gnames[igraph],gtitles[igraph]
 
-  x, y = array( 'd' ), array( 'd' )  
+  x, y = array( 'd' ), array( 'd' )
+
+  nn = 0
 
   for i in range(nruns) :
-    x.append(allruns_values[i][0])
-    y.append(allruns_values[i][igraph]) 
-    
-  gr = TGraph( nruns, x, y )
+    if allruns_values[i][igraph] != None:
+      x.append(allruns_values[i][0])
+      y.append(allruns_values[i][igraph]) 
+      nn = nn + 1
+      
+  gr = TGraph( nn, x, y )
   gr.SetName( gnames[igraph] )
   gr.SetTitle( gtitles[igraph] )
   gr.GetXaxis().SetTitle( 'Run number' )
@@ -328,7 +332,7 @@ for igraph in range(1,len(gnames)) : # skip element 0, run number
   gr.Write()
 
   if testing:
-      print('Created graph %s' % (gnames[igraph]) )
+      print('Created graph %s for %i runs' % (gnames[igraph], nn) )
 
 f.Close()
    
