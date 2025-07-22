@@ -3,22 +3,7 @@ import csv
 from utils import get_histo
 from ROOT import gROOT, TF1
 
-#
-# This module contains two control functions, 'init' and 'check', and the custom functions which inspect the histograms (one custom function for each histogram).
-#
 # 'init' and 'check' call the custom functions.  'init' returns graph names and titles. 'check' returns the numbers to be graphed.
-#
-#
-# Change all instances of new_module to your module's name 
-#
-# Adapt the example custom functions (new_module_occupancy and new_module_e) to retrieve the metrics needed from their histogram.
-# Add more custom functions, or remove one if it is not required.
-#
-# Add the custom functions to the list of functions in 'init' and 'check'.
-#
-# In 'check', provide the set of limits for each metric, and adapt the code to use these. 
-#
-
 
 
 def init() : 
@@ -97,14 +82,15 @@ def omega_3pi_mass(rootfile) :
   
   # Provide unique graph names, starting with 'rho_'. The first must be the status code from this function.
 
-  names = ['3pi_mass_and_yield_status','3pi_mass','3pi_yield_ps','3pi_resolution']
-  titles = ['Omega->3pi status','3pi mass (GeV/c^{2})','Omega->3pi yield per 1000 PS triggers','Omega->3pi resolution (sigma, GeV)']   # Graph titles
-  values = [-1,-1,-1,-1]                                          # Default values, keep as -1
+  names = ['3pi_mass_and_yield_status','3pi_mass','3pi_yield_per_k_ps','3pi_resolution']
+  titles = ['Omega->3pi status','3pi mass (GeV/c^{2})','Omega->3pi yield per 1000 PS pairs','Omega->3pi width (sigma, GeV)']   # Graph titles
+  values = [-1, None, None, None]                                          # Default values, keep status as -1
 
   if not rootfile :  # called by init function
     return [names, titles, values]
 
-  # The following code finds the histogram, extracts metrics, checks them against the limits provided, assigns a status code and then returns a list of status code followed by the metrics. 
+  # The following code finds the histogram, extracts metrics, checks them against the limits provided, assigns a status code and then returns a list of status code followed by the metrics.
+  # Metrics can be None for fit fail or histo missing
   # Status codes are 1 (good), 0 (bad) or -1 (don't know/file problem/not enough data/some other error)
   # If you just want to plot a metric without comparing it to limits, set its status code to 1, so that it doesn't make the overall status look bad.
 
@@ -118,30 +104,49 @@ def omega_3pi_mass(rootfile) :
 
   if (not h) :
     return values
+
   if (not h_ps) :
-    return values
+    histoname = 'PSPairEnergy'      # this should be present in ver 1 instead of PSC_PS
+    dirname = 'highlevel'
+    h_ps = get_histo(rootfile, dirname, histoname, min_counts)
+
+    if (not h_ps) :
+      return values
+
 
   # code to check the histogram and find the status values
 
   counts = h.Integral(150, 400)
 
   maximum = h.GetBinCenter(h.GetMaximumBin())
-  fr = h.Fit("gaus", "SQ", "", maximum - 0.05, maximum + 0.05)
-  
-  mass = fr.Parameter(1)
-  sigma = fr.Parameter(2)
+  fitstatus = h.Fit("gaus", "SQ0", "", maximum - 0.05, maximum + 0.05)
+
+  if int(fitstatus) == 0 :
+    mass = fitstatus.Parameter(1)
+    sigma = fitstatus.Parameter(2)
+
+    return_mass = float('%.3f'%(mass))
+    return_sigma = float('%.3f'%(sigma))
+
+    status = 1
+    
+    if mass < mmin or mass > mmax:
+      status = 0
+
+  else :
+    
+    return_mass = None
+    return_sigma = None
+    status = -1
   
   n_ps = h_ps.Integral()
-  
-  status = 1
-  if counts < ymin or counts > ymax:
-      status=0
 
-  if mass < mmin or mass > mmax:
-      status=0
-
+  if n_ps > 0:
+    return_yield = float('%.2f'%(1000.*float(counts)/(float(n_ps))))
+  else :
+    return_yield = None
       
-  values = [status, float('%.3f'%(mass)), float('%.2f'%(1000.*float(counts)/(float(n_ps)))), float('%.3f'%(sigma)) ] 
+  values = [status, return_mass, return_yield, return_sigma]
   
   return values       # return array of values, status first
 
@@ -161,8 +166,8 @@ def omega_3pi_mass_prekinfit(rootfile) :
   # Provide unique graph names. The first must be the status code from this function.
 
   names = ['omega_prekinfit_status','omega_prekinfit_resolution']
-  titles = ['Omega->3pi pre kin fit status','Omega->3pi resolution, pre kin fit (sigma, GeV)']   # Graph titles
-  values = [-1,-1]                                          # Default values, keep as -1
+  titles = ['Omega->3pi pre kin fit status','Omega->3pi width, pre kin fit (sigma, GeV)']   # Graph titles
+  values = [-1, None]                                          # Default values, keep as -1
 
   if not rootfile :  # called by init function
     return [names, titles, values]
@@ -185,20 +190,23 @@ def omega_3pi_mass_prekinfit(rootfile) :
   counts = h.Integral(150, 400)
 
   maximum = h.GetBinCenter(h.GetMaximumBin())
-  fr = h.Fit("gaus", "SQ", "", maximum - 0.05, maximum + 0.05)
+  fitstatus = h.Fit("gaus", "SQ0", "", maximum - 0.05, maximum + 0.05)
   
-  mass = fr.Parameter(1)
-  sigma = fr.Parameter(2)
-
   status = 1
-#  if counts < ymin or counts > ymax:
-#      status=0
 
-#   if mass < mmin or mass > mmax:
-#       status=0
+  if int(fitstatus) == 0 :
+    #mass = fitstatus.Parameter(1)
+    sigma = fitstatus.Parameter(2)
 
-      
-  values = [status, float('%.3f'%(sigma)) ] 
+    #return_mass = float('%.3f'%(mass))
+    return_sigma = float('%.3f'%(sigma))
+
+  else :
+    
+    return_mass = None
+    return_sigma = None
+
+  values = [status, return_sigma ] 
   
   return values       # return array of values, status first
 
@@ -217,7 +225,7 @@ def omega_pi0g_mass(rootfile) :
 
   names = ['pi0g_mass_and_yield_status','pi0g_mass','pi0g_yield_ps']
   titles = ['Omega->pi0gamma status','Omega->pi0gamma mass (GeV/c^{2})','Omega->pi0gamma yield per 1000 PS triggers'] # Graph titles
-  values = [-1, -1, -1]                                          # Default values, keep as -1
+  values = [-1, None, None]                                          # Default values, keep status as -1
 
   if not rootfile :  # called by init function
     return [names, titles, values]
@@ -236,8 +244,15 @@ def omega_pi0g_mass(rootfile) :
 
   if (not h) :
     return values
+  
   if (not h_ps) :
-    return values
+    histoname = 'PSPairEnergy'      # this should be present in ver 1 instead of PSC_PS
+    dirname = 'highlevel'
+    h_ps = get_histo(rootfile, dirname, histoname, min_counts)
+
+    if (not h_ps) :
+      return values
+
 
   # code to check the histogram and find the status values
 
@@ -253,16 +268,16 @@ def omega_pi0g_mass(rootfile) :
   fomega.SetParameter(2,0.04)      # not 0.03
   fomega.SetParameter(3,h.GetBinContent(50))   # not bin 0
 
-  fitstatus = h.Fit(fomega, "Q0S")
+  fitstatus = h.Fit(fomega, "SQ0")
 
   if int(fitstatus != 0) :
-    fitstatus = h.Fit(fomega,"EQ0S")        # second go seems to work when first fails
+    fitstatus = h.Fit(fomega,"ESQ0")        # second go seems to work when first fails
 
   status = 1
   
   if int(fitstatus) == 0 :
     omega_mass = fitstatus.Parameter(1)
-    #omega_width = fitstatus.GetParameter(2)
+    #omega_width = fitstatus.Parameter(2)
 
     if omega_mass < mmin or omega_mass > mmax:
       status = 0
@@ -272,11 +287,16 @@ def omega_pi0g_mass(rootfile) :
   else :
     
     return_mass = None
-    status = 0
-    print('bad fit')
+    status = -1
 
-      
-  values = [status, return_mass, float('%.2f'%(1000.*float(counts)/(float(n_ps))))]
+
+  if n_ps > 0:
+    return_yield = float('%.2f'%(1000.*float(counts)/(float(n_ps))))
+  else :
+    return_yield = None
+
+    
+  values = [status, return_mass, return_yield]
   
   return values       # return array of values, status first
 

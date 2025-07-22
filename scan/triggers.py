@@ -1,4 +1,3 @@
-import csv
 from utils import get_histo     # demon's helper functions
 from ROOT import gROOT
 
@@ -7,15 +6,6 @@ from ROOT import gROOT
 #
 # 'init' and 'check' call the custom functions.  'init' returns graph names and titles. 'check' returns the numbers to be graphed.
 #
-# Copy and rename trigger_rates.py and test_trigger_rates.py, and change all instances of trigger_rates to your module's name  
-#
-# Adapt the example custom functions (trigger_rates_occupancy and trigger_rates_e) to retrieve the metrics needed from their histogram.
-# Add more custom functions, or remove one if it is not required.
-#
-# Add the custom functions to the list of functions in 'init' and 'check'.
-#
-# To show a pair of quantities together in a TGraphErr, give them names like x and x_err, eg rho_mass and rho_mass_err
-# At present, test_triggers makes these into separate graphs, but scan makes them into TGraphErr
 
 
 def init() : 
@@ -78,12 +68,6 @@ def check(run, rootfile) :
 
 
 def triggers(rootfile) : 
-
-  # Example custom function to check the occupancy histogram
-
-  # print('in triggers()...')
-
-  # Provide unique graph names, starting with 'triggers_'. The first must be the status code from this function. Do not call it triggers_status - call it something else ending with _status, eg triggers_functionname_status.
 
   names = ['trig_status','main_trig','bcal_trig','percent_bcal_trig_mg','ps_trig','percent_ps_trig_mg','random_trig','percent_random_trig_mg']
   titles = ['tr_status','Main triggers','BCAL triggers','BCAL triggers/Main triggers (\%)','PS triggers','PS triggers/Main triggers (\%)','Random triggers','Random triggers/Main triggers (\%)']

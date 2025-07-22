@@ -37,7 +37,6 @@ def check(run, rootfile) :
 
   # If the histogram is missing or the hit fails, status is set to -1 and data are set to None
 
-
   # list of functions to check, here they should be called with rootfile, followed by the status limits, then the fit and momentum limits, then the error limit, and return an array of values
 
   dedx = sc_dedx(rootfile)  
@@ -68,7 +67,7 @@ def sc_dedx(rootfile) :
 
   #print("in sc_dedx() ... ")
 
-  titles = ['dE/dx status', 'dE/dx q+ MPV at 1.5 GeV/c (keV/cm)','dE/dx q+ width at 1.5 GeV/c (keV/cm)', 'dE/dx q- MPV at 1.5 GeV/c (keV/cm)','dE/dx q- width at 1.5 GeV/c (keV/cm)']
+  titles = ['SC dE/dx status', 'SC dE/dx q+ MPV at 1.5 GeV/c (keV/cm)','SC dE/dx q+ width at 1.5 GeV/c (keV/cm)', 'SC dE/dx q- MPV at 1.5 GeV/c (keV/cm)','SC dE/dx q- width at 1.5 GeV/c (keV/cm)']
   names = ['dedx_status', 'qp_dedx_mpv', 'qp_dedx_sig', 'qm_dedx_mpv','qm_dedx_sig']
   values = [-1, None, None, None, None ]
 

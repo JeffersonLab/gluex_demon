@@ -1,23 +1,10 @@
-import csv
 from utils import get_histo     # demon's helper functions
-
 from ROOT import gROOT
 
 #
 # This module contains two control functions, 'init' and 'check', and the custom functions which inspect the histograms (one custom function for each histogram).
 #
 # 'init' and 'check' call the custom functions.  'init' returns graph names and titles. 'check' returns the numbers to be graphed.
-#
-# Copy and rename tracking.py and test_new_module.py, and change all instances of new_module to your module's name  
-#
-# Adapt the example custom functions (tracking_occupancy and new_module_e) to retrieve the metrics needed from their histogram.
-# Add more custom functions, or remove one if it is not required.
-#
-# Add the custom functions to the list of functions in 'init' and 'check'.
-#
-# To show a pair of quantities together in a TGraphErr, give them names like x and x_err, eg rho_mass and rho_mass_err
-# At present, test_tracking makes these into separate graphs, but scan makes them into TGraphErr
-
 
 def init() : 
 
@@ -86,15 +73,9 @@ def check(run, rootfile) :
 
 def fom(rootfile, llim=0.3, ulim=0.9 ) :
 
-  # 
-
-  #print('in tracking_fom()...')
-
-  # Provide unique graph names, starting with 'tracking_'. The first must be the status code from this function. Do not call it tracking_status - call it something else ending with _status, eg tracking_functionname_status.
-
   names = ['fom_min_status','fom_min']            
   titles = ['Tracking FOM status','Tracking FOM histo minimum']   # Graph titles
-  values = [-1, -1]
+  values = [-1, None]
 
   if not rootfile :  # called by init function
     return [names, titles, values]
@@ -140,7 +121,7 @@ def ncandidates(rootfile) :
 
   names = ['ncandidates_status','ncandidates_mean']  
   titles = ['Track candidates status','Number of track candidates'] # graph titles
-  values = [-1,-1]                                       # Default values, keep as -1
+  values = [-1, None]                                       # Default values, keep as -1
 
   if not rootfile :  # called by init function
     return [names, titles, values]
@@ -186,7 +167,7 @@ def nwirebasedtracks(rootfile) :
 
   names = ['nwirebasedtracks_status','nwirebasedtracks_mean']  
   titles = ['Wire-based tracks status','Number of wire-based tracks'] # graph titles
-  values = [-1,-1]                                       # Default values, keep as -1
+  values = [-1, None]                                       # Default values, keep as -1
 
   if not rootfile :  # called by init function
     return [names, titles, values]
@@ -232,7 +213,7 @@ def ntimebasedtracks(rootfile) :
 
   names = ['ntimebasedtracks_status','ntimebasedtracks_mean']  
   titles = ['Time-based tracks status','Number of time-based tracks'] # graph titles
-  values = [-1,-1]                                       # Default values, keep as -1
+  values = [-1, None]                                       # Default values, keep as -1
 
   if not rootfile :  # called by init function
     return [names, titles, values]

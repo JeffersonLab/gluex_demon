@@ -97,8 +97,6 @@ def sc_rf_time(rootfile) :
   #print("in sc_piplus_rf_time() ...")
   names = ['sc_rf_status', 'pim_SCRFdt_mg', 'pim_SCRFdt_mg_err', 'pip_SCRFdt_mg', 'pip_SCRFdt_mg_err', 'proton_SCRFdt_mg', 'proton_SCRFdt_mg_err']   
   titles = ['SC-RF time status', 'PiMinus SC-RF time (ns)',  'PiMinus SC-RF time width (ns)', 'PiPlus SC-RF time (ns)',  'PiPlus SC-RF time width (ns)', 'Proton SC-RF time (ns)',  'Proton SC-RF time width (ns)']   # Graph titles 
-#  values = [-1, -1, -1, -1, -1, -1, -1 ]
-
   values = [-1, None, None, None, None, None, None ]   
     
   if not rootfile :  # called by init function
@@ -172,7 +170,6 @@ def tof_rf_time(rootfile) :
   #print("in tof_rf_time() ...")
   names = ['tof_rf_status', 'pim_TOFRFdt_mg', 'pim_TOFRFdt_mg_err', 'pip_TOFRFdt_mg', 'pip_TOFRFdt_mg_err', 'proton_TOFRFdt_mg', 'proton_TOFRFdt_mg_err']   
   titles = ['TOF-RF time status', 'PiMinus TOF-RF time (ns)',  'PiMinus TOF-RF time width (ns)', 'PiPlus TOF-RF time (ns)',  'PiPlus TOF-RF time width (ns)', 'Proton TOF-RF time (ns)',  'Proton TOF-RF time width (ns)']   # Graph titles 
-#  values = [-1, -1, -1, -1, -1, -1, -1 ]
 
   values = [-1, None, None, None, None, None, None ]   
   
@@ -247,7 +244,6 @@ def bcal_rf_time(rootfile) :
   #print("in bcal_rf_time() ...")
   names = ['bcal_rf_piplus_status', 'pim_BCALRFdt_mg', 'pim_BCALRFdt_mg_err', 'pip_BCALRFdt_mg', 'pip_BCALRFdt_mg_err', 'proton_BCALRFdt_mg', 'proton_BCALRFdt_mg_err', 'gamma_BCALRFdt_mg', 'gamma_BCALRFdt_mg_err', 'gamma_1GeV_BCALRFdt_mg', 'gamma_1GeV_BCALRFdt_mg_err']   
   titles = ['BCAL-RF time status', 'PiMinus BCAL-RF time (ns)',  'PiMinus BCAL-RF time width (ns)', 'PiPlus BCAL-RF time (ns)',  'PiPlus BCAL-RF time width (ns)', 'Proton BCAL-RF time (ns)',  'Proton BCAL-RF time width (ns)', 'Photon BCAL-RF time (ns)',  'Photon BCAL-RF time width (ns)', 'Photon > 1GeV BCAL-RF time (ns)',  'Photon > 1GeV BCAL-RF time width (ns)']   # Graph titles ]   # Graph titles ]   # Graph titles ]   # Graph titles 
-#  values = [-1, -1, -1, -1, -1, -1, -1, -1, -1 ,-1, -1]
 
   values = [-1, None, None, None, None, None, None, None, None, None, None ]   
 
@@ -350,7 +346,6 @@ def fcal_rf_time(rootfile) :
   #print("in fcal_rf_time() ...")
   names = ['fcal_rf_piplus_status', 'pim_FCALRFdt_mg', 'pim_FCALRFdt_mg_err', 'pip_FCALRFdt_mg', 'pip_FCALRFdt_mg_err', 'gamma_FCALRFdt_mg', 'gamma_FCALRFdt_mg_err']   
   titles = ['FCAL-RF time status', 'PiMinus FCAL-RF time (ns)',  'PiMinus FCAL-RF time width (ns)', 'PiPlus FCAL-RF time (ns)',  'PiPlus FCAL-RF time width (ns)', 'Photon FCAL-RF time (ns)',  'Photon FCAL-RF time width (ns)']   # Graph titles 
-#  values = [-1, -1, -1, -1, -1, -1, -1 ]
 
   values = [-1, None, None, None, None, None, None ]   
   

@@ -88,9 +88,9 @@ def new_module_occupancy(rootfile, occmin=0.99) :
 
   # Provide unique graph names, starting with 'new_module_'. The first must be the status code from this function. Do not call it new_module_status - call it something else ending with _status, eg new_module_functionname_status.
 
-  names = ['new_module_occ_status','new_module_occ_percent']            
-  titles = ['New_Module occupancy status','New_Module occupancy (%)']   # Graph titles
-  values = [-1, -1]
+  names = ['occ_status','occ_percent']            
+  titles = ['Occupancy status','Occupancy (%)']   # Graph titles
+  values = [-1, None]
 
   if not rootfile :  # called by init function
     return [names, titles, values]
@@ -149,14 +149,14 @@ def new_module_occupancy(rootfile, occmin=0.99) :
 
 
 
-  new_module_occupancy = 100*(3522-Ndead)/3522.0
+  occupancy = 100*(3522-Ndead)/3522.0
 
   status=1
 
-  if new_module_occupancy < occmin:
+  if occupancy < occmin:
     status=0
 
-  values = [status, float('%.3f'%(new_module_occupancy)) ]
+  values = [status, float('%.3f'%(occupancy)) ]
 
   return values       # return array of values, status first
   
@@ -168,17 +168,18 @@ def new_module_e(rootfile) :
 
   print('in new_module_e()...')
 
-# Provide unique graph names, starting with 'new_module_'. The first must be the status code from this function. Do not call it new_module_status - call it something else ending with _status, eg new_module_functionname_status.
+# Provide unique graph names. The first must be the status code from this function. Do not call it new_module_status - call it something else ending with _status, eg new_module_functionname_status.
 
-  names = ['new_module_e_status','new_module_e_mean','new_module_e_width']  
+  names = ['e_status','e_mean','e_width']  
   titles = ['E status','E mean (GeV)','E width (GeV)']      # These will be the graph titles
-  values = [-1,-1,-1]                                       # Default values, keep as -1
+  values = [-1, None, None]                                 # Default values, -1 for status, None for others
 
   if not rootfile :  # called by init function
     return [names, titles, values]
 
-  # The following code finds the histogram, extracts metrics, checks them against the limits provided, assigns a status code and then returns a list of status code followed by the metrics. 
-  # Status codes are 1 (good), 0 (bad) or -1 (don't know/file problem/not enough data/some other error)
+  # The following code finds the histogram, extracts metrics, checks them against the limits provided, assigns a status code and then returns a list of status code followed by the metrics.
+  # Metrics can be None if unknown (histo is missing or fit fails).
+  # Status codes are 1 (good), 0 (bad) or -1 (don't know/file problem/fit problem/not enough data/some other error)
   # If you just want to plot a metric without comparing it to limits, set its status code to 1, so that it doesn't make the overall status look bad.
 
   histoname = 'dedx_p_pos'   # monitoring histogram to check
@@ -201,15 +202,15 @@ def new_module_e(rootfile) :
   if p.GetEntries() < 50 :   # not enough entries
     return values 
 
-  new_module_e_mean = p.GetMean()
-  new_module_e_width = p.GetRMS()
+  e_mean = p.GetMean()
+  e_width = p.GetRMS()
 
   status = 1
-  if new_module_e_mean < emin or new_module_e_mean > emax:
+  if e_mean < emin or e_mean > emax:
       status=0
 
 
-  values = [status, float('%.5f'%(new_module_e_mean)), float('%.5f'%(new_module_e_width)) ]
+  values = [status, float('%.5f'%(e_mean)), float('%.5f'%(e_width)) ]
   
   return values       # return array of values, status first
 

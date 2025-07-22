@@ -1,24 +1,7 @@
-import csv
 from utils import get_histo     # demon's helper functions
-
 from ROOT import gROOT, TF1
 
-#
-# This module contains two control functions, 'init' and 'check', and the custom functions which inspect the histograms (one custom function for each histogram).
-#
 # 'init' and 'check' call the custom functions.  'init' returns graph names and titles. 'check' returns the numbers to be graphed.
-#
-#
-# Change all instances of new_module to your module's name 
-#
-# Adapt the example custom functions (new_module_occupancy and new_module_e) to retrieve the metrics needed from their histogram.
-# Add more custom functions, or remove one if it is not required.
-#
-# Add the custom functions to the list of functions in 'init' and 'check'.
-#
-# In 'check', provide the set of limits for each metric, and adapt the code to use these. 
-#
-
 
 
 def init() : 
@@ -102,7 +85,7 @@ def rho_mass_yield(rootfile) :
 
   names = ['rho_mass_and_yield_status','rho_yield','rho_mass','rho_mass_err','rho_width', 'rho_width_err']
   titles = ['Rho status','Rho yield (counts, post kinfit)','Rho mass (GeV/c^{2})','Rho mass std dev','Rho width (GeV/c^{2})','Rho width std dev']   # Graph titles
-  values = [-1,-1,-1,-1, -1, -1]                                          # Default values, keep as -1
+  values = [-1, None, None, None, None, None]                                          # Default values, keep status as -1
 
   if not rootfile :  # called by init function
     return [names, titles, values]
@@ -145,13 +128,12 @@ def rho_mass_yield(rootfile) :
 #    if counts >= ymin and counts <= ymax and mass >= mmin and mass <= mmax:
     if mass >= mmin and mass <= mmax:
       status=1
-
-    x = 2  
-    for thing in [ mass, err_mass, width, err_width ] :
-      values[x] = float('%.3f'%(thing))
-      x = x+1
       
-  values[0] = status  
+    values[0] = status  
+    values[2] = float('%.4f'%(mass))
+    values[3] = float('%.4f'%(err_mass))    
+    values[4] = float('%.4f'%(width))
+    values[5] = float('%.4f'%(err_width))    
 
   return values       # return array of values, status first
 
@@ -162,9 +144,9 @@ def rho_ps_triggers(rootfile) :
   
   # Provide unique graph names, starting with 'rho_'. The first must be the status code from this function.
 
-  names = ['rho_ps_trig_status','ps_trigger_count','rho_per_trigger']
-  titles = ['Rho PS trig status','PS trigger count','Rho yield per 1000 PS triggers']           # Graph titles
-  values = [-1,-1,-1]                                             # Default values, keep as -1
+  names = ['rho_ps_pair_status','ps_pair_count','rho_per_kpspairs']
+  titles = ['Rho per k PS pair status','PS pair count','Rho yield per 1000 PS pairs']           # Graph titles
+  values = [-1, None, None]                                                        # Default values, keep status as -1
 
   if not rootfile :  # called by init function
     return [names, titles, values]
@@ -180,13 +162,19 @@ def rho_ps_triggers(rootfile) :
   h = get_histo(rootfile, dirname, histoname, min_counts)
 
   if (not h) :
-    return values
+
+    histoname = 'PSPairEnergy'      # this should be present in ver 1 instead of PSC_PS
+    dirname = 'highlevel'
+    h = get_histo(rootfile, dirname, histoname, min_counts)
+
+    if (not h) :
+      return values
 
   # code to check the histogram and find the status values
 
   pscounts = h.Integral()
 
-  if (pscounts < 1):
+  if pscounts < 1:
     return values
 
   histoname = 'InvariantMass'                                      # monitoring histogram to check

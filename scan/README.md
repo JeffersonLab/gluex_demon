@@ -21,7 +21,7 @@ It then loops through the directory of root files, opening each one and passing 
 _check_ calls each of the histogram-inspection functions.  
 
 When the histogram-inspection functions are called by _check_ (with a valid pointer to the opened root file), 
-they extract the required quantities from the histogram, assess them, and return a list of the quantities and associated status values.  The status values should be 1 (good), 0 (bad) or -1 (undefined).  If there is no real good or bad range for a quantity, its status should be set to 1 (good). 
+they extract the required quantities from the histogram, assess them, and return a list of the quantities and associated status values.  The status values should be 1 (good), 0 (bad) or -1 (undefined).  If there is no real good or bad range for a quantity, its status should be set to 1 (good).  If a fit fails, the quantity should have the value None and the corresponding status should be -1 (undefined).
 
 The quantities and their assigned status ratings are used to compile root graphs which will appear on the module's web page.  
 A combined status graph for each  module is concocted from the status ratings of all of that module's quantities.  

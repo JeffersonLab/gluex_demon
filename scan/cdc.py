@@ -151,7 +151,7 @@ def occupancy(rootfile, occmax=9) :
 
 def efficiency(rootfile, e0min=0.97, e5min=0.96, e6min=0.89) :
 
-  titles = ['Efficiency status', 'Hit efficiency at 0.04mm', 'Hit efficiency at 0.04mm error', 'Hit efficiency at 5mm', 'Hit efficiency at 5mm error', 'Hit efficiency at 6.4mm', 'Hit efficiency at 6.4mm error']
+  titles = ['Efficiency status', 'CDC hit efficiency at 0.04mm', 'Hit efficiency at 0.04mm error', 'CDC hit efficiency at 5mm', 'Hit efficiency at 5mm error', 'CDC hit efficiency at 6.4mm', 'Hit efficiency at 6.4mm error']
   names = ['eff_status', 'eff0_hitefficiency_mg', 'eff0_hitefficiency_mg_err', 'eff5_hitefficiency_mg', 'eff5_hitefficiency_mg_err', 'eff6_hitefficiency_mg', 'eff6_hitefficiency_mg_err']
   values = [-1, None, None, None, None, None, None]
 
@@ -191,7 +191,7 @@ def efficiency(rootfile, e0min=0.97, e5min=0.96, e6min=0.89) :
 
 def dedx(rootfile, dedxmin=1.9998, dedxmax=2.0402, resmin=0.25, resmax=0.37) :
 
-  titles = ['dE/dx status', 'dE/dx q+ mean at 1.5 GeV/c (keV/cm)', 'dE/dx q+ resolution at 1.5 GeV/c', 'dE/dx q- mean at 1.5 GeV/c (keV/cm)', 'dE/dx q- resolution at 1.5 GeV/c', 'dE/dx q+ overall mean (keV/cm)', 'dE/dx q+ overall width']
+  titles = ['dE/dx status', 'CDC dE/dx q+ mean at 1.5 GeV/c (keV/cm)', 'CDC dE/dx q+ resolution at 1.5 GeV/c', 'CDC dE/dx q- mean at 1.5 GeV/c (keV/cm)', 'CDC dE/dx q- resolution at 1.5 GeV/c', 'CDC dE/dx q+ overall mean (keV/cm)', 'CDC dE/dx q+ overall width']
   names = ['dedx_status', 'qp_dedx_mean', 'qp_dedx_res', 'qm_dedx_mean', 'qm_dedx_res', 'qp_dedx_allmean', 'qp_dedx_allsig']
   values = [-1, None, None, None, None, None, None]
 
@@ -295,9 +295,9 @@ def dedx(rootfile, dedxmin=1.9998, dedxmax=2.0402, resmin=0.25, resmax=0.37) :
 
 def ttod(rootfile, ttodmeanmax=15.0, ttodsigmamax=150.0) :
 
-  titles = ['TTOD status','TTOD residual mean (#mum)','TTOD residual width (#mum)']
+  titles = ['TTOD status','CDC TTOD residual mean (#mum)','CDC TTOD residual width (#mum)']
   names = ['ttod_status','ttod_mean','ttod_res']
-  values = [-1,-1,-1]
+  values = [-1, None, None]
 
   if not rootfile :  # called by init function
     return [names, titles, values]

@@ -1,5 +1,4 @@
-import csv
-
+from utils import get_histo
 from ROOT import gROOT
 
 #
@@ -44,8 +43,8 @@ def check(run, rootfile) :
   # This calls the custom functions to get an array of metrics,
   # concatenates those into one list, adds the overall status and returns the list
   
-  # Status codes are 1 (good), 0 (bad) or -1 (don't know/file
-  # problem/not enough data/some other error)
+  # Status codes are 1 (good), 0 (bad) or -1 (don't know/file problem/not enough data/some other error)
+  # Metrics can be None if histo is missing or fit is bad
   
   # List of custom functions, called with arguments rootfile followed by the value limits.
   # Each function checks one histogram and returns a list, its status code followed by the values to be graphed.
@@ -58,8 +57,7 @@ def check(run, rootfile) :
   dypos = tof_1_dypos(rootfile)
     
   # This finds the overall status, setting it to the min value of each histogram status
-  
-  
+    
   statuslist = []
   for thing in [dEdxPlane1, dEdxPlane2, dxpos, dypos] :         # Add or remove the list names assigned above.  
     statuslist.append(thing[0])   # status is the first value in the array
@@ -79,15 +77,13 @@ def check(run, rootfile) :
 # tof dEdX Horizontal Plane
 def tof_1_dEdxP1(rootfile) :
   
-  # Example custom function to check another histogram
-  
   # print('in tof_1_dEdxP1()...')
   
-  # Provide unique graph names, starting with 'tof_1_'. The first must be the status code from this function.
+  # Provide unique graph names. The first must be the status code from this function.
 
-  names = ['tof_1_dEdxP1_status','tof_1_dEdxP1','tof_1_dEdxP1_err']  
+  names = ['dEdxP1_status','dEdxP1','dEdxP1_err']  
   titles = ['dEdx Horizontal Plane','dEdx [GeV]','#sigma dEdx [GeV]']      # These will be the graph titles
-  values = [-1,-1,-1]                                       # Default values, keep as -1
+  values = [-1, None, None]                                       # Default values, keep status as -1
   
   if not rootfile :  # called by init function
     return [names, titles, values]
@@ -118,12 +114,12 @@ def tof_1_dEdxP1(rootfile) :
   MPV = f1.GetParameter(1);
   dMPV = f1.GetParError(1);  
   
-  tof_1_dEdxP1 = MPV
-  tof_1_dEdxP1_err = dMPV
+  dEdxP1 = MPV
+  dEdxP1_err = dMPV
   
   status = 1
   
-  values = [status, float('%.5f'%(tof_1_dEdxP1)), float('%.5f'%(tof_1_dEdxP1_err)) ]
+  values = [status, float('%.5f'%(dEdxP1)), float('%.5f'%(dEdxP1_err)) ]
   
   return values       # return array of values, status first
 
@@ -135,9 +131,9 @@ def tof_1_dEdxP2(rootfile) :
   
   #print('in tof_1_dEdxP2()...')
   
-  # Provide unique graph names, starting with 'tof_1_'. The first must be the status code from this function.
+  # Provide unique graph names. The first must be the status code from this function.  
   
-  names = ['tof_1_dEdxP2_status','tof_1_dEdxP2','tof_1_dEdxP2_err']  
+  names = ['dEdxP2_status','dEdxP2','dEdxP2_err']  
   titles = ['dEdx Vertical Plane','dEdx [GeV]','#sigma dEdx [GeV]']      # These will be the graph titles
   values = [-1,-1,-1]                                       # Default values, keep as -1
   
@@ -171,12 +167,12 @@ def tof_1_dEdxP2(rootfile) :
   MPV = f1.GetParameter(1);
   dMPV = f1.GetParError(1);
   
-  tof_1_dEdxP2 = MPV
-  tof_1_dEdxP2_err = dMPV
+  dEdxP2 = MPV
+  dEdxP2_err = dMPV
   
   status = 1
   
-  values = [status, float('%.5f'%(tof_1_dEdxP2)), float('%.5f'%(tof_1_dEdxP2_err)) ]
+  values = [status, float('%.5f'%(dEdxP2)), float('%.5f'%(dEdxP2_err)) ]
   
   return values       # return array of values, status first
 
@@ -184,33 +180,32 @@ def tof_1_dEdxP2(rootfile) :
 # tof dxpos: X-position from delta T Horizontal plane minus x position from tracking
 def tof_1_dxpos(rootfile):                      
   
-  # Example custom function to check another histogram
-  
   #print('in tof_1_dxpos()...')
+
+  # Provide unique graph names. The first must be the status code from this function. 
+
   
-  # Provide unique graph names, starting with 'tof_1_'. The first must be the status code from this function.
-  
-  names = ['tof_1_dxpos_status',
-           'tof_1_dxpos14','tof_1_dxpos14_err',
-           'tof_1_dxpos15','tof_1_dxpos15_err',
-           'tof_1_dxpos16','tof_1_dxpos16_err',
-           'tof_1_dxpos17','tof_1_dxpos17_err',
-           'tof_1_dxpos18','tof_1_dxpos18_err',
-           'tof_1_dxpos19','tof_1_dxpos19_err',
-           'tof_1_dxpos20','tof_1_dxpos20_err',
-           'tof_1_dxpos21','tof_1_dxpos21_err',
-           'tof_1_dxpos22','tof_1_dxpos22_err',
-           'tof_1_dxpos23','tof_1_dxpos23_err',
-           'tof_1_dxpos24','tof_1_dxpos24_err',
-           'tof_1_dxpos25','tof_1_dxpos25_err',
-           'tof_1_dxpos26','tof_1_dxpos26_err',
-           'tof_1_dxpos27','tof_1_dxpos27_err',
-           'tof_1_dxpos28','tof_1_dxpos28_err',
-           'tof_1_dxpos29','tof_1_dxpos29_err',
-           'tof_1_dxpos30','tof_1_dxpos30_err',
-           'tof_1_dxpos31','tof_1_dxpos31_err',
-           'tof_1_dxpos32','tof_1_dxpos32_err',
-           'tof_1_dxpos33','tof_1_dxpos33_err']  
+  names = ['dxpos_status',
+           'dxpos14','dxpos14_err',
+           'dxpos15','dxpos15_err',
+           'dxpos16','dxpos16_err',
+           'dxpos17','dxpos17_err',
+           'dxpos18','dxpos18_err',
+           'dxpos19','dxpos19_err',
+           'dxpos20','dxpos20_err',
+           'dxpos21','dxpos21_err',
+           'dxpos22','dxpos22_err',
+           'dxpos23','dxpos23_err',
+           'dxpos24','dxpos24_err',
+           'dxpos25','dxpos25_err',
+           'dxpos26','dxpos26_err',
+           'dxpos27','dxpos27_err',
+           'dxpos28','dxpos28_err',
+           'dxpos29','dxpos29_err',
+           'dxpos30','dxpos30_err',
+           'dxpos31','dxpos31_err',
+           'dxpos32','dxpos32_err',
+           'dxpos33','dxpos33_err']  
   titles = ['dxpos',
             '#Deltax Paddle 14','#sigma #DeltaX Paddle 14',
             '#Deltax Paddle 15','#sigma #DeltaX Paddle 15',
@@ -233,26 +228,26 @@ def tof_1_dxpos(rootfile):
             '#Deltax Paddle 32','#sigma #DeltaX Paddle 32',
             '#Deltax Paddle 33','#sigma #DeltaX Paddle 33']      # These will be the graph titles
   values = [-1,
-            -1,-1,
-            -1,-1,
-            -1,-1,
-            -1,-1,
-            -1,-1,
-            -1,-1,
-            -1,-1,
-            -1,-1,
-            -1,-1,
-            -1,-1,
-            -1,-1,
-            -1,-1,
-            -1,-1,
-            -1,-1,
-            -1,-1,
-            -1,-1,
-            -1,-1,
-            -1,-1,
-            -1,-1,
-            -1,-1]                                       # Default values, keep as -1
+            None, None,
+            None, None,
+            None, None,
+            None, None,
+            None, None,
+            None, None,
+            None, None,
+            None, None,
+            None, None,
+            None, None,
+            None, None,
+            None, None,
+            None, None,
+            None, None,
+            None, None,
+            None, None,
+            None, None,
+            None, None,
+            None, None,
+            None, None]                                       # Default values, keep status as -1
 
   if not rootfile :  # called by init function
     return [names, titles, values]
@@ -317,33 +312,31 @@ def tof_1_dxpos(rootfile):
 # tof dxpos: Y-position from delta T Vertical plane minus x position from tracking
 def tof_1_dypos(rootfile):                      
   
-  # Example custom function to check another histogram
-  
   #print('in tof_1_dypos()...')
   
-  # Provide unique graph names, starting with 'tof_1_'. The first must be the status code from this function.
+  # Provide unique graph names. The first must be the status code from this function.
   
-  names = ['tof_1_dypos_status',
-           'tof_1_dypos14','tof_1_dypos14_err',
-           'tof_1_dypos15','tof_1_dypos15_err',
-           'tof_1_dypos16','tof_1_dypos16_err',
-           'tof_1_dypos17','tof_1_dypos17_err',
-           'tof_1_dypos18','tof_1_dypos18_err',
-           'tof_1_dypos19','tof_1_dypos19_err',
-           'tof_1_dypos20','tof_1_dypos20_err',
-           'tof_1_dypos21','tof_1_dypos21_err',
-           'tof_1_dypos22','tof_1_dypos22_err',
-           'tof_1_dypos23','tof_1_dypos23_err',
-           'tof_1_dypos24','tof_1_dypos24_err',
-           'tof_1_dypos25','tof_1_dypos25_err',
-           'tof_1_dypos26','tof_1_dypos26_err',
-           'tof_1_dypos27','tof_1_dypos27_err',
-           'tof_1_dypos28','tof_1_dypos28_err',
-           'tof_1_dypos29','tof_1_dypos29_err',
-           'tof_1_dypos30','tof_1_dypos30_err',
-           'tof_1_dypos31','tof_1_dypos31_err',
-           'tof_1_dypos32','tof_1_dypos32_err',
-           'tof_1_dypos33','tof_1_dypos33_err']  
+  names = ['dypos_status',
+           'dypos14','dypos14_err',
+           'dypos15','dypos15_err',
+           'dypos16','dypos16_err',
+           'dypos17','dypos17_err',
+           'dypos18','dypos18_err',
+           'dypos19','dypos19_err',
+           'dypos20','dypos20_err',
+           'dypos21','dypos21_err',
+           'dypos22','dypos22_err',
+           'dypos23','dypos23_err',
+           'dypos24','dypos24_err',
+           'dypos25','dypos25_err',
+           'dypos26','dypos26_err',
+           'dypos27','dypos27_err',
+           'dypos28','dypos28_err',
+           'dypos29','dypos29_err',
+           'dypos30','dypos30_err',
+           'dypos31','dypos31_err',
+           'dypos32','dypos32_err',
+           'dypos33','dypos33_err']  
   titles = ['dypos',
             '#Deltay Paddle 14','#sigma #DeltaY Paddle 14',
             '#Deltay Paddle 15','#sigma #DeltaY Paddle 15',
@@ -366,26 +359,26 @@ def tof_1_dypos(rootfile):
             '#Deltay Paddle 32','#sigma #DeltaY Paddle 32',
             '#Deltay Paddle 33','#sigma #DeltaY Paddle 33']      # These will be the graph titles
   values = [-1,
-            -1,-1,
-            -1,-1,
-            -1,-1,
-            -1,-1,
-            -1,-1,
-            -1,-1,
-            -1,-1,
-            -1,-1,
-            -1,-1,
-            -1,-1,
-            -1,-1,
-            -1,-1,
-            -1,-1,
-            -1,-1,
-            -1,-1,
-            -1,-1,
-            -1,-1,
-            -1,-1,
-            -1,-1,
-            -1,-1]                                       # Default values, keep as -1
+            None, None,
+            None, None,
+            None, None,
+            None, None,
+            None, None,
+            None, None,
+            None, None,
+            None, None,
+            None, None,
+            None, None,
+            None, None,
+            None, None,
+            None, None,
+            None, None,
+            None, None,
+            None, None,
+            None, None,
+            None, None,
+            None, None,
+            None, None]                                       # Default values, keep status as -1
 
   if not rootfile :  # called by init function
     return [names, titles, values]
@@ -447,26 +440,3 @@ def tof_1_dypos(rootfile):
   return values       # return array of values, status first
 
 
-
-def get_histo(rootfile, dirname, histoname, min_counts) :
-
-  test = rootfile.GetDirectory(dirname) 
-
-  # file pointer contains tobj if dir exists, set false if not
-
-  if (not test):
-    #print('Could not find ' + dirname)
-    return False
-
-  rootfile.cd(dirname)
-
-  h = gROOT.FindObject(histoname)
-
-  if (not h) :
-    #print('Could not find ' + histoname)
-    return False
-
-  if h.GetEntries() < min_counts:
-    return False
-
-  return h

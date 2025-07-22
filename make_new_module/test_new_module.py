@@ -28,8 +28,8 @@ gROOT.SetBatch(True)
 
 import new_module        # import new module 
 
-modules = [new_module]   # list of function names
-run_module = [True]      # call the function if true
+modules = [new_module]   # list of module names
+run_module = [True]      # include the module if true
 
 testing = 1  # stop after <runlimit> files, print diagnostics
 runlimit = 2 # process this number of runs if testing=1

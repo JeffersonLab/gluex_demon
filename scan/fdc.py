@@ -1,5 +1,5 @@
-import csv
 
+from utils import get_histo
 from ROOT import gROOT,TF1
 
 
@@ -11,7 +11,6 @@ def init() :
   names = ['fdc_status']
   values = [-1]
 
-#  occ = fdc_occupancy(False)  # return names, titles, values
   eff = fdc_efficiency(False)
   tdc = fdc_tdc(False)
   dedxpos = fdc_dedxpos(False)
@@ -37,7 +36,8 @@ def check(run, rootfile) :
   # the status checks are at the end of each function
 
   # status codes: 1 (good), 0 (bad) or -1 (some other problem, eg histogram missing or not enough data)
-
+  # metrics can be None for unknown (no histo, bad fit)
+  
   # acceptable value limits, defined here for accessibility
 
   dedxmin = 1.5 # 1.9
@@ -68,8 +68,6 @@ def check(run, rootfile) :
   statuslist = []
 
   things = [ eff, dedxpos, dedxneg, tdc ]
-
-  #things = [ eff ]
   
   for thing in things :
 
@@ -90,9 +88,9 @@ def check(run, rootfile) :
 
 def fdc_dedxpos(rootfile, dedxmin=1.9998, dedxmax=2.0402, dedxresmin=0.25, dedxresmax=0.37) :
 
-  titles = ['q+ dE/dx status','q+ dE/dx mean at 1.5 GeV/c (keV/cm)','q+ dE/dx resolution at 1.5 GeV/c']
-  names = ['fdc_dedxpos_status','fdc_dedxposmean','fdc_dedxposres']
-  values = [-1,-1,-1]
+  titles = ['q+ dE/dx status','FDC q+ dE/dx mean at 1.5 GeV/c (keV/cm)','FDC q+ dE/dx resolution at 1.5 GeV/c']
+  names = ['dedxpos_status','dedxposmean','dedxposres']
+  values = [-1, None, None]
 
   if not rootfile :  # called by init function
     return [names, titles, values]
@@ -139,9 +137,9 @@ def fdc_dedxpos(rootfile, dedxmin=1.9998, dedxmax=2.0402, dedxresmin=0.25, dedxr
 
 def fdc_dedxneg(rootfile, dedxmin=1.9998, dedxmax=2.0402, dedxresmin=0.25, dedxresmax=0.37) :
 
-  titles = ['q- dE/dx status','q- dE/dx mean at 1.5 GeV/c (keV/cm)','q- dE/dx resolution at 1.5 GeV/c']
-  names = ['fdc_dedxneg_status','fdc_dedxnegmean','fdc_dedxnegres']
-  values = [-1,-1,-1]
+  titles = ['q- dE/dx status','FDC q- dE/dx mean at 1.5 GeV/c (keV/cm)','FDC q- dE/dx resolution at 1.5 GeV/c']
+  names = ['dedxneg_status','dedxnegmean','dedxnegres']
+  values = [-1, None, None]
 
   if not rootfile :  # called by init function
     return [names, titles, values]
@@ -186,9 +184,9 @@ def fdc_dedxneg(rootfile, dedxmin=1.9998, dedxmax=2.0402, dedxresmin=0.25, dedxr
 
 def fdc_efficiency(rootfile, e0min=0.97, e2min=0.96, e4min=0.89, e5min=0.85) :
 
-  titles = ['Efficiency status', 'Wire efficiency at 0.04mm', 'Wire efficiency at 0.04mm error', 'Wire efficiency at 2mm', 'Wire efficiency at 2mm error', 'Wire efficiency at 4mm', 'Wire efficiency at 4mm error', 'Wire efficiency at 5mm', 'Wire efficiency at 5mm error']
+  titles = ['FDC efficiency status', 'FDC wire efficiency at 0.04mm', 'FDC wire efficiency at 0.04mm error', 'FDC wire efficiency at 2mm', 'FDC wire efficiency at 2mm error', 'FDC wire efficiency at 4mm', 'FDC wire efficiency at 4mm error', 'FDC wire efficiency at 5mm', 'FDC wire efficiency at 5mm error']
   names = ['eff_status', 'eff0_hitefficiency_mg', 'eff0_hitefficiency_mg_err', 'eff2_hitefficiency_mg', 'eff2_hitefficiency_mg_err', 'eff4_hitefficiency_mg', 'eff4_hitefficiency_mg_err', 'eff5_hitefficiency_mg', 'eff5_hitefficiency_mg_err']
-  values = [-1, -1, -1, -1, -1, -1, -1, -1, -1]
+  values = [-1, None, None, None, None, None, None, None, None]
 
   if not rootfile :  # called by init function
     return [names, titles, values]
@@ -234,8 +232,8 @@ def fdc_efficiency(rootfile, e0min=0.97, e2min=0.96, e4min=0.89, e5min=0.85) :
 def fdc_tdc(rootfile, tdcmin=-2, tdcmax=2) :
 
   titles = ['FDC TDC status','FDC hit wire time peak, max diff from mean (ns)']
-  names = ['fdc_tdc_status','fdc_tdc_max_diff']
-  values = [-1,-1]
+  names = ['fdc_tdc_status','tdc_max_diff']
+  values = [-1, None]
 
   if not rootfile :  # called by init function
     return [names, titles, values]
@@ -282,26 +280,3 @@ def fdc_tdc(rootfile, tdcmin=-2, tdcmax=2) :
   return values
 
 
-
-def get_histo(rootfile, dirname, histoname, min_counts) :
-
-  test = rootfile.GetDirectory(dirname) 
-
-  # file pointer contains tobj if dir exists, set false if not
-
-  if (not test):
-    #print('Could not find ' + dirname)
-    return False
-
-  rootfile.cd(dirname)
-
-  h = gROOT.FindObject(histoname)
-
-  if (not h) :
-    #print('Could not find ' + histoname)
-    return False
-
-  if h.GetEntries() < min_counts:
-    return
-
-  return h

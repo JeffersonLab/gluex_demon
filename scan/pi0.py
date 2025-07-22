@@ -1,6 +1,4 @@
-import csv
 from utils import get_histo     # demon's helper functions
-
 from ROOT import gROOT, TF1
 
 #
@@ -72,18 +70,17 @@ def check(run, rootfile) :
 
 def bcal_inv_mass(rootfile, llim=130, ulim=140) :
 
-  #print('in bcal_inv_mass()...')
-
-  # Provide unique graph names, starting with 'pi0_'. The first must be the status code from this function. Do not call it pi0_status - call it something else ending with _status, eg pi0_functionname_status
+  # Provide unique graph names. The first must be the status code from this function. 
   
   names = ['bcal_2g_mass_status', '300_bcal_mg', '500_bcal_mg', '700_bcal_mg', '900_bcal_mg']
   titles = ['BCAL diphoton mass status', 'BCAL diphoton mass (cluster E > 300 MeV)', 'BCAL diphoton mass (cluster E > 500 MeV)', 'BCAL diphoton mass (cluster E > 700 MeV)', 'BCAL diphoton mass (cluster E > 900 MeV)']   # Graph titles
-  values = [-1, -1, -1, -1, -1]
+  values = [-1, None, None, None, None]
 
   if not rootfile :  # called by init function
     return [names, titles, values]
 
-  # The following code finds the histogram, extracts metrics, checks them against the limits provided, assigns a status code and then returns a list of status code followed by the metrics. 
+  # The following code finds the histogram, extracts metrics, checks them against the limits provided, assigns a status code and then returns a list of status code followed by the metrics.
+  # Unknown metrics (no histo/no fit) are set to None.
   # Status codes are 1 (good), 0 (bad) or -1 (don't know/file problem/not enough data/some other error)
   # If you just want to plot a metric without comparing it to limits, set its status code to 1, so that it doesn't make the overall status look bad.
 
@@ -128,12 +125,15 @@ def bcal_inv_mass(rootfile, llim=130, ulim=140) :
     values[4] = None
     
 
-  status=1  
+  status=1
   for i in range(1,5) :
     if values[i] == None :
-      status = 0
-    elif values[i] < llim or values[i] > ulim :
-      status = 0
+      status = -1
+      
+  for i in range(1,5) :
+    if values[i] != None :
+      if values[i] < llim or values[i] > ulim :
+        status = 0
 
   values[0] = status
 
@@ -149,12 +149,13 @@ def bcal_fcal_inv_mass(rootfile, llim=110, ulim=135) :
 
   names = ['bcal_fcal_2g_mass_status', '300_bcalfcal_mg', '500_bcalfcal_mg', '700_bcalfcal_mg', '900_bcalfcal_mg']
   titles = ['BCAL_FCAL diphoton mass status', 'BCAL_FCAL diphoton mass (cluster E > 300 MeV)', 'BCAL_FCAL diphoton mass (cluster E > 500 MeV)', 'BCAL_FCAL diphoton mass (cluster E > 700 MeV)', 'BCAL_FCAL diphoton mass (cluster E > 900 MeV)']   # Graph titles
-  values = [-1, -1, -1, -1, -1]
+  values = [-1, None, None, None, None]
 
   if not rootfile :  # called by init function
     return [names, titles, values]
 
-  # The following code finds the histogram, extracts metrics, checks them against the limits provided, assigns a status code and then returns a list of status code followed by the metrics. 
+  # The following code finds the histogram, extracts metrics, checks them against the limits provided, assigns a status code and then returns a list of status code followed by the metrics.
+  # Metrics can be None if unknown.
   # Status codes are 1 (good), 0 (bad) or -1 (don't know/file problem/not enough data/some other error)
   # If you just want to plot a metric without comparing it to limits, set its status code to 1, so that it doesn't make the overall status look bad.
 
@@ -202,12 +203,15 @@ def bcal_fcal_inv_mass(rootfile, llim=110, ulim=135) :
     values[4] = None
     
 
-  status=1  
+  status=1
   for i in range(1,5) :
     if values[i] == None :
-      status = 0
-    elif values[i] < llim or values[i] > ulim :
-      status = 0
+      status = -1
+      
+  for i in range(1,5) :
+    if values[i] != None :
+      if values[i] < llim or values[i] > ulim :
+        status = 0
 
   values[0] = status
 
@@ -226,7 +230,7 @@ def fitmasshisto(h) :
   fitfunc.SetParLimits(1,0.06,0.18);
   fitfunc.SetParLimits(2,0.006,0.02);
 
-  fitresult = h.Fit(fitfunc,"RQS");
+  fitresult = h.Fit(fitfunc,"RQS0");
   
   if int(fitresult) == 0 :
     mean = 1000 * fitresult.Parameter(1)
@@ -249,7 +253,7 @@ def bcal_fcal_fitmasshisto(h) :
   fitfunc.SetParLimits(1,0.02,0.3);
   fitfunc.SetParLimits(2,0.001,0.05);
 
-  fitresult = h.Fit(fitfunc,"RQS");
+  fitresult = h.Fit(fitfunc,"RQS0");
   
   if int(fitresult) == 0 :
     mean = 1000 * fitresult.Parameter(1)

@@ -1,24 +1,10 @@
-import csv
 from utils import get_histo     # demon's helper functions
-import time
 from ROOT import gROOT, TF1,TH1I
 
 #
 # This module contains two control functions, 'init' and 'check', and the custom functions which inspect the histograms (one custom function for each histogram).
 #
 # 'init' and 'check' call the custom functions.  'init' returns graph names and titles. 'check' returns the numbers to be graphed.
-#
-#
-# Change all instances of new_module to your module's name 
-#
-# Adapt the example custom functions (new_module_occupancy and new_module_e) to retrieve the metrics needed from their histogram.
-# Add more custom functions, or remove one if it is not required.
-#
-# Add the custom functions to the list of functions in 'init' and 'check'.
-#
-# In 'check', provide the set of limits for each metric, and adapt the code to use these. 
-#
-
 
 
 def init() : 
@@ -89,23 +75,19 @@ def check(run, rootfile) :
 
 def rho_psigma_pse(rootfile) : 
 
-  # Example custom function to check another histogram
-
-  # Acceptable value limits, defined here for accessibility
-  status = 1
-  # none yet
   
-  # Provide unique graph names, starting with 'rho_'. The first must be the status code from this function.
+  # Provide unique graph names. The first must be the status code from this function.
 
-  names = ['photons_psigma_pse_status', 'photons_ps_e', 'photons_ps_e_err', 'photons_rho_psigma',  'photons_rho_psigma_err', 'photons_rho_psigma_0', 'photons_rho_psigma_0_err', 'photons_rho_psigma_90', 'photons_rho_psigma_90_err', 'photons_rho_psigma_135', 'photons_rho_psigma_135_err', 'photons_rho_psigma_45', 'photons_rho_psigma_45_err', 'photons_rho_phi0_diamond', 'photons_rho_phi0_diamond_err', 'photons_rho_phi0_amo', 'photons_rho_phi0_amo_err' ]
+  names = ['photons_psigma_pse_status', 'ps_e', 'ps_e_err', 'rho_psigma',  'rho_psigma_err', 'rho_psigma_0', 'rho_psigma_0_err', 'rho_psigma_90', 'rho_psigma_90_err', 'rho_psigma_135', 'rho_psigma_135_err', 'rho_psigma_45', 'rho_psigma_45_err', 'rho_phi0_diamond', 'rho_phi0_diamond_err', 'rho_phi0_amo', 'rho_phi0_amo_err' ]
   titles = ['PS E and Rho P#Sigma status', 'Photon beam energy (diamond edge, amo peak) from PS pair E (GeV)', 'PS E err','Abs(P#Sigma) from #rho(770) production', 'Abs(P#Sigma)_err', 'P#Sigma (0)', 'P#Sigma(0)err', 'P#Sigma (90)', 'P#Sigma(90)err', 'P#Sigma (135)', 'P#Sigma(135)err', 'P#Sigma (45)', 'P#Sigma(45)err','#phi_{0} diamond', '#phi_{0} diamond err', '#phi_{0} amo', '#phi_{0} amo err' ]   # Graph titles
-  values = [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1]                      # Default values, keep as -1
+  values = [-1, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None]                      # Default values, keep as -1
 
   if not rootfile :  # called by init function
     return [names, titles, values]
 
   # The following code finds the histogram, extracts metrics, checks them against the limits provided, assigns a status code and then returns a list of status code followed by the metrics. 
   # Status codes are 1 (good), 0 (bad) or -1 (don't know/file problem/not enough data/some other error)
+  # Metrics can be None if unknown (no histo or bad fit)
   # If you just want to plot a metric without comparing it to limits, set its status code to 1, so that it doesn't make the overall status look bad.
 
   histoname = 'PiPlusPsi_t'                       # monitoring histogram to check
@@ -141,18 +123,21 @@ def rho_psigma_pse(rootfile) :
   if counts_before > halfmaxcounts and counts_after > halfmaxcounts :
     amo = True
 
+  status = 1
+
   if amo :     # for amo, just take fitted peak,  # for diamond, find steepest part of edge
 
     g = TF1('g','gaus',psmaxe-0.5, psmaxe+0.5) 
 
     fitstat = hps.Fit('g','RQ')
   
-    if int(fitstat) != 0 :
-      return values
-
-    epeak = g.GetParameter(1)
-    errors = g.GetParErrors()    
-    epeakerr = errors[1]     
+    if int(fitstat) == 0 :
+      epeak = g.GetParameter(1)
+      errors = g.GetParErrors()    
+      epeakerr = errors[1]
+    else :
+      status = -1
+    
 
   else : 
   
@@ -171,18 +156,17 @@ def rho_psigma_pse(rootfile) :
     f = TF1('f','gaus')
     fitstat=hdiff.Fit(f,'Q')
 
-    if int(fitstat) != 0 :
-      return values
+    if int(fitstat) == 0 :
+      binwidth = hps.GetBinWidth(1)    
+      epeak = psmaxe + (f.GetParameter(1)- 10)*binwidth
+      errors = f.GetParErrors()
+      epeakerr = errors[1]*binwidth
+    else :
+      status = -1
 
-    binwidth = hps.GetBinWidth(1)    
-    epeak = psmaxe + (f.GetParameter(1)- 10)*binwidth
-    errors = f.GetParErrors()
-    epeakerr = errors[1]*binwidth
-
-      
-  values[0] = 0    # status, update later on
-  values[1] = float('%.2f'%(epeak))
-  values[2] = float('%.2f'%(epeakerr))
+  if status == 1:       
+    values[1] = float('%.4f'%(epeak))
+    values[2] = float('%.4f'%(epeakerr))
 
 
   # --- p2pi hists psi histo ---
@@ -196,6 +180,7 @@ def rho_psigma_pse(rootfile) :
   fitstat = hp.Fit('f','Q')
 
   if int(fitstat) != 0 :
+    values[0] = -1
     return values
   
   PSigma = f.GetParameter(1)
@@ -252,14 +237,14 @@ def rho_psigma_pse(rootfile) :
       
   PSigma = abs(PSigma)    # report abs value for overall graph to make it simpler
 
-  values[0] = 1    # status
+  values[0] = status
   index = 3
 
   for x in [PSigma, PSigmaErr, PSigma0, PSigma0Err, PSigma90, PSigma90Err, PSigma135, PSigma135Err, PSigma45, PSigma45Err, Phi0D, Phi0ErrD, Phi0Amo, Phi0ErrAmo] :
     if x == None :
       values[index] = x
     else : 
-      values[index] = float('%.2f'%(x))
+      values[index] = float('%.3f'%(x))
     index = index + 1
 
       

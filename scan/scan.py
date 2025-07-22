@@ -109,15 +109,20 @@ import photons
 import photons_cpp
 import rho
 import omega
-
+import pi0
+import tracking
 import triggers
 
-modules_xdef = [triggers]
-modules_def = [triggers, photons, timing, rf, cdc, fdc, sc, tof_1, rho, omega]       # default list of modules
+modules_def = [photons, rho, omega, pi0, triggers, tracking, timing, rf, cdc, fdc, sc, tof_1]
+modules_xdef = [triggers, photons, timing, rf, cdc, fdc, sc, tof_1, rho, omega]       # default list of modules
 modules_cpp = [triggers, photons_cpp, timing, rf, ps_e, cdc_cpp, fdc, tof_1, fmwpc, ctof]   # modules for CPP
-    
-testing = 0  # stop after <runlimit> files, print diagnostics
-runlimit = 10 # process this number of runs if testing=1
+
+modules_xxdef = [triggers, photons, timing, rf, cdc, fdc, sc, tof_1, rho, omega]       # default list of modules
+modules_xdef = [rho, omega, pi0, triggers, photons, timing, rf, tracking, cdc, fdc, sc, tof_1]
+
+
+testing = 1  # stop after <runlimit> files, print diagnostics
+runlimit = 5 # process this number of runs if testing=1
 checkstatus = 0  # process runs with RCDB status>0
 
 RunPeriod=""
@@ -394,8 +399,8 @@ for filename in histofilelist:
             thisrun_status.append(newdata[0])     # append the 1D list adding a row
 
             if testing: 
-                print('\nData from module %s:' % (active_modules[imod].__name__) )
-                print('%s'%(newdata))
+                print('Data from module %s:' % (active_modules[imod].__name__) )
+                print('%s\n'%(newdata))
 
 
 

@@ -1,5 +1,5 @@
-import csv
 
+from utils import get_histo
 from ROOT import gROOT, TF1
 #ROOT.gErrorIgnoreLevel = ROOT.kError
 
@@ -100,9 +100,9 @@ def check(run, rootfile) :
 
 def rf_tagh_tof(rootfile, tmax=0.1, sigmax=0.1) :
 
-  names = ['rf_tagh_tof_status','rf_tagh_tof','rf_tagh_tof_err']
+  names = ['rf_tagh_tof_status','tagh_tof','tagh_tof_err']
   titles = ['TDC time status', 'DeltaT (RF_TAGH - RF_TOF)', '#sigma DeltaT (RF_TAGH - RF_TOF)' ]
-  values = [-1, -1, -1]   # Default values, keep as -1
+  values = [-1, None, None]   # Default values, keep as -1
 
   if not rootfile :  # called by init function
     return [names, titles, values]
@@ -110,7 +110,7 @@ def rf_tagh_tof(rootfile, tmax=0.1, sigmax=0.1) :
   histoname = 'RFDeltaT_TAGH_TOF'   # monitoring histogram to check
   dirname = '/RF/DeltaT_RF_OtherRFs'      # directory containing the histogram
 
-  h = get_histo(rootfile, dirname, histoname)
+  h = get_histo(rootfile, dirname, histoname, min_counts=100)
 
   if not h:
     return values
@@ -126,9 +126,9 @@ def rf_tagh_tof(rootfile, tmax=0.1, sigmax=0.1) :
 
 def rf_psc_tof(rootfile, tmax=0.1, sigmax=0.1) :
 
-  names = ['rf_psc_tof_status','rf_psc_tof','rf_psc_tof_err']
+  names = ['rf_psc_tof_status','psc_tof','psc_tof_err']
   titles = ['TDC time status', 'DeltaT (RF_PSC - RF_TOF)', '#sigma DeltaT (RF_PSC - RF_TOF)' ]
-  values = [-1, -1, -1]   # Default values, keep as -1
+  values = [-1, None, None]   # Default values, keep as -1
 
   if not rootfile :  # called by init function
     return [names, titles, values]
@@ -136,7 +136,7 @@ def rf_psc_tof(rootfile, tmax=0.1, sigmax=0.1) :
   histoname = 'RFDeltaT_PSC_TOF'   # monitoring histogram to check
   dirname = '/RF/DeltaT_RF_OtherRFs'      # directory containing the histogram
 
-  h = get_histo(rootfile, dirname, histoname)
+  h = get_histo(rootfile, dirname, histoname, min_counts=100)
 
   if not h:
     return values
@@ -153,9 +153,9 @@ def rf_psc_tof(rootfile, tmax=0.1, sigmax=0.1) :
 
 def rf_fdc_tof(rootfile, tmax=0.1, sigmax=0.1) :
 
-  names = ['rf_fdc_tof_status','rf_fdc_tof','rf_fdc_tof_err']
+  names = ['rf_fdc_tof_status','fdc_tof','fdc_tof_err']
   titles = ['TDC time status', 'DeltaT (RF_FDC - RF_TOF)', '#sigma DeltaT (RF_FDC - RF_TOF)' ]
-  values = [-1, -1, -1]   # Default values, keep as -1
+  values = [-1, None, None]   # Default values, keep as -1
 
   if not rootfile :  # called by init function
     return [names, titles, values]
@@ -163,12 +163,9 @@ def rf_fdc_tof(rootfile, tmax=0.1, sigmax=0.1) :
   histoname = 'RFDeltaT_FDC_TOF'   # monitoring histogram to check
   dirname = '/RF/DeltaT_RF_OtherRFs'      # directory containing the histogram
 
-  h = get_histo(rootfile, dirname, histoname)
+  h = get_histo(rootfile, dirname, histoname, min_counts=100)
 
   if not h:
-    return values
-
-  if h.GetEntries() < 100 :
     return values
 
   values = fit_histo(h, tmax, sigmax)
@@ -181,9 +178,9 @@ def rf_fdc_tof(rootfile, tmax=0.1, sigmax=0.1) :
 
 def rf_fdc_tagh(rootfile, tmax=0.1, sigmax=0.1) :
 
-  names = ['rf_fdc_tagh_status','rf_fdc_tagh','rf_fdc_tagh_err']
+  names = ['rf_fdc_tagh_status','fdc_tagh','fdc_tagh_err']
   titles = ['TDC time status', 'DeltaT (RF_FDC - RF_TAGH)', '#sigma DeltaT (RF_FDC - RF_TAGH)' ]
-  values = [-1, -1, -1]   # Default values, keep as -1
+  values = [-1, None, None]   # Default values, keep as -1
 
   if not rootfile :  # called by init function
     return [names, titles, values]
@@ -191,12 +188,9 @@ def rf_fdc_tagh(rootfile, tmax=0.1, sigmax=0.1) :
   histoname = 'RFDeltaT_FDC_TAGH'   # monitoring histogram to check
   dirname = '/RF/DeltaT_RF_OtherRFs'      # directory containing the histogram
 
-  h = get_histo(rootfile, dirname, histoname)
+  h = get_histo(rootfile, dirname, histoname, min_counts=100)
 
   if not h:
-    return values
-
-  if h.GetEntries() < 100 :
     return values
 
   values = fit_histo(h, tmax, sigmax)
@@ -208,9 +202,9 @@ def rf_fdc_tagh(rootfile, tmax=0.1, sigmax=0.1) :
 
 def rf_fdc_psc(rootfile, tmax=0.1, sigmax=0.1) :
 
-  names = ['rf_fdc_psc_status','rf_fdc_psc','rf_fdc_psc_err']
+  names = ['rf_fdc_psc_status','fdc_psc','fdc_psc_err']
   titles = ['TDC time status', 'DeltaT (RF_FDC - RF_PSC)', '#sigma DeltaT (RF_FDC - RF_PSC)' ]
-  values = [-1, -1, -1]   # Default values, keep as -1
+  values = [-1, None, None]   # Default values, keep as -1
 
   if not rootfile :  # called by init function
     return [names, titles, values]
@@ -218,12 +212,9 @@ def rf_fdc_psc(rootfile, tmax=0.1, sigmax=0.1) :
   histoname = 'RFDeltaT_FDC_PSC'   # monitoring histogram to check
   dirname = '/RF/DeltaT_RF_OtherRFs'      # directory containing the histogram
 
-  h = get_histo(rootfile, dirname, histoname)
+  h = get_histo(rootfile, dirname, histoname, min_counts=100)
 
   if (not h) :
-    return values
-
-  if h.GetEntries() < 100 :
     return values
 
   values = fit_histo(h, tmax, sigmax)
@@ -234,9 +225,9 @@ def rf_fdc_psc(rootfile, tmax=0.1, sigmax=0.1) :
 
 def rf_psc_tagh(rootfile, tmax=0.1, sigmax=0.1) :
 
-  names = ['rf_psc_tagh_status','rf_psc_tagh','rf_psc_tagh_err']
+  names = ['rf_psc_tagh_status','psc_tagh','psc_tagh_err']
   titles = ['TDC time status', 'DeltaT (RF_PSC - RF_TAGH)', '#sigma DeltaT (RF_PSC - RF_TAGH)' ]
-  values = [-1, -1, -1]   # Default values, keep as -1
+  values = [-1, None, None]   # Default values, keep as -1
 
   if not rootfile :  # called by init function
     return [names, titles, values]
@@ -244,12 +235,9 @@ def rf_psc_tagh(rootfile, tmax=0.1, sigmax=0.1) :
   histoname = 'RFDeltaT_PSC_TAGH'   # monitoring histogram to check
   dirname = '/RF/DeltaT_RF_OtherRFs'      # directory containing the histogram
 
-  h = get_histo(rootfile, dirname, histoname)
+  h = get_histo(rootfile, dirname, histoname, min_counts=100)
 
   if (not h) :
-    return values
-
-  if h.GetEntries() < 100 :
     return values
 
   values = fit_histo(h, tmax, sigmax)
@@ -260,7 +248,7 @@ def rf_psc_tagh(rootfile, tmax=0.1, sigmax=0.1) :
 
 def fit_histo(h, tmax, sigmax) :
 
-  values = [ -1, -1, -1 ]
+  values = [ -1, None, None ]
   status = 0
 
   g = TF1('g','gaus',-2, 2)
@@ -280,25 +268,3 @@ def fit_histo(h, tmax, sigmax) :
 
 
   return values  
-
-
-
-def get_histo(rootfile, dirname, histoname) :
-
-  test = rootfile.GetDirectory(dirname) 
-
-  # file pointer contains tobj if dir exists, set false if not
-
-  if (not test):
-    #print('Could not find ' + dirname)
-    return False
-
-  rootfile.cd(dirname)
-
-  h = gROOT.FindObject(histoname)
-
-  if (not h) :
-    #print('Could not find ' + histoname)
-    return False
-
-  return h
