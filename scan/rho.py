@@ -113,19 +113,20 @@ def rho_mass_yield(rootfile) :
   frho.SetParameter(0,10)
   frho.SetParameter(1,0.770)
   frho.SetParameter(2,0.1)
+  frho.SetParLimits(2,0.05,0.7)
 
-  fitstat = h.Fit("frho", "RQ0")
+  fitstat = h.Fit("frho", "RQ0S")
 
   status = 0
   
   if int(fitstat) == 0:
-    mass = frho.GetParameter(1)
-    width = frho.GetParameter(2)    # FWHM
-    errors = frho.GetParErrors()
-    err_mass = errors[1]
-    err_width = errors[2]  
-  
-#    if counts >= ymin and counts <= ymax and mass >= mmin and mass <= mmax:
+
+    mass = fitstat.Parameter(1)
+    width = fitstat.Parameter(2)
+    err_mass = fitstat.GetErrors()[1]    
+    err_width = fitstat.GetErrors()[2]
+
+    #    if counts >= ymin and counts <= ymax and mass >= mmin and mass <= mmax:
     if mass >= mmin and mass <= mmax:
       status=1
       

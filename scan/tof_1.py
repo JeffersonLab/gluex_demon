@@ -105,7 +105,7 @@ def tof_1_dEdxP1(rootfile) :
   # code to check the histogram and find the status values
   
   MAX = h.GetBinCenter(h.GetMaximumBin())
-  r = h.Fit("landau","Q","R", MAX*0.9, MAX*2.2)
+  r = h.Fit("landau","Q0","R", MAX*0.9, MAX*2.2)
 
   if int(r) != 0 :  # bad fit
     return values
@@ -158,7 +158,7 @@ def tof_1_dEdxP2(rootfile) :
 
   MAX = h.GetBinCenter(h.GetMaximumBin())
 
-  r = h.Fit("landau","Q","R", MAX*0.9, MAX*2.2)
+  r = h.Fit("landau","Q0","R", MAX*0.9, MAX*2.2)
 
   if int(r) != 0 :  # bad fit
     return values
@@ -285,10 +285,10 @@ def tof_1_dxpos(rootfile):
 
         pos = h1d.GetBinCenter(h1d.GetMaximumBin())
     
-        h1d.Fit("gaus", "Q","R", pos-4., pos+4.)
+        h1d.Fit("gaus", "Q0","R", pos-4., pos+4.)
         f1 = h1d.GetFunction("gaus")
         pos = f1.GetParameter(1)
-        r = h1d.Fit("gaus", "Q","R", pos-4., pos+4.)
+        r = h1d.Fit("gaus", "Q0","R", pos-4., pos+4.)
         f1 = h1d.GetFunction("gaus")
 
         if int(r) == 0:
@@ -416,10 +416,10 @@ def tof_1_dypos(rootfile):
     
         pos = h1d.GetBinCenter(h1d.GetMaximumBin())
         
-        h1d.Fit("gaus", "Q","R", pos-4., pos+4.)
+        h1d.Fit("gaus", "Q0","R", pos-4., pos+4.)
         f1 = h1d.GetFunction("gaus")
         pos = f1.GetParameter(1)
-        r = h1d.Fit("gaus", "Q","R", pos-4., pos+4.)
+        r = h1d.Fit("gaus", "Q0","R", pos-4., pos+4.)
         f1 = h1d.GetFunction("gaus");
   
         if int(r) == 0:

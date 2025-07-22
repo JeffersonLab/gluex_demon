@@ -78,9 +78,9 @@ def rho_psigma_pse(rootfile) :
   
   # Provide unique graph names. The first must be the status code from this function.
 
-  names = ['photons_psigma_pse_status', 'ps_e', 'ps_e_err', 'rho_psigma',  'rho_psigma_err', 'rho_psigma_0', 'rho_psigma_0_err', 'rho_psigma_90', 'rho_psigma_90_err', 'rho_psigma_135', 'rho_psigma_135_err', 'rho_psigma_45', 'rho_psigma_45_err', 'rho_phi0_diamond', 'rho_phi0_diamond_err', 'rho_phi0_amo', 'rho_phi0_amo_err' ]
-  titles = ['PS E and Rho P#Sigma status', 'Photon beam energy (diamond edge, amo peak) from PS pair E (GeV)', 'PS E err','Abs(P#Sigma) from #rho(770) production', 'Abs(P#Sigma)_err', 'P#Sigma (0)', 'P#Sigma(0)err', 'P#Sigma (90)', 'P#Sigma(90)err', 'P#Sigma (135)', 'P#Sigma(135)err', 'P#Sigma (45)', 'P#Sigma(45)err','#phi_{0} diamond', '#phi_{0} diamond err', '#phi_{0} amo', '#phi_{0} amo err' ]   # Graph titles
-  values = [-1, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None]                      # Default values, keep as -1
+  names = ['photons_psigma_pse_status', 'diamond_PSe_mg', 'diamond_PSe_mg_err', 'amo_PSe_mg', 'amo_PSe_mg_err', 'rho_psigma',  'rho_psigma_err', 'rho_psigma_0', 'rho_psigma_0_err', 'rho_psigma_90', 'rho_psigma_90_err', 'rho_psigma_135', 'rho_psigma_135_err', 'rho_psigma_45', 'rho_psigma_45_err', 'rho_phi0_diamond', 'rho_phi0_diamond_err', 'rho_phi0_amo', 'rho_phi0_amo_err' ]
+  titles = ['PS E and Rho P#Sigma status', 'Photon beam energy from PS pair E (GeV)', 'PS E err (diamond)', 'AMO: Photon beam energy peak from PS pair E (GeV)', 'PS E err (amo)', 'Abs(P#Sigma) from #rho(770) production', 'Abs(P#Sigma)_err', 'P#Sigma (0)', 'P#Sigma(0)err', 'P#Sigma (90)', 'P#Sigma(90)err', 'P#Sigma (135)', 'P#Sigma(135)err', 'P#Sigma (45)', 'P#Sigma(45)err','#phi_{0} diamond', '#phi_{0} diamond err', '#phi_{0} amo', '#phi_{0} amo err' ]   # Graph titles
+  values = [-1, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None]                      # Default values, keep as -1
 
   if not rootfile :  # called by init function
     return [names, titles, values]
@@ -129,12 +129,16 @@ def rho_psigma_pse(rootfile) :
 
     g = TF1('g','gaus',psmaxe-0.5, psmaxe+0.5) 
 
-    fitstat = hps.Fit('g','RQ')
+    fitstat = hps.Fit('g','RQ0')
   
     if int(fitstat) == 0 :
       epeak = g.GetParameter(1)
       errors = g.GetParErrors()    
       epeakerr = errors[1]
+
+      values[3] = float('%.4f'%(epeak))
+      values[4] = float('%.4f'%(epeakerr))
+      
     else :
       status = -1
     
@@ -154,19 +158,19 @@ def rho_psigma_pse(rootfile) :
     # bin 1 : filled with (maxbin-9) - (maxbin-10) : maxbin - 9.5 : has bin center 0.5  
 
     f = TF1('f','gaus')
-    fitstat=hdiff.Fit(f,'Q')
+    fitstat=hdiff.Fit(f,'Q0')
 
     if int(fitstat) == 0 :
       binwidth = hps.GetBinWidth(1)    
       epeak = psmaxe + (f.GetParameter(1)- 10)*binwidth
       errors = f.GetParErrors()
       epeakerr = errors[1]*binwidth
+
+      values[1] = float('%.4f'%(epeak))
+      values[2] = float('%.4f'%(epeakerr))
+      
     else :
       status = -1
-
-  if status == 1:       
-    values[1] = float('%.4f'%(epeak))
-    values[2] = float('%.4f'%(epeakerr))
 
 
   # --- p2pi hists psi histo ---
@@ -177,7 +181,7 @@ def rho_psigma_pse(rootfile) :
   #  #psi_{#pi^{+}}");
 
   f = TF1('f','[0]*(1.0 + [1]*cos(2*(x + [2])/180.*3.14159))',-180.,180.)
-  fitstat = hp.Fit('f','Q')
+  fitstat = hp.Fit('f','Q0')
 
   if int(fitstat) != 0 :
     values[0] = -1
@@ -238,7 +242,7 @@ def rho_psigma_pse(rootfile) :
   PSigma = abs(PSigma)    # report abs value for overall graph to make it simpler
 
   values[0] = status
-  index = 3
+  index = 5
 
   for x in [PSigma, PSigmaErr, PSigma0, PSigma0Err, PSigma90, PSigma90Err, PSigma135, PSigma135Err, PSigma45, PSigma45Err, Phi0D, Phi0ErrD, Phi0Amo, Phi0ErrAmo] :
     if x == None :
