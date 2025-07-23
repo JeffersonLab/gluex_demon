@@ -99,7 +99,7 @@ def rho_psigma_pse(rootfile) :
   histoname = 'PS_E'   # monitoring histogram to check
   dirname = '/PS_flux/PSC_PS'      # directory containing the histogram
 
-  min_counts = 1000
+  min_counts = 20000
   hps = get_histo(rootfile, dirname, histoname, min_counts)
 
   if (not hps) :
@@ -112,28 +112,16 @@ def rho_psigma_pse(rootfile) :
   if (not (hpsit and hps)) :
     return values
 
-  # find out if this has a sharp peak (diamond) or broad peak (amo)
-  # diamond coh peak is about 1 GeV wide
-  
-  # See if counts exceed half max at 1 GeV either side of maximum, yes = amo.
-  
-  psmaxbin = hps.GetMaximumBin()
-  psmaxe = hps.GetBinCenter(psmaxbin)
 
-  halfmaxcounts = 0.5*hps.GetMaximum()
-  
-  counts_before = hps.GetBinContent(hps.FindBin(psmaxe-1.0))
-  counts_after = hps.GetBinContent(hps.FindBin(psmaxe+1.0))   
-
-  amo = False
-
-  if counts_before > halfmaxcounts and counts_after > halfmaxcounts :
-    amo = True
+  amo = test_for_amo(hps)
 
   status = 1
 
   if amo :     # for amo, just take fitted peak,  # for diamond, find steepest part of edge
 
+    psmaxbin = hps.GetMaximumBin()
+    psmaxe = hps.GetBinCenter(psmaxbin)
+    
     g = TF1('g','gaus',psmaxe-0.5, psmaxe+0.5) 
 
     fitstat = hps.Fit('g','RQ0')
@@ -151,33 +139,13 @@ def rho_psigma_pse(rootfile) :
     
 
   else : 
-  
-    hdiff = TH1I('hdiff','hdiff',20,0,20)      # find negative values in derivative, fit to find where slope is max  
 
-    nprev = hps.GetBinContent(psmaxbin-10)
-    for i in range(1,20):
-      nnext = hps.GetBinContent(psmaxbin-10 + i)
-      diff = nnext - nprev
-      if (diff < 0) :
-        hdiff.SetBinContent(i,-1*diff)
-      nprev = nnext
-
-    # bin 1 : filled with (maxbin-9) - (maxbin-10) : maxbin - 9.5 : has bin center 0.5  
-
-    f = TF1('f','gaus')
-    fitstat=hdiff.Fit(f,'Q0')
-
-    if int(fitstat) == 0 :
-      binwidth = hps.GetBinWidth(1)    
-      epeak = psmaxe + (f.GetParameter(1)- 10)*binwidth
-      errors = f.GetParErrors()
-      epeakerr = errors[1]*binwidth
-
-      values[1] = float('%.4f'%(epeak))
-      values[2] = float('%.4f'%(epeakerr))
-      
-    else :
+    values[1], values[2] = find_edge(hps)
+    
+    if values[1] == None :
       status = -1
+
+
 
 
   # --- p2pi hists psi histo ---
@@ -262,6 +230,88 @@ def rho_psigma_pse(rootfile) :
   return values       # return array of values, status first
 
 
+
+
+def test_for_amo(hps) :
+  # find out if this has a sharp peak (diamond) or broad peak (amo)
+  # diamond coh peak is about 1 GeV wide
+  
+  # See if counts exceed half max at 1 GeV below maximum, 0.5 GeV above maximum, yes = amo.
+  
+  psmaxbin = hps.GetMaximumBin()
+  psmaxe = hps.GetBinCenter(psmaxbin)
+
+  halfmaxcounts = 0.5*hps.GetMaximum()
+  
+  counts_before = hps.GetBinContent(hps.FindBin(psmaxe - 1.0))
+  counts_after = hps.GetBinContent(hps.FindBin(psmaxe + 0.5))   
+
+  amo = False
+
+  if counts_before > halfmaxcounts and counts_after > halfmaxcounts :
+    amo = True
+
+  return amo
+
+
+def find_edge(h):
+  
+
+  # rebin the histo to find out where the coherent edge is
+  
+  rebinfactor = 5
+  
+  h2 = h.Clone("h2")
+
+  h2.Rebin(rebinfactor)
+
+  h2maxbin = h2.GetMaximumBin()
+
+  h2_edge_end = 0
+  
+  for i in range(h2maxbin, h2maxbin + int(3*15/float(rebinfactor))) :     # edge width usually about 15 bins before rebinning
+    if h2.GetBinContent(i+1) > h2.GetBinContent(i) :
+      h2_edge_end = i-1
+      break
+
+  if h2_edge_end == 0 :
+    return [None, None]
+
+
+  edge_width = rebinfactor * (h2_edge_end - h2maxbin)
+
+  edge_start = rebinfactor * h2maxbin
+  edge_end = rebinfactor * h2_edge_end
+
+
+  # find the derivative of the original histo for the edge region, fit to find the max    
+  
+  hdiff = TH1I('hdiff','hdiff',  edge_width, h.GetBinCenter(edge_start), h.GetBinCenter(edge_end))
+
+  
+  for i in range(1, edge_width) :
+    hdiff.SetBinContent(i, h.GetBinContent(edge_start-1+i) - h.GetBinContent(edge_start+i))
+
+  fitstat = hdiff.Fit("gaus","WSQ0")
+
+  # The histo is shifted down by 0.5 bins, it contains diff between previous bin and present bin
+
+  #hdiff.Draw()
+  #input()
+                      
+  if int(fitstat) == 0:
+    edge = 0.5*h.GetBinWidth(1) + fitstat.Parameter(1)
+    edge_err = fitstat.GetErrors()[1]
+
+    return_edge = float('%.4f'%(edge))
+    return_err = float('%.4f'%(edge_err))    
+    
+  else :
+    return_edge = None
+    return_err = None
+
+  
+  return [return_edge, return_err]
 
 
 #  Quantiles code  
