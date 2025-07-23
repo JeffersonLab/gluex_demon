@@ -113,15 +113,14 @@ import pi0
 import tracking
 import triggers
 
+#modules_def = [timing]
+
 modules_def = [photons, rho, omega, pi0, triggers, tracking, timing, rf, cdc, fdc, sc, tof_1]
-modules_xdef = [triggers, photons, timing, rf, cdc, fdc, sc, tof_1, rho, omega]       # default list of modules
 modules_cpp = [triggers, photons_cpp, timing, rf, ps_e, cdc_cpp, fdc, tof_1, fmwpc, ctof]   # modules for CPP
 
-modules_xxdef = [triggers, photons, timing, rf, cdc, fdc, sc, tof_1, rho, omega]       # default list of modules
-modules_xdef = [rho, omega, pi0, triggers, photons, timing, rf, tracking, cdc, fdc, sc, tof_1]
 
 
-testing = 1  # stop after <runlimit> files, print diagnostics
+testing = 0  # stop after <runlimit> files, print diagnostics
 runlimit = 5 # process this number of runs if testing=1
 checkstatus = 0  # process runs with RCDB status>0
 
@@ -150,7 +149,7 @@ if histdir == "" :
 
 if RunPeriod == "2025-01" and VersionNumber == "01":
     checkstatus = 2025
-    print('Starting from 131305, runs with at least 10M events, not checking RCDB status')
+    print('Starting from 131593, runs with at least 10M events, not checking RCDB status')
     
 if testing:
     print('Looking for monitoring histograms inside directory',histdir)
@@ -319,7 +318,7 @@ for filename in histofilelist:
         skiprun = 0
 
         if checkstatus == 2025 :
-            if run < 131405 :
+            if run < 131593 :
                 skiprun = 1
             else :
                 condition = db.get_condition(run, "event_count")
@@ -691,12 +690,17 @@ for i in range(len(pagenames)):
             gr.SetMarkerColor(mg_colours[n_g % 5])
             gr.SetMarkerStyle(mg_symbols[int(n_g/5) % 4])
             gr.SetMarkerSize(0.5)
-            gr.SetLineWidth(0)      # Hide the errorbars on tgrapherror multigraphs    
+            gr.SetLineWidth(0)      # Hide the errorbars on tgrapherror multigraphs
+            
             thismg.Add(gr)
             n_g = n_g + 1
                
         if n_g == 0 :
             continue
+
+
+        thismg.GetXaxis().SetRangeUser(x[0],x[nruns-1])      
+        thismg.GetXaxis().SetNoExponent(True)           
         
         thismg.Write()
 

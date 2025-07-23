@@ -79,7 +79,7 @@ def rho_psigma_pse(rootfile) :
   # Provide unique graph names. The first must be the status code from this function.
 
   names = ['photons_psigma_pse_status', 'diamond_PSe_mg', 'diamond_PSe_mg_err', 'amo_PSe_mg', 'amo_PSe_mg_err', 'rho_psigma',  'rho_psigma_err', 'rho_psigma_0', 'rho_psigma_0_err', 'rho_psigma_90', 'rho_psigma_90_err', 'rho_psigma_135', 'rho_psigma_135_err', 'rho_psigma_45', 'rho_psigma_45_err', 'rho_phi0_diamond', 'rho_phi0_diamond_err', 'rho_phi0_amo', 'rho_phi0_amo_err' ]
-  titles = ['PS E and Rho P#Sigma status', 'Photon beam energy from PS pair E (GeV)', 'PS E err (diamond)', 'AMO: Photon beam energy peak from PS pair E (GeV)', 'PS E err (amo)', 'Abs(P#Sigma) from #rho(770) production', 'Abs(P#Sigma)_err', 'P#Sigma (0)', 'P#Sigma(0)err', 'P#Sigma (90)', 'P#Sigma(90)err', 'P#Sigma (135)', 'P#Sigma(135)err', 'P#Sigma (45)', 'P#Sigma(45)err','#phi_{0} diamond', '#phi_{0} diamond err', '#phi_{0} amo', '#phi_{0} amo err' ]   # Graph titles
+  titles = ['PS E and Rho P#Sigma status', 'Photon beam energy from PS pair E (GeV)', 'PS E err (diamond)', 'Photon beam energy (amo peak) from PS pair E (GeV)', 'PS E err (amo)', 'Abs(P#Sigma) from #rho(770) production', 'Abs(P#Sigma)_err', 'P#Sigma (0)', 'P#Sigma(0)err', 'P#Sigma (90)', 'P#Sigma(90)err', 'P#Sigma (135)', 'P#Sigma(135)err', 'P#Sigma (45)', 'P#Sigma(45)err','#phi_{0} diamond', '#phi_{0} diamond err', '#phi_{0} amo', '#phi_{0} amo err' ]   # Graph titles
   values = [-1, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None]                      # Default values, keep as -1
 
   if not rootfile :  # called by init function
@@ -102,6 +102,13 @@ def rho_psigma_pse(rootfile) :
   min_counts = 1000
   hps = get_histo(rootfile, dirname, histoname, min_counts)
 
+  if (not hps) :
+
+    histoname = 'PSPairEnergy'      # this should be present in ver 1 instead of PSC_PS
+    dirname = 'highlevel'
+    hps = get_histo(rootfile, dirname, histoname, min_counts)
+
+  
   if (not (hpsit and hps)) :
     return values
 
