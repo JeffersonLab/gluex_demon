@@ -119,8 +119,8 @@ def ncandidates(rootfile) :
 
 # Provide unique graph names, starting with 'tracking_'. The first must be the status code from this function. Do not call it tracking_status - call it something else ending with _status, eg tracking_functionname_status.
 
-  names = ['ncandidates_status','ncandidates_mean']  
-  titles = ['Track candidates status','Number of track candidates'] # graph titles
+  names = ['ncandidates_status','candidates']  
+  titles = ['Track candidates status','Mean number of track candidates'] # graph titles
   values = [-1, None]                                       # Default values, keep as -1
 
   if not rootfile :  # called by init function
@@ -165,8 +165,8 @@ def nwirebasedtracks(rootfile) :
 
 # Provide unique graph names, starting with 'tracking_'. The first must be the status code from this function. Do not call it tracking_status - call it something else ending with _status, eg tracking_functionname_status.
 
-  names = ['nwirebasedtracks_status','nwirebasedtracks_mean']  
-  titles = ['Wire-based tracks status','Number of wire-based tracks'] # graph titles
+  names = ['nwirebasedtracks_status','wire_based']  
+  titles = ['Wire-based tracks status','Mean number of wire-based tracks'] # graph titles
   values = [-1, None]                                       # Default values, keep as -1
 
   if not rootfile :  # called by init function
@@ -211,8 +211,8 @@ def ntimebasedtracks(rootfile) :
 
 # Provide unique graph names, starting with 'tracking_'. The first must be the status code from this function. Do not call it tracking_status - call it something else ending with _status, eg tracking_functionname_status.
 
-  names = ['ntimebasedtracks_status','ntimebasedtracks_mean']  
-  titles = ['Time-based tracks status','Number of time-based tracks'] # graph titles
+  names = ['ntimebasedtracks_status','time_based']  
+  titles = ['Time-based tracks status','Mean number of time-based tracks'] # graph titles
   values = [-1, None]                                       # Default values, keep as -1
 
   if not rootfile :  # called by init function

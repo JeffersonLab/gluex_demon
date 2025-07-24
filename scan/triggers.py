@@ -65,11 +65,12 @@ def check(run, rootfile) :
 
   return allvals
  
-
+'percent_bcal_trig_mg'
+'bcal_trigratio_mg'
 
 def triggers(rootfile) : 
 
-  names = ['trig_status','main_trig','bcal_trig','percent_bcal_trig_mg','ps_trig','percent_ps_trig_mg','random_trig','percent_random_trig_mg']
+  names = ['trig_status','main_trig','bcal_trig','bcal_trigratio_mg','ps_trig','ps_trigratio_mg','random_trig','random_trigratio_mg']
   titles = ['tr_status','Main triggers','BCAL triggers','BCAL triggers/Main triggers (%)','PS triggers','PS triggers/Main triggers (%)','Random triggers','Random triggers/Main triggers (%)']
   values = [-1, None, None, None, None, None, None, None ]
 
