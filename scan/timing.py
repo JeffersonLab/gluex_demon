@@ -95,8 +95,8 @@ def check(run, rootfile) :
 def sc_rf_time(rootfile) :
 
   #print("in sc_rf_time() ...")
-  names = ['sc_rf_status', 'pim_SCRFdt_mg', 'pim_SCRFdt_mg_err', 'pip_SCRFdt_mg', 'pip_SCRFdt_mg_err', 'proton_SCRFdt_mg', 'proton_SCRFdt_mg_err']   
-  titles = ['SC-RF time status', 'PiMinus SC-RF time (ns)',  'PiMinus SC-RF time width (ns)', 'PiPlus SC-RF time (ns)',  'PiPlus SC-RF time width (ns)', 'Proton SC-RF time (ns)',  'Proton SC-RF time width (ns)']   # Graph titles 
+  names = ['sc_rf_status', 'pim_SCRF_mg', 'pim_SCRF_mg_err', 'pip_SCRF_mg', 'pip_SCRF_mg_err', 'p_SCRF_mg', 'p_SCRF_mg_err']   
+  titles = ['SC-RF time status', 'PiMinus #DeltaT(SC-RF) (ns)',  'PiMinus #DeltaT(SC-RF) width (ns)', 'PiPlus #DeltaT(SC-RF) (ns)',  'PiPlus #DeltaT(SC-RF) width (ns)', 'Proton #DeltaT(SC-RF) (ns)',  'Proton #DeltaT(SC-RF) width (ns)']   # Graph titles 
   values = [-1, None, None, None, None, None, None ]   
     
   if not rootfile :  # called by init function
@@ -165,8 +165,8 @@ def sc_rf_time(rootfile) :
 def tof_rf_time(rootfile) :
 
   #print("in tof_rf_time() ...")
-  names = ['tof_rf_status', 'pim_TOFRFdt_mg', 'pim_TOFRFdt_mg_err', 'pip_TOFRFdt_mg', 'pip_TOFRFdt_mg_err', 'proton_TOFRFdt_mg', 'proton_TOFRFdt_mg_err']   
-  titles = ['TOF-RF time status', 'PiMinus TOF-RF time (ns)',  'PiMinus TOF-RF time width (ns)', 'PiPlus TOF-RF time (ns)',  'PiPlus TOF-RF time width (ns)', 'Proton TOF-RF time (ns)',  'Proton TOF-RF time width (ns)']   # Graph titles 
+  names = ['tof_rf_status', 'pim_TOFRF_mg', 'pim_TOFRF_mg_err', 'pip_TOFRF_mg', 'pip_TOFRF_mg_err', 'p_TOFRF_mg', 'p_TOFRF_mg_err']   
+  titles = ['TOF-RF time status', 'PiMinus #DeltaT(TOF-RF) (ns)',  'PiMinus #DeltaT(TOF-RF) width (ns)', 'PiPlus #DeltaT(TOF-RF) (ns)',  'PiPlus #DeltaT(TOF-RF) width (ns)', 'Proton #DeltaT(TOF-RF) (ns)',  'Proton #DeltaT(TOF-RF) width (ns)']   # Graph titles 
 
   values = [-1, None, None, None, None, None, None ]   
   
@@ -237,8 +237,8 @@ def tof_rf_time(rootfile) :
 def bcal_rf_time(rootfile) :
   
   #print("in bcal_rf_time() ...")
-  names = ['bcal_rf_status', 'pim_BCALRFdt_mg', 'pim_BCALRFdt_mg_err', 'pip_BCALRFdt_mg', 'pip_BCALRFdt_mg_err', 'proton_BCALRFdt_mg', 'proton_BCALRFdt_mg_err', 'gamma_BCALRFdt_mg', 'gamma_BCALRFdt_mg_err', 'gamma_1GeV_BCALRFdt_mg', 'gamma_1GeV_BCALRFdt_mg_err']   
-  titles = ['BCAL-RF time status', 'PiMinus BCAL-RF time (ns)',  'PiMinus BCAL-RF time width (ns)', 'PiPlus BCAL-RF time (ns)',  'PiPlus BCAL-RF time width (ns)', 'Proton BCAL-RF time (ns)',  'Proton BCAL-RF time width (ns)', 'Photon BCAL-RF time (ns)',  'Photon BCAL-RF time width (ns)', 'Photon > 1GeV BCAL-RF time (ns)',  'Photon > 1GeV BCAL-RF time width (ns)']   # Graph titles ]   # Graph titles ]   # Graph titles ]   # Graph titles 
+  names = ['bcal_rf_status', 'pim_BCALRF_mg', 'pim_BCALRF_mg_err', 'pip_BCALRF_mg', 'pip_BCALRF_mg_err', 'p_BCALRF_mg', 'p_BCALRF_mg_err', 'g_BCALRF_mg', 'g_BCALRF_mg_err', 'g_1GeV_BCALRF_mg', 'g_1GeV_BCALRF_mg_err']   
+  titles = ['BCAL-RF time status', 'PiMinus #DeltaT(BCAL-RF) (ns)',  'PiMinus #DeltaT(BCAL-RF) width (ns)', 'PiPlus #DeltaT(BCAL-RF) (ns)',  'PiPlus #DeltaT(BCAL-RF) width (ns)', 'Proton #DeltaT(BCAL-RF) (ns)',  'Proton #DeltaT(BCAL-RF) width (ns)', 'Photon #DeltaT(BCAL-RF) (ns)',  'Photon #DeltaT(BCAL-RF) width (ns)', 'Photon > 1GeV #DeltaT(BCAL-RF) (ns)',  'Photon > 1GeV #DeltaT(BCAL-RF) width (ns)']   # Graph titles ]   # Graph titles ]   # Graph titles ]   # Graph titles 
 
   values = [-1, None, None, None, None, None, None, None, None, None, None ]   
 
@@ -334,8 +334,8 @@ def bcal_rf_time(rootfile) :
 def fcal_rf_time(rootfile) :
 
   #print("in fcal_rf_time() ...")
-  names = ['fcal_rf_status', 'pim_FCALRFdt_mg', 'pim_FCALRFdt_mg_err', 'pip_FCALRFdt_mg', 'pip_FCALRFdt_mg_err', 'gamma_FCALRFdt_mg', 'gamma_FCALRFdt_mg_err']   
-  titles = ['FCAL-RF time status', 'PiMinus FCAL-RF time (ns)',  'PiMinus FCAL-RF time width (ns)', 'PiPlus FCAL-RF time (ns)',  'PiPlus FCAL-RF time width (ns)', 'Photon FCAL-RF time (ns)',  'Photon FCAL-RF time width (ns)']   # Graph titles 
+  names = ['fcal_rf_status', 'pim_FCALRF_mg', 'pim_FCALRF_mg_err', 'pip_FCALRF_mg', 'pip_FCALRF_mg_err', 'g_FCALRF_mg', 'g_FCALRF_mg_err']   
+  titles = ['FCAL-RF time status', 'PiMinus #DeltaT(FCAL-RF) (ns)',  'PiMinus #DeltaT(FCAL-RF) width (ns)', 'PiPlus #DeltaT(FCAL-RF) (ns)',  'PiPlus #DeltaT(FCAL-RF) width (ns)', 'Photon #DeltaT(FCAL-RF) (ns)',  'Photon #DeltaT(FCAL-RF) width (ns)']   # Graph titles 
 
   values = [-1, None, None, None, None, None, None ]   
   
