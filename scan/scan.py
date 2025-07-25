@@ -35,7 +35,7 @@ def make_graph(gname,gtitle,nruns,x,y) :
     gr.GetXaxis().SetNoExponent(True)
     gr.GetXaxis().SetTitle( 'Run number' )
     gr.GetYaxis().SetTitle( gtitle )
-    gr.SetMarkerStyle( 21 )
+    gr.SetMarkerStyle( 20 )
     gr.SetMarkerSize( 0.5 )    
     return gr
 
@@ -62,7 +62,7 @@ def make_graph_errs(gname,gtitle,nruns,x,y,dx,dy) :
     gr.GetXaxis().SetNoExponent(True)    
     gr.GetXaxis().SetTitle( 'Run number' )
     gr.GetYaxis().SetTitle( gtitle )
-    gr.SetMarkerStyle( 21 )
+    gr.SetMarkerStyle( 20 )
     gr.SetMarkerSize( 0.5 )    
     return gr
 
@@ -668,8 +668,9 @@ for i in range(len(pagenames)):
    # now construct the multigraphs
         
     mg_colours = [63, 887, 907, 807, 801]
-    mg_symbols = [107, 108, 109, 113]
-
+    #mg_symbols = [107, 108, 109, 113]
+    mg_symbols = [20, 21, 22, 23]
+    
     for mg_name in mgnames:
         
         thismg = make_multigraph(mg_name,mg_name)
@@ -678,7 +679,7 @@ for i in range(len(pagenames)):
         for graphname in graphname_store:
             
             if graphname.endswith("_mg") :
-                keystring = graphname.rsplit('_',2)[1]
+                keystring = graphname.rsplit('_',2)[1]     # penultimate string, separated by _
             else :
                 keystring = compositestatusgraphname
                 
@@ -691,7 +692,24 @@ for i in range(len(pagenames)):
             gr.SetMarkerStyle(mg_symbols[int(n_g/5) % 4])
             gr.SetMarkerSize(0.5)
             gr.SetLineWidth(0)      # Hide the errorbars on tgrapherror multigraphs
+
+            #shorten the graph name used in multigraph  from something_something_keystring_mg to something_something  or something_status to something
+            # so that it is legible in the legend
             
+            newname = ''
+            
+            if graphname.endswith(keystring+"_mg") :
+                newname = graphname[:-len("_"+keystring+"_mg")]
+
+            elif graphname.endswith("_status") :
+                newname = graphname[:-len("_status")]
+
+            if newname != '' :
+                #print('changing name of ',graphname,'to',newname)
+                gr.SetName(newname)
+                
+
+                
             thismg.Add(gr)
             n_g = n_g + 1
                

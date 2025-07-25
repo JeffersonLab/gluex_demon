@@ -94,19 +94,13 @@ def check(run, rootfile) :
   
 def sc_rf_time(rootfile) :
 
-  #print("in sc_piplus_rf_time() ...")
+  #print("in sc_rf_time() ...")
   names = ['sc_rf_status', 'pim_SCRFdt_mg', 'pim_SCRFdt_mg_err', 'pip_SCRFdt_mg', 'pip_SCRFdt_mg_err', 'proton_SCRFdt_mg', 'proton_SCRFdt_mg_err']   
   titles = ['SC-RF time status', 'PiMinus SC-RF time (ns)',  'PiMinus SC-RF time width (ns)', 'PiPlus SC-RF time (ns)',  'PiPlus SC-RF time width (ns)', 'Proton SC-RF time (ns)',  'Proton SC-RF time width (ns)']   # Graph titles 
   values = [-1, None, None, None, None, None, None ]   
     
   if not rootfile :  # called by init function
     return [names, titles, values]
-
-  error_max = 0.01       # criteria for good/bad
-  pi_time_min = -0.1
-  pi_time_max = 0.1
-  p_time_min = -0.15
-  p_time_max = 0.15
 
   pi_low_limit = -0.3     # fit ranges
   pi_high_limit = 0.3
@@ -118,6 +112,9 @@ def sc_rf_time(rootfile) :
   p_pmin = 0.0
   p_pmax = 0.0    # no limit if 0.0
 
+  # check the min and max time diff for pi- only  
+  pim_max_dt = 0.01
+
   dirname = '/Independent/Hist_DetectorPID/SC'          # directory containing that histogram
   min_counts = 1000
   fitoptions = "0SQI"
@@ -126,7 +123,11 @@ def sc_rf_time(rootfile) :
   hpim = get_histo(rootfile, dirname, histoname, min_counts)
 
   if hpim:
-    pim = check_deltatvsp(hpim, fitoptions, pi_time_min, pi_time_max, error_max, pi_pmin, pi_pmax, pi_low_limit, pi_high_limit)
+    pim = check_deltatvsp(hpim, fitoptions, pi_pmin, pi_pmax, pi_low_limit, pi_high_limit)
+
+    if pim[0] == 1: # successful fit
+      if abs(pim[1]) > pim_max_dt :
+        pim[0] = 0
   else:
     pim = [-1, None, None]
 
@@ -135,7 +136,7 @@ def sc_rf_time(rootfile) :
   hpip = get_histo(rootfile, dirname, histoname, min_counts)
 
   if hpip:
-    pip = check_deltatvsp(hpip, fitoptions, pi_time_min, pi_time_max, error_max, pi_pmin, pi_pmax, pi_low_limit, pi_high_limit)
+    pip = check_deltatvsp(hpip, fitoptions, pi_pmin, pi_pmax, pi_low_limit, pi_high_limit)
   else:
     pip = [-1, None, None]
 
@@ -144,7 +145,7 @@ def sc_rf_time(rootfile) :
   hp = get_histo(rootfile, dirname, histoname, min_counts)
 
   if hp:
-    p = check_deltatvsp(hp, fitoptions, p_time_min, p_time_max, error_max, p_pmin, p_pmax, p_low_limit, p_high_limit)
+    p = check_deltatvsp(hp, fitoptions, p_pmin, p_pmax, p_low_limit, p_high_limit)
   else:
     p = [-1, None, None]    
 
@@ -152,16 +153,12 @@ def sc_rf_time(rootfile) :
   pipstatus = pip.pop(0) 
   pstatus = p.pop(0)
 
-  status = min(pimstatus, pipstatus, pstatus) 
-
-  values = [status]
+  values = [pimstatus]
   values.extend(pim)
   values.extend(pip)
   values.extend(p)
 
   return values
-
-
 
 #############
   
@@ -176,12 +173,6 @@ def tof_rf_time(rootfile) :
   if not rootfile :  # called by init function
     return [names, titles, values]
 
-  error_max = 0.01       # criteria for good/bad
-  pi_time_min = -0.04
-  pi_time_max = 0.04
-  p_time_min = -0.5
-  p_time_max = 0.5
-
   pi_low_limit = -0.3     # fit ranges
   pi_high_limit = 0.3
   pi_pmin = 0.0
@@ -191,17 +182,23 @@ def tof_rf_time(rootfile) :
   p_high_limit = 0.5
   p_pmin = 0.0
   p_pmax = 0.0    # no limit if 0.0
+
+  # check the min and max time diff for pi- only    
+  pim_max_dt = 0.005 
   
   dirname = '/Independent/Hist_DetectorPID/TOF'          # directory containing that histogram
   min_counts = 1000
   fitoptions = "0SQI"
 
-  
   histoname = 'DeltaTVsP_Pi-'      # monitoring histogram to check
   hpim = get_histo(rootfile, dirname, histoname, min_counts)
 
   if hpim:
-    pim = check_deltatvsp(hpim, fitoptions, pi_time_min, pi_time_max, error_max, pi_pmin, pi_pmax, pi_low_limit, pi_high_limit)
+    pim = check_deltatvsp(hpim, fitoptions, pi_pmin, pi_pmax, pi_low_limit, pi_high_limit)
+
+    if pim[0] == 1: # successful fit
+      if abs(pim[1]) > pim_max_dt :
+        pim[0] = 0    
   else:
     pim = [-1, None, None]
 
@@ -210,7 +207,7 @@ def tof_rf_time(rootfile) :
   hpip = get_histo(rootfile, dirname, histoname, min_counts)
 
   if hpip:
-    pip = check_deltatvsp(hpip, fitoptions, pi_time_min, pi_time_max, error_max, pi_pmin, pi_pmax, pi_low_limit, pi_high_limit)
+    pip = check_deltatvsp(hpip, fitoptions, pi_pmin, pi_pmax, pi_low_limit, pi_high_limit)
   else:
     pip = [-1, None, None]
 
@@ -219,7 +216,7 @@ def tof_rf_time(rootfile) :
   hp = get_histo(rootfile, dirname, histoname, min_counts)
 
   if hp:
-    p = check_deltatvsp(hp, fitoptions, p_time_min, p_time_max, error_max, p_pmin, p_pmax, p_low_limit, p_high_limit)
+    p = check_deltatvsp(hp, fitoptions, p_pmin, p_pmax, p_low_limit, p_high_limit)
   else:
     p = [-1, None, None]    
 
@@ -227,9 +224,7 @@ def tof_rf_time(rootfile) :
   pipstatus = pip.pop(0) 
   pstatus = p.pop(0)
   
-  status = min(pimstatus, pipstatus, pstatus) 
-
-  values = [status]
+  values = [pimstatus]
   values.extend(pim)
   values.extend(pip)
   values.extend(p)
@@ -242,7 +237,7 @@ def tof_rf_time(rootfile) :
 def bcal_rf_time(rootfile) :
   
   #print("in bcal_rf_time() ...")
-  names = ['bcal_rf_piplus_status', 'pim_BCALRFdt_mg', 'pim_BCALRFdt_mg_err', 'pip_BCALRFdt_mg', 'pip_BCALRFdt_mg_err', 'proton_BCALRFdt_mg', 'proton_BCALRFdt_mg_err', 'gamma_BCALRFdt_mg', 'gamma_BCALRFdt_mg_err', 'gamma_1GeV_BCALRFdt_mg', 'gamma_1GeV_BCALRFdt_mg_err']   
+  names = ['bcal_rf_status', 'pim_BCALRFdt_mg', 'pim_BCALRFdt_mg_err', 'pip_BCALRFdt_mg', 'pip_BCALRFdt_mg_err', 'proton_BCALRFdt_mg', 'proton_BCALRFdt_mg_err', 'gamma_BCALRFdt_mg', 'gamma_BCALRFdt_mg_err', 'gamma_1GeV_BCALRFdt_mg', 'gamma_1GeV_BCALRFdt_mg_err']   
   titles = ['BCAL-RF time status', 'PiMinus BCAL-RF time (ns)',  'PiMinus BCAL-RF time width (ns)', 'PiPlus BCAL-RF time (ns)',  'PiPlus BCAL-RF time width (ns)', 'Proton BCAL-RF time (ns)',  'Proton BCAL-RF time width (ns)', 'Photon BCAL-RF time (ns)',  'Photon BCAL-RF time width (ns)', 'Photon > 1GeV BCAL-RF time (ns)',  'Photon > 1GeV BCAL-RF time width (ns)']   # Graph titles ]   # Graph titles ]   # Graph titles ]   # Graph titles 
 
   values = [-1, None, None, None, None, None, None, None, None, None, None ]   
@@ -250,14 +245,6 @@ def bcal_rf_time(rootfile) :
   
   if not rootfile :  # called by init function
     return [names, titles, values]
-
-  error_max = 0.01       # criteria for good/bad
-  pi_time_min = -0.3
-  pi_time_max = 0.3
-  p_time_min = -0.5
-  p_time_max = 0.5
-  g_time_min = -0.1
-  g_time_max = 0.1
 
   pi_low_limit = -0.5     # fit ranges
   pi_high_limit = 0.5
@@ -274,7 +261,8 @@ def bcal_rf_time(rootfile) :
   g_pmin = 0.0
   g_pmax = 0.0    # no limit if 0.0
 
-  
+  g_max_dt = 0.02  # good if less than this 
+
   dirname = '/Independent/Hist_DetectorPID/BCAL'          # directory containing that histogram
   min_counts = 1000
   fitoptions = "0SQI"
@@ -283,7 +271,7 @@ def bcal_rf_time(rootfile) :
   hpim = get_histo(rootfile, dirname, histoname, min_counts)
 
   if hpim:
-    pim = check_deltatvsp(hpim, fitoptions, pi_time_min, pi_time_max, error_max, pi_pmin, pi_pmax, pi_low_limit, pi_high_limit)
+    pim = check_deltatvsp(hpim, fitoptions, pi_pmin, pi_pmax, pi_low_limit, pi_high_limit)
   else:
     pim = [-1, None, None]
 
@@ -292,7 +280,7 @@ def bcal_rf_time(rootfile) :
   hpip = get_histo(rootfile, dirname, histoname, min_counts)
 
   if hpip:
-    pip = check_deltatvsp(hpip, fitoptions, pi_time_min, pi_time_max, error_max, pi_pmin, pi_pmax, pi_low_limit, pi_high_limit)
+    pip = check_deltatvsp(hpip, fitoptions, pi_pmin, pi_pmax, pi_low_limit, pi_high_limit)
   else:
     pip = [-1, None, None]
 
@@ -301,7 +289,7 @@ def bcal_rf_time(rootfile) :
   hp = get_histo(rootfile, dirname, histoname, min_counts)
 
   if hp:
-    p = check_deltatvsp(hp, fitoptions, p_time_min, p_time_max, error_max, p_pmin, p_pmax, p_low_limit, p_high_limit)
+    p = check_deltatvsp(hp, fitoptions, p_pmin, p_pmax, p_low_limit, p_high_limit)
   else:
     p = [-1, None, None]    
 
@@ -312,9 +300,13 @@ def bcal_rf_time(rootfile) :
   hg = get_histo(rootfile, dirname, histoname, min_counts)
 
   if hg:
-    g = check_deltatvsp(hg, fitoptions, g_time_min, g_time_max, error_max, g_pmin, g_pmax, g_low_limit, g_high_limit)
+    g = check_deltatvsp(hg, fitoptions, g_pmin, g_pmax, g_low_limit, g_high_limit)
+    if g[0] == 1:
+      if abs(g[1]) > g_max_dt :
+        g[0] = 0
+    
     gamma1min = 1.0
-    g1 = check_deltatvsp(hg, fitoptions, g_time_min, g_time_max, error_max, gamma1min, g_pmax, g_low_limit, g_high_limit)
+    g1 = check_deltatvsp(hg, fitoptions, gamma1min, g_pmax, g_low_limit, g_high_limit)
   else:
     g = [-1, None, None]
     g1 = [-1, None, None]        
@@ -326,9 +318,7 @@ def bcal_rf_time(rootfile) :
   gstatus = g.pop(0)
   g1status = g1.pop(0)     
 
-  status = min(pimstatus, pipstatus, pstatus, gstatus, g1status) 
-
-  values = [status]
+  values = [gstatus]
   values.extend(pim)
   values.extend(pip)
   values.extend(p)
@@ -344,19 +334,13 @@ def bcal_rf_time(rootfile) :
 def fcal_rf_time(rootfile) :
 
   #print("in fcal_rf_time() ...")
-  names = ['fcal_rf_piplus_status', 'pim_FCALRFdt_mg', 'pim_FCALRFdt_mg_err', 'pip_FCALRFdt_mg', 'pip_FCALRFdt_mg_err', 'gamma_FCALRFdt_mg', 'gamma_FCALRFdt_mg_err']   
+  names = ['fcal_rf_status', 'pim_FCALRFdt_mg', 'pim_FCALRFdt_mg_err', 'pip_FCALRFdt_mg', 'pip_FCALRFdt_mg_err', 'gamma_FCALRFdt_mg', 'gamma_FCALRFdt_mg_err']   
   titles = ['FCAL-RF time status', 'PiMinus FCAL-RF time (ns)',  'PiMinus FCAL-RF time width (ns)', 'PiPlus FCAL-RF time (ns)',  'PiPlus FCAL-RF time width (ns)', 'Photon FCAL-RF time (ns)',  'Photon FCAL-RF time width (ns)']   # Graph titles 
 
   values = [-1, None, None, None, None, None, None ]   
   
   if not rootfile :  # called by init function
     return [names, titles, values]
-
-  error_max = 0.02       # criteria for good/bad
-  pi_time_min = -0.3
-  pi_time_max = 0.3
-  g_time_min = -0.1
-  g_time_max = 0.1
 
   pi_low_limit = -0.7     # fit ranges
   pi_high_limit = 0.7
@@ -368,6 +352,7 @@ def fcal_rf_time(rootfile) :
   g_pmin = 0.0
   g_pmax = 0.0    # no limit if 0.0
   
+  g_max_dt = 0.1  # good if less than this
   
   dirname = '/Independent/Hist_DetectorPID/FCAL'          # directory containing that histogram
   min_counts = 1000
@@ -377,7 +362,7 @@ def fcal_rf_time(rootfile) :
   hpim = get_histo(rootfile, dirname, histoname, min_counts)
 
   if hpim:
-    pim = check_deltatvsp(hpim, fitoptions, pi_time_min, pi_time_max, error_max, pi_pmin, pi_pmax, pi_low_limit, pi_high_limit)
+    pim = check_deltatvsp(hpim, fitoptions, pi_pmin, pi_pmax, pi_low_limit, pi_high_limit)
   else:
     pim = [-1, None, None]
 
@@ -386,7 +371,7 @@ def fcal_rf_time(rootfile) :
   hpip = get_histo(rootfile, dirname, histoname, min_counts)
 
   if hpip:
-    pip = check_deltatvsp(hpip, fitoptions, pi_time_min, pi_time_max, error_max, pi_pmin, pi_pmax, pi_low_limit, pi_high_limit)
+    pip = check_deltatvsp(hpip, fitoptions, pi_pmin, pi_pmax, pi_low_limit, pi_high_limit)
   else:
     pip = [-1, None, None]
 
@@ -397,7 +382,11 @@ def fcal_rf_time(rootfile) :
   hg = get_histo(rootfile, dirname, histoname, min_counts)
 
   if hg:
-    g = check_deltatvsp(hg, fitoptions, g_time_min, g_time_max, error_max, g_pmin, g_pmax, g_low_limit, g_high_limit)
+    g = check_deltatvsp(hg, fitoptions, g_pmin, g_pmax, g_low_limit, g_high_limit)
+    if g[0] == 1:
+      if abs(g[1]) > g_max_dt :
+        g[0] = 0
+
   else:
     g = [-1, None, None]
 
@@ -406,32 +395,27 @@ def fcal_rf_time(rootfile) :
   pipstatus = pip.pop(0) 
   gstatus = g.pop(0)
 
-  status = min(pimstatus, pipstatus, gstatus) 
-
-  values = [status]
+  values = [gstatus]
   values.extend(pim)
   values.extend(pip)
   values.extend(g)
 
   return values
 
-  
-
 # TODO: check size of resolution or error as well?
 def cdc_rf_time(rootfile) :
 
   #print("in cdc_rf_time() ...")
 
-  names = ['cdc_sc_status','cdc_sc_mean','cdc_sc_mean_err']     # These will be unique graph names, start with modulename_status
-  titles = ['CDC-SC time status','Earliest CDC - matched SC time mean (ns)', 'Earliest CDC - matched SC time width (ns)']  # Graph titles 
+  names = ['cdc_sc_status','cdc_sc','cdc_sc_err']     # These will be unique graph names, start with modulename_status
+  titles = ['CDC-SC time status','Earliest CDC - matched SC time, mean (ns)', 'Earliest CDC - matched SC time, width (ns)']  # Graph titles 
 
   values = [-1, None, None]
   
   if not rootfile :  # called by init function
     return [names, titles, values]
 
-  time_min = -1.5   # acceptability limits
-  time_max = 1.5
+  time_max = 0.5  # acceptability limits
 
   low_limit = -15.   # fit range
   high_limit = 10.
@@ -447,7 +431,7 @@ def cdc_rf_time(rootfile) :
     return values
     
   fitoptions = "0SQ"
-  values = check_deltat(h, fitoptions, time_min, time_max, low_limit, high_limit)
+  values = check_deltat(h, fitoptions, time_max, low_limit, high_limit)
 
   return values
 
@@ -455,15 +439,14 @@ def cdc_rf_time(rootfile) :
 # TODO: check size of resolution or error as well?
 def fdc_rf_time(rootfile) :
   #print("in fdc_rf_time() ...")
-  names = ['fdc_time_status','fdc_time_mean','fdc_time_mean_err']     # These will be unique graph names, start with modulename_status
-  titles = ['FDC time status','FDC earliest flight-corrected time mean (ns)', 'FDC earliest flight-corrected time width (ns)']  # Graph titles 
+  names = ['fdc_time_status','fdc_t0','fdc_t0_err']     # These will be unique graph names, start with modulename_status
+  titles = ['FDC time status','FDC earliest flight-corrected time, mean (ns)', 'FDC earliest flight-corrected time, width (ns)']  # Graph titles 
   values = [-1, None, None ]
 
   if not rootfile :  # called by init function
     return [names, titles, values]
 
-  time_min = -1   # acceptability limits
-  time_max = 1
+  time_max = 0.5  # acceptability limits
 
   low_limit = -15.   # fit range
   high_limit = 10.
@@ -479,23 +462,22 @@ def fdc_rf_time(rootfile) :
     return values
 
   fitoptions = "0SQ"
-  values = check_deltat(h, fitoptions, time_min, time_max, low_limit, high_limit)
-  #print(values)
+  values = check_deltat(h, fitoptions, time_max, low_limit, high_limit)
+
   return values       # return array of values, status first
 
 
 # TODO: check size of resolution or error as well?
 def ps_rf_time(rootfile) :
   #print("in ps_rf_time() ...")
-  names = ['ps_rf_status','ps_rf_mean','ps_rf_mean_err']     # These will be unique graph names, start with modulename_status
+  names = ['ps_tagh_status','ps_tagh','ps_tagh_err']     # These will be unique graph names, start with modulename_status
   titles = ['PS-TAGH time status','PS-TAGH time mean (ns)', 'PS-TAGH time width (ns)']  # Graph titles 
   values = [-1, None, None]
 
   if not rootfile :  # called by init function
     return [names, titles, values]
 
-  time_min = -0.1   # acceptability limits
-  time_max = 0.1
+  time_max = 0.1   # acceptability limits
 
   low_limit = 0.3    # fit range
   high_limit = 0.3
@@ -523,12 +505,11 @@ def ps_rf_time(rootfile) :
   ps_time_mean_err = r.Parameter(2)
 
   status = 1
-  if ps_time_mean < time_min or ps_time_mean > time_max:
+  if abs(ps_time_mean) > time_max:
       status=0
 
-
   values = [status, float('%.5f'%(ps_time_mean)), float('%.5f'%(ps_time_mean_err)) ]
-  #print(values)
+
   return values       # return array of values, status first
 
 
@@ -536,15 +517,14 @@ def ps_rf_time(rootfile) :
 # TODO: check size of resolution or error as well?
 def tagh_rf_time(rootfile) :
   #print("in tagh_rf_time() ...")
-  names = ['tagh_rf_status','tagh_rf_mean','tagh_rf_mean_err']     # These will be unique graph names, start with modulename_status
+  names = ['tagh_rf_status','tagh_rf','tagh_rf_err']     # These will be unique graph names, start with modulename_status
   titles = ['TAGH-RF time status','TAGH-RF time mean (ns)', 'TAGH-RF time width (ns)']  # Graph titles 
   values = [-1, None, None]   
 
   if not rootfile :  # called by init function
     return [names, titles, values]
 
-  time_min = -5   # acceptability limits
-  time_max = 5
+  time_max = 0.03   # acceptability limits
 
   low_limit = -0.3    # fit range
   high_limit = 0.3
@@ -562,24 +542,22 @@ def tagh_rf_time(rootfile) :
   # code to check the histogram and find the status values
 
   fitoptions = "0SQ"
-  values = check_deltat(h, fitoptions, time_min, time_max, low_limit, high_limit)
+  values = check_deltat(h, fitoptions, time_max, low_limit, high_limit)
 
-  #print(values)
   return values       # return array of values, status first
 
 
 # TODO: check size of resolution or error as well?
 def tagm_rf_time(rootfile) :
   #print("in tagm_rf_time() ...")
-  names = ['tagm_rf_status','tagm_rf_mean','tagm_rf_mean_err']     # These will be unique graph names, start with modulename_status
+  names = ['tagm_rf_status','tagm_rf','tagm_rf_err']     # These will be unique graph names, start with modulename_status
   titles = ['TAGM-RF time status','TAGM-RF time mean (ns)', 'TAGM-RF time width (ns)']  # Graph titles 
   values = [-1, None, None]   
 
   if not rootfile :  # called by init function
     return [names, titles, values]
-
-  time_min = -5   # acceptability limits
-  time_max = 5
+  
+  time_max = 0.03   # acceptability limits
 
   low_limit = -0.3    # fit range
   high_limit = 0.3
@@ -597,16 +575,16 @@ def tagm_rf_time(rootfile) :
   # code to check the histogram and find the status values
   if h:
     fitoptions = "0SQ"
-    values = check_deltat(h, fitoptions, time_min, time_max, low_limit, high_limit)
+    values = check_deltat(h, fitoptions, time_max, low_limit, high_limit)
 
   #print(values)
   return values       # return array of values, status first
 
 
 
-#    pim = check_deltatvsp(hpim, fitoptions, time_min, time_max, error_max, pi_pmin, pi_pmax, pi_low_limit, pi_high_limit)
 
-def check_deltatvsp(h, fitoptions, tmin, tmax, emax, pmin, pmax, low_limit, high_limit) :
+
+def check_deltatvsp(h, fitoptions, pmin, pmax, low_limit, high_limit) :
 
   values = [ -1, None, None ]   # defaults in case fit fails
 
@@ -631,16 +609,13 @@ def check_deltatvsp(h, fitoptions, tmin, tmax, emax, pmin, pmax, low_limit, high
     sigma = fitresult.Parameter(2)
     status = 1
     
-    if mean < tmin or mean > tmax or abs(mean_error) > emax:
-      status=0
-
     values = [ status, float('%.5f'%(mean)), float('%.5f'%(sigma)) ]
 
   return values
 
 
 
-def check_deltat(h, fitoptions, tmin, tmax, low_limit, high_limit) :
+def check_deltat(h, fitoptions, tmax, low_limit, high_limit) :
 
   values = [ -1, None, None ]   # defaults in case fit fails
 
@@ -653,7 +628,7 @@ def check_deltat(h, fitoptions, tmin, tmax, low_limit, high_limit) :
     sigma = fitresult.Parameter(2)
     status = 1
   
-    if mean < tmin or mean > tmax :
+    if abs(mean) > tmax :
       status=0
       
     values = [ status, float('%.5f'%(mean)), float('%.5f'%(sigma)) ]
