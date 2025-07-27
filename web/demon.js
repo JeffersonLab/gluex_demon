@@ -209,10 +209,12 @@ async function getgraphnames() {
     let styletext2 = ' class="statusgraphpanel"';
     let divtext = '';
     let linkfile = '';
-    let listoflinks = '';
+    let listoflinks = '<ul>';
 
     graphs_this_page = [];  // tells jsROOT which graphs to show
 
+    console.log('Detector: '+Detector)
+    
     if (Detector != "") {  // detector page
 
         let j = det_list.indexOf(Detector) - 1;   // because det_list starts w overview
@@ -226,20 +228,23 @@ async function getgraphnames() {
             let rootgraph =  gdir + '/' + thisgraph;
             let style = styletext
 
-           // if (thisgraph.includes('status')) style = styletext2;
-
-            // only show composite status graphs, hide the others
-            if (thisgraph.includes('status') && !thisgraph.includes('composite')) continue;
+            // only show composite status_all graphs, hide the other status graphs
+            if (thisgraph.endsWith('status')) continue; 
 
             graphs_this_page.push(rootgraph);  // copy graph name into array for this page
 
-            divtext += `<div id="${thisgraph}" class="graph_top"></div>`;
+	    let anchorname = thisgraph;
+	    if (thisgraph.endsWith("_status_all")) {
+		anchorname = thisgraph.substring(0,thisgraph.length-4);  // trim _all
+	    }
+	    
+            divtext += `<div id="${anchorname}" class="graph_top"></div>`;
 
-            divtext += '<div id=g_' + thisgraph + style + '>';
+            divtext += '<div id=gdiv_' + thisgraph + style + '>';
             divtext += '</div>';
 
-            divtext += `<div class="graph_names"><a href="#${thisgraph}">${thisgraph}</a>&nbsp;&nbsp;<a href="#selectors">Top of page</a></div>`;
-            listoflinks += `<a href = "#${thisgraph}">${thisgraph}</a> `;
+            divtext += `<div class="graph_names"><a href="#${anchorname}">${anchorname}</a>&nbsp;&nbsp;<a href="#selectors">Top of page</a></div>`;
+            listoflinks += `<li><a href = "#${anchorname}">${anchorname}</a></li> `;
 
         }
 
@@ -262,12 +267,18 @@ async function getgraphnames() {
 
             graphs_this_page.push(rootgraph);  // copy graph name into array for this page
 
-            //divtext += `<div id="${statusgraphs[i]}" class="graph_names">${statusgraphs[i]}</div>`;
-            divtext += `<div id="${thisgraph}" class="graph_top"></div>`;
-            divtext += `<div id=g_${thisgraph} ${styletext}></div>`;  // the graph gets inserted inside this later
-            divtext += `<div class="graph_names"><a href="#${thisgraph}">${thisgraph}</a>&nbsp;&nbsp;<a href="#selectors">Top of page</a>`; //</div>`;
+	    let anchorname = thisgraph;
+	    if (thisgraph.endsWith("_status_all")) {
+		anchorname = thisgraph.substring(0,thisgraph.length-11);
+	    }
+	    
+            divtext += `<div id="${anchorname}" class="graph_top"></div>`;
 
-            listoflinks += `<a href = "#${thisgraph}">${thisgraph}</a> `;
+            divtext += `<div id=gdiv_${thisgraph} ${styletext}></div>`;  // the graph gets inserted inside this later
+
+            divtext += `<div class="graph_names"><a href="#${anchorname}">${anchorname}</a>&nbsp;&nbsp;<a href="#selectors">Top of page</a>`; //</div>`;
+
+            listoflinks += `<a href = "#${anchorname}">${anchorname}</a> `;
 
             if (i>0) { // no detector link for overall readiness
 
@@ -285,6 +296,7 @@ async function getgraphnames() {
 
     } 
 
+    listoflinks += '</ul>';
     document.getElementById("graphs").innerHTML = divtext;    
     document.getElementById("links_graphs_this_page").innerHTML = 'Graphs on this page: ' + listoflinks;    
 
@@ -296,8 +308,6 @@ async function readlist(listfile) {
 
     const text = await fetchfiledata(listfile);
 
-    console.log('fetchfiledata result: '+ text);
-
     let returntext = '';
 
     if (!text) {  // file not found
@@ -307,13 +317,10 @@ async function readlist(listfile) {
 
     } else {
 
-        returntext = text.split('\n');    // array of lines,  with '' in last place
-        
+        returntext = text.split('\n');    // array of lines,  with '' in last place        
         if (returntext[returntext.length-1] === '') returntext.pop();
-
     }
 
-    console.log('fillmenu returning ',returntext);
     return returntext;
 }
 
@@ -360,25 +367,23 @@ async function drawGraphs() {
 
     if (file) {
         console.log('file opened');
-
-        //console.log(graphs_this_page);
             
         const obj = [];
         const leg = [];
-            // this makes an object named after the graph, which populates the div with the same name
+	
+        // this makes an object named after the graph, which populates the div with the same name
 
         for (let i = 0; i < graphs_this_page.length; i++) {
 
             const gname = graphs_this_page[i];  //graphnames[i]
 
-            const divname = 'g_' + gname.split('/')[1];      // the divname doesnt include the directory
+            const divname = 'gdiv_' + gname.split('/')[1];      // the divname doesnt include the directory
 	    
             // only show composite status graphs, hide the others
-            if (gname.includes('status') && !gname.includes('composite')) continue;
+            if (gname.endsWith('status')) continue;
 	    
-            //console.log('looking for graph called ',gname);
             obj[i] = await file.readObject(gname).catch((err) => {       
-                //console.error(err);
+                console.error(err);
 		return null;     // graph not found
             });
 	    
@@ -389,25 +394,24 @@ async function drawGraphs() {
 		thisdiv.classList.add("graphmissing"); 
 		continue;  
 	    }
-
-	    Object.assign(obj[i], {fMarkerSize: 0.5, fMarkerStyle: 8, fMarkerColor: 890, fEditable: 0});
-
-//	    settings.XValuesFormat = '.0f';
 	    
-            if (gname.includes('composite')) {
+	    Object.assign(obj[i], {fMarkerSize: 0.5, fMarkerStyle: 8, fMarkerColor: 890, fEditable: 0});
+	    
+            if (gname.includes('status')) {
                 obj[i].fMinimum = -1.5;
                 obj[i].fMaximum = 1.5;
 		// obj[i].fYaxis.fNdivisions = 1;  // gives an error
             }
 
-
             let drawlegend = false;
    	    leg[i] = await create('TLegend');    
 	    
-	    if (obj[i]._typename == 'TMultiGraph') { // && !gname.includes('composite')) {
+	    if (obj[i]._typename == 'TMultiGraph') { // && !gname.includes('composite')) {                 
+
 		if (obj[i].fGraphs) {
 		    if (obj[i].fGraphs.arr) {
 			if (obj[i].fGraphs.arr.length>1 ) drawlegend = true;      // don't draw legend on the status composite multigraph made in JS bc it kills the graph
+			console.log('set drawlegend');
 		    }
 		}
 	    }
@@ -415,9 +419,7 @@ async function drawGraphs() {
 	    if (drawlegend) {
 		
 		const garr = obj[i].fGraphs.arr;
-
 		let y1 = 0.9 - 0.1*garr.length;
-
 		if (y1<0.18) y1=0.18;
 		
                 Object.assign(leg[i], { fX1NDC: 0.91, fY1NDC: y1, fX2NDC: 1.0, fY2NDC: 0.9, fColumnSeparation:0, fMargin:0.15 });
@@ -434,33 +436,12 @@ async function drawGraphs() {
 		}
             }
 
-
             let gpainter = await draw(divname, obj[i], 'ap;gridx;gridy;');     // draw the graph first, otherwise xmin gets reset to 0  !
-            if (drawlegend) await draw(divname,leg[i]);
-	   	    
-//	    console.log(obj[i]);
-//	    console.log(gpainter);
+            if (drawlegend) await draw(divname,leg[i]);	    
 
            // TMultiGraphPainter has array of Painters with xmin and xmax set to range   autorange set to true
 	    // data are in arrays fX  fY
 	    
-/*
-      let h2painter = await draw('drawth2', obj2, 'col');
- 
-      // zooming handled in the frame painter now
-      let fp = h2painter.getFramePainter();
- 
-      // keep old function to be able invoke it again
-      fp.oldZoom = fp.zoom;
- 
-      // redefine zoom function of TH2 painter to make synchronous zooming of TH1 object
-      fp.zoom = function(xmin,xmax,ymin,ymax,zmin,zmax) {
-          h1painter.getFramePainter().zoom(xmin, xmax);
-          return this.oldZoom(xmin,xmax,ymin,ymax,zmin,zmax);
-      }	    
-*/
-		//		debugger;
-           
         }
 
         console.log('drawing completed');
