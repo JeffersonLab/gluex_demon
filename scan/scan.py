@@ -119,7 +119,7 @@ modules_def = [photons, rho, omega, pi0, triggers, tracking, timing, rf, cdc, fd
 modules_cpp = [triggers, photons_cpp, timing, rf, ps_e, cdc_cpp, fdc, tof_1, fmwpc, ctof]   # modules for CPP
 
 
-testing = 1  # stop after <runlimit> files, print diagnostics
+testing = 0  # stop after <runlimit> files, print diagnostics
 runlimit = 5 # process this number of runs if testing=1
 checkstatus = 0  # process runs with RCDB status>0
 
