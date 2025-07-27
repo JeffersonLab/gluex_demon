@@ -471,7 +471,7 @@ def fdc_rf_time(rootfile) :
 def ps_rf_time(rootfile) :
   #print("in ps_rf_time() ...")
   names = ['ps_tagh_status','ps_tagh','ps_tagh_err']     # These will be unique graph names, start with modulename_status
-  titles = ['PS-TAGH time status','PS-TAGH time mean (ns)', 'PS-TAGH time width (ns)']  # Graph titles 
+  titles = ['PS-TAGH time status','#DeltaT(PS-TAGH) (ns)', '#DeltaT(PS-TAGH) width (ns)']  # Graph titles 
   values = [-1, None, None]
 
   if not rootfile :  # called by init function
@@ -518,7 +518,7 @@ def ps_rf_time(rootfile) :
 def tagh_rf_time(rootfile) :
   #print("in tagh_rf_time() ...")
   names = ['tagh_rf_status','tagh_rf','tagh_rf_err']     # These will be unique graph names, start with modulename_status
-  titles = ['TAGH-RF time status','TAGH-RF time mean (ns)', 'TAGH-RF time width (ns)']  # Graph titles 
+  titles = ['TAGH-RF time status','#DeltaT(TAGH-RF) (ns)', '#DeltaT(TAGH-RF) width (ns)']  # Graph titles 
   values = [-1, None, None]   
 
   if not rootfile :  # called by init function
@@ -551,7 +551,7 @@ def tagh_rf_time(rootfile) :
 def tagm_rf_time(rootfile) :
   #print("in tagm_rf_time() ...")
   names = ['tagm_rf_status','tagm_rf','tagm_rf_err']     # These will be unique graph names, start with modulename_status
-  titles = ['TAGM-RF time status','TAGM-RF time mean (ns)', 'TAGM-RF time width (ns)']  # Graph titles 
+  titles = ['TAGM-RF time status','#DeltaT(TAGM-RF) (ns)', '#DeltaT(TAGM-RF) width (ns)']  # Graph titles 
   values = [-1, None, None]   
 
   if not rootfile :  # called by init function

@@ -82,7 +82,7 @@ def tof_1_dEdxP1(rootfile) :
   # Provide unique graph names. The first must be the status code from this function.
 
   names = ['dEdxP1_status','dEdxP1','dEdxP1_err']  
-  titles = ['dEdx Horizontal Plane','dEdx [GeV]','#sigma dEdx [GeV]']      # These will be the graph titles
+  titles = ['dEdx Horizontal Plane','Plane 1 dEdx [GeV]','#sigma dEdx [GeV]']      # These will be the graph titles
   values = [-1, None, None]                                       # Default values, keep status as -1
   
   if not rootfile :  # called by init function
@@ -134,7 +134,7 @@ def tof_1_dEdxP2(rootfile) :
   # Provide unique graph names. The first must be the status code from this function.  
   
   names = ['dEdxP2_status','dEdxP2','dEdxP2_err']  
-  titles = ['dEdx Vertical Plane','dEdx [GeV]','#sigma dEdx [GeV]']      # These will be the graph titles
+  titles = ['dEdx Vertical Plane','Plane 2 dEdx [GeV]','#sigma dEdx [GeV]']      # These will be the graph titles
   values = [-1,-1,-1]                                       # Default values, keep as -1
   
   if not rootfile :  # called by init function
