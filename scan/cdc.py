@@ -183,7 +183,7 @@ def efficiency(rootfile, e0min=0.97, e5min=0.96, e6min=0.89) :
     if e0 < e0min or e5 < e5min or e6 < e6min:
       status = 0
 
-    values = [status, float('%.2f'%(e0)), float('%.3f'%(e0err)),float('%.2f'%(e5)), float('%.3f'%(e5err)), float('%.2f'%(e6)), float('%.3f'%(e6err))]
+    values = [status, float('%.3f'%(e0)), float('%.3f'%(e0err)),float('%.3f'%(e5)), float('%.3f'%(e5err)), float('%.3f'%(e6)), float('%.3f'%(e6err))]
 
     return values
 
