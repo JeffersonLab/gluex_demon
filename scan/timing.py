@@ -30,6 +30,7 @@ def init() :
   sc = sc_rf_time(False)  # return names, titles, values
   tof = tof_rf_time(False)  # return names, titles, values
   bcal = bcal_rf_time(False)
+  ecal = ecal_rf_time(False)  
   fcal = fcal_rf_time(False)
 
   cdc = cdc_rf_time(False)
@@ -47,7 +48,7 @@ def init() :
   tagh_adctdc = tagh_adctdc_channels(False)
   tagm_adctdc = tagm_adctdc_channels(False)
   
-  things = [ sc, tof, bcal, fcal, cdc, fdc, ps, tagh, tagm ] 
+  things = [ sc, tof, bcal, ecal, fcal, cdc, fdc, ps, tagh, tagm ] 
   things += [ fdc_tdc, sc_chans, tagh_chans, tagm_chans, sc_adctdc, tof_adctdc, tagh_adctdc, tagm_adctdc ]
 
   for thing in things :   # loop through the arrays returned from each function    
@@ -73,6 +74,7 @@ def check(run, rootfile) :
   sc = sc_rf_time(rootfile)  
   tof = tof_rf_time(rootfile)
   bcal = bcal_rf_time(rootfile)
+  ecal = ecal_rf_time(rootfile)  
   fcal = fcal_rf_time(rootfile)
   cdc = cdc_rf_time(rootfile)
   fdc = fdc_rf_time(rootfile)  
@@ -80,7 +82,7 @@ def check(run, rootfile) :
   tagh = tagh_rf_time(rootfile)
   tagm = tagm_rf_time(rootfile)
   
-  things = [ sc, tof, bcal, fcal, cdc, fdc, ps, tagh, tagm ] 
+  things = [ sc, tof, bcal, ecal, fcal, cdc, fdc, ps, tagh, tagm ] 
 
 
   fdc_tdcmin = -10
@@ -353,6 +355,80 @@ def bcal_rf_time(rootfile) :
   return values
 
   
+##############
+
+def ecal_rf_time(rootfile) :
+
+  #print("in ecal_rf_time() ...")
+  names = ['ecal_rf_status', 'pim_ECALRF_mg', 'pim_ECALRF_mg_err', 'pip_ECALRF_mg', 'pip_ECALRF_mg_err', 'g_ECALRF_mg', 'g_ECALRF_mg_err']   
+  titles = ['ECAL-RF time status', 'PiMinus #DeltaT(ECAL-RF) (ns)',  'PiMinus #DeltaT(ECAL-RF) width (ns)', 'PiPlus #DeltaT(ECAL-RF) (ns)',  'PiPlus #DeltaT(ECAL-RF) width (ns)', 'Photon #DeltaT(ECAL-RF) (ns)',  'Photon #DeltaT(ECAL-RF) width (ns)']   # Graph titles 
+
+  values = [-1, None, None, None, None, None, None ]   
+  
+  if not rootfile :  # called by init function
+    return [names, titles, values]
+
+  pi_low_limit = -0.7     # fit ranges
+  pi_high_limit = 0.7
+  pi_pmin = 0.6
+  pi_pmax = 0.0   # no limit if 0.0
+
+  g_low_limit = -0.5
+  g_high_limit = 0.5
+  g_pmin = 0.0
+  g_pmax = 0.0    # no limit if 0.0
+  
+  g_max_dt = 0.1  # good if less than this
+  
+  dirname = '/Independent/Hist_DetectorPID/ECAL'          # directory containing that histogram
+  min_counts = 1000
+  fitoptions = "0SQI"
+
+  histoname = 'DeltaTVsP_Pi-'      # monitoring histogram to check
+  hpim = get_histo(rootfile, dirname, histoname, min_counts)
+
+  if hpim:
+    pim = check_deltatvsp(hpim, fitoptions, pi_pmin, pi_pmax, pi_low_limit, pi_high_limit)
+  else:
+    pim = [-1, None, None]
+
+  
+  histoname = 'DeltaTVsP_Pi+'      # monitoring histogram to check
+  hpip = get_histo(rootfile, dirname, histoname, min_counts)
+
+  if hpip:
+    pip = check_deltatvsp(hpip, fitoptions, pi_pmin, pi_pmax, pi_low_limit, pi_high_limit)
+  else:
+    pip = [-1, None, None]
+
+    
+  dirname = '/Independent/Hist_Neutrals'          # directory containing that histogram  
+  histoname = 'ECALNeutralShowerDeltaTVsE'      # monitoring histogram to check
+
+  hg = get_histo(rootfile, dirname, histoname, min_counts)
+
+  if hg:
+    g = check_deltatvsp(hg, fitoptions, g_pmin, g_pmax, g_low_limit, g_high_limit)
+    if g[0] == 1:
+      if abs(g[1]) > g_max_dt :
+        g[0] = 0
+
+  else:
+    g = [-1, None, None]
+
+
+  pimstatus = pim.pop(0) 
+  pipstatus = pip.pop(0) 
+  gstatus = g.pop(0)
+
+  values = [gstatus]
+  values.extend(pim)
+  values.extend(pip)
+  values.extend(g)
+
+  return values
+
+
 
 ##############
 
