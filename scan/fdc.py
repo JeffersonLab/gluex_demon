@@ -12,11 +12,10 @@ def init() :
   values = [-1]
 
   eff = fdc_efficiency(False)
-  tdc = fdc_tdc(False)
   dedxpos = fdc_dedxpos(False)
   dedxneg = fdc_dedxneg(False)
 
-  things = [ eff, dedxpos, dedxneg, tdc ]
+  things = [ eff, dedxpos, dedxneg ]
 
   #things = [ eff ]
   
@@ -57,8 +56,6 @@ def check(run, rootfile) :
 
   eff = fdc_efficiency(rootfile, e0min, e2min, e4min)
   
-  tdc = fdc_tdc(rootfile, tdcmin, tdcmax)
-
   dedxpos = fdc_dedxpos(rootfile, dedxmin, dedxmax, dedxresmin, dedxresmax)
 
   dedxneg = fdc_dedxneg(rootfile, dedxmin, dedxmax, dedxresmin, dedxresmax)
@@ -67,7 +64,7 @@ def check(run, rootfile) :
 
   statuslist = []
 
-  things = [ eff, dedxpos, dedxneg, tdc ]
+  things = [ eff, dedxpos, dedxneg ]
   
   for thing in things :
 
@@ -227,56 +224,5 @@ def fdc_efficiency(rootfile, e0min=0.97, e2min=0.96, e4min=0.89, e5min=0.85) :
     return values
 
 
-
-
-def fdc_tdc(rootfile, tdcmin=-2, tdcmax=2) :
-
-  titles = ['FDC TDC status','FDC hit wire time peak, max diff from mean (ns)']
-  names = ['fdc_tdc_status','tdc_max_diff']
-  values = [-1, None]
-
-  if not rootfile :  # called by init function
-    return [names, titles, values]
-
-  dirname = '/HLDetectorTiming/Physics Triggers/FDC'
-  histoname = 'FDCHit Wire time vs. module'
-
-  min_counts = 1000
-
-  h = get_histo(rootfile, dirname, histoname, min_counts)
-
-  if (not h) :
-    return values
-
-  n = h.GetEntries()
-
-  nmin = 0.5*(n/48)   # 0.5 x entries/number of modules (one is always missing?) 
-  # find the overall peak time, then look at each module to find the tdiff
-
-  p = h.ProjectionY("p",1,48)   # 400 bins !
-
-  maxbin = p.GetMaximumBin()
-  overall_epeak = p.GetXaxis().GetBinCenter(maxbin)
-  max_tdiff = 0
-
-  for mod in range(1,49):
-    p = h.ProjectionY("p",mod,mod)   # 400 bins !
-    #p.Rebin(8)
-    if p.GetEntries() > nmin:
-
-      # find the bin with max content, histo looks like spike on flat bg
-      maxbin = p.GetMaximumBin()
-      epeak = p.GetXaxis().GetBinCenter(maxbin)
-      tdiff = epeak - overall_epeak
-      if abs(tdiff) > abs(max_tdiff):
-        max_tdiff = tdiff  
-
-  status = 1
-  if max_tdiff < tdcmin or max_tdiff > tdcmax:
-    status=0
-
-  values = [status, float('%.1f'%(max_tdiff)) ]
-  
-  return values
 
 

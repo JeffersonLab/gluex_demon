@@ -31,7 +31,6 @@ def init() :
   tof = tof_rf_time(False)  # return names, titles, values
   bcal = bcal_rf_time(False)
   fcal = fcal_rf_time(False)
-  ecal = ecal_rf_time(False)  
 
   cdc = cdc_rf_time(False)
   fdc = fdc_rf_time(False)
@@ -39,7 +38,17 @@ def init() :
   tagh = tagh_rf_time(False)
   tagm = tagm_rf_time(False)
   
-  things = [ sc, tof, bcal, ecal, fcal, cdc, fdc, ps, tagh, tagm ] 
+  fdc_tdc = fdc_tdc_diff(False)
+  sc_chans = sc_rf_channels(False)
+  tagh_chans = tagh_rf_channels(False)
+  tagm_chans = tagm_rf_channels(False)
+  sc_adctdc = sc_adctdc_channels(False)
+  tof_adctdc = tof_adctdc_channels(False)
+  tagh_adctdc = tagh_adctdc_channels(False)
+  tagm_adctdc = tagm_adctdc_channels(False)
+  
+  things = [ sc, tof, bcal, fcal, cdc, fdc, ps, tagh, tagm ] 
+  things += [ fdc_tdc, sc_chans, tagh_chans, tagm_chans, sc_adctdc, tof_adctdc, tagh_adctdc, tagm_adctdc ]
 
   for thing in things :   # loop through the arrays returned from each function    
 
@@ -64,7 +73,6 @@ def check(run, rootfile) :
   sc = sc_rf_time(rootfile)  
   tof = tof_rf_time(rootfile)
   bcal = bcal_rf_time(rootfile)
-  ecal = ecal_rf_time(rootfile)  
   fcal = fcal_rf_time(rootfile)
   cdc = cdc_rf_time(rootfile)
   fdc = fdc_rf_time(rootfile)  
@@ -72,7 +80,22 @@ def check(run, rootfile) :
   tagh = tagh_rf_time(rootfile)
   tagm = tagm_rf_time(rootfile)
   
-  things = [ sc, tof, bcal, ecal, fcal, cdc, fdc, ps, tagh, tagm ] 
+  things = [ sc, tof, bcal, fcal, cdc, fdc, ps, tagh, tagm ] 
+
+
+  fdc_tdcmin = -10
+  fdc_tdcmax = 10
+
+  fdc_tdc = fdc_tdc_diff(rootfile, fdc_tdcmin, fdc_tdcmax)
+  sc_chans = sc_rf_channels(rootfile)
+  tagh_chans = tagh_rf_channels(rootfile)
+  tagm_chans = tagm_rf_channels(rootfile)
+  sc_adctdc = sc_adctdc_channels(rootfile)
+  tof_adctdc = tof_adctdc_channels(rootfile)
+  tagh_adctdc = tagh_adctdc_channels(rootfile)
+  tagm_adctdc = tagm_adctdc_channels(rootfile)
+
+  things += [ fdc_tdc, sc_chans, tagh_chans, tagm_chans, sc_adctdc, tof_adctdc, tagh_adctdc, tagm_adctdc ]
 
   # set the overall status to the min value of each histogram status
 
@@ -333,80 +356,6 @@ def bcal_rf_time(rootfile) :
 
 ##############
 
-def ecal_rf_time(rootfile) :
-
-  #print("in ecal_rf_time() ...")
-  names = ['ecal_rf_status', 'pim_ECALRF_mg', 'pim_ECALRF_mg_err', 'pip_ECALRF_mg', 'pip_ECALRF_mg_err', 'g_ECALRF_mg', 'g_ECALRF_mg_err']   
-  titles = ['ECAL-RF time status', 'PiMinus #DeltaT(ECAL-RF) (ns)',  'PiMinus #DeltaT(ECAL-RF) width (ns)', 'PiPlus #DeltaT(ECAL-RF) (ns)',  'PiPlus #DeltaT(ECAL-RF) width (ns)', 'Photon #DeltaT(ECAL-RF) (ns)',  'Photon #DeltaT(ECAL-RF) width (ns)']   # Graph titles 
-
-  values = [-1, None, None, None, None, None, None ]   
-  
-  if not rootfile :  # called by init function
-    return [names, titles, values]
-
-  pi_low_limit = -0.7     # fit ranges
-  pi_high_limit = 0.7
-  pi_pmin = 0.6
-  pi_pmax = 0.0   # no limit if 0.0
-
-  g_low_limit = -0.5
-  g_high_limit = 0.5
-  g_pmin = 0.0
-  g_pmax = 0.0    # no limit if 0.0
-  
-  g_max_dt = 0.1  # good if less than this
-  
-  dirname = '/Independent/Hist_DetectorPID/ECAL'          # directory containing that histogram
-  min_counts = 1000
-  fitoptions = "0SQI"
-
-  histoname = 'DeltaTVsP_Pi-'      # monitoring histogram to check
-  hpim = get_histo(rootfile, dirname, histoname, min_counts)
-
-  if hpim:
-    pim = check_deltatvsp(hpim, fitoptions, pi_pmin, pi_pmax, pi_low_limit, pi_high_limit)
-  else:
-    pim = [-1, None, None]
-
-  
-  histoname = 'DeltaTVsP_Pi+'      # monitoring histogram to check
-  hpip = get_histo(rootfile, dirname, histoname, min_counts)
-
-  if hpip:
-    pip = check_deltatvsp(hpip, fitoptions, pi_pmin, pi_pmax, pi_low_limit, pi_high_limit)
-  else:
-    pip = [-1, None, None]
-
-    
-  dirname = '/Independent/Hist_Neutrals'          # directory containing that histogram  
-  histoname = 'ECALNeutralShowerDeltaTVsE'      # monitoring histogram to check
-
-  hg = get_histo(rootfile, dirname, histoname, min_counts)
-
-  if hg:
-    g = check_deltatvsp(hg, fitoptions, g_pmin, g_pmax, g_low_limit, g_high_limit)
-    if g[0] == 1:
-      if abs(g[1]) > g_max_dt :
-        g[0] = 0
-
-  else:
-    g = [-1, None, None]
-
-
-  pimstatus = pim.pop(0) 
-  pipstatus = pip.pop(0) 
-  gstatus = g.pop(0)
-
-  values = [gstatus]
-  values.extend(pim)
-  values.extend(pip)
-  values.extend(g)
-
-  return values
-
-
-##############
-
 def fcal_rf_time(rootfile) :
 
   #print("in fcal_rf_time() ...")
@@ -656,6 +605,412 @@ def tagm_rf_time(rootfile) :
   #print(values)
   return values       # return array of values, status first
 
+
+def fdc_tdc_diff(rootfile, tdcmin=-2, tdcmax=2) :
+
+  titles = ['FDC TDC status','FDC hit wire time peak, max diff from mean (ns)']
+  names = ['fdc_tdc_status','tdc_max_diff']
+  values = [-1, None]
+
+  if not rootfile :  # called by init function
+    return [names, titles, values]
+
+  dirname = '/HLDetectorTiming/Physics Triggers/FDC'
+  histoname = 'FDCHit Wire time vs. module'
+
+  min_counts = 1000
+
+  h = get_histo(rootfile, dirname, histoname, min_counts)
+
+  if (not h) :
+    return values
+
+  n = h.GetEntries()
+
+  nmin = 0.5*(n/48)   # 0.5 x entries/number of modules (one is always missing?) 
+  # find the overall peak time, then look at each module to find the tdiff
+
+  p = h.ProjectionY("p",1,48)   # 400 bins !
+
+  maxbin = p.GetMaximumBin()
+  overall_epeak = p.GetXaxis().GetBinCenter(maxbin)
+  max_tdiff = 0
+
+  for mod in range(1,49):
+    p = h.ProjectionY("p",mod,mod)   # 400 bins !
+    #p.Rebin(8)
+    if p.GetEntries() > nmin:
+
+      # find the bin with max content, histo looks like spike on flat bg
+      maxbin = p.GetMaximumBin()
+      epeak = p.GetXaxis().GetBinCenter(maxbin)
+      tdiff = epeak - overall_epeak
+      if abs(tdiff) > abs(max_tdiff):
+        max_tdiff = tdiff  
+
+  status = 1
+  if max_tdiff < tdcmin or max_tdiff > tdcmax:
+    status=0
+
+  values = [status, float('%.1f'%(max_tdiff)) ]
+  
+  return values
+
+
+def sc_rf_channels(rootfile, diffmin=-0.2, diffmax=0.2) :
+
+  #print("in sc_rf_channels() ...")
+
+  titles = ['SC channel status', 'SC RF time number bad channels','SC RF time maximum difference']
+  names = ['sc_channel_status','sc_rftime_bad_channels','sc_rftime_max_diff']
+  values = [-1, None, None]
+
+  if not rootfile :  # called by init function
+    return [names, titles, values]
+
+  dirname = '/HLDetectorTiming/Physics Triggers/TRACKING'
+  histoname = 'SC - RF Time vs. Sector'
+
+  min_counts = 1000
+
+  h = get_histo(rootfile, dirname, histoname, min_counts)
+
+  if (not h) :
+    return values
+
+  n = h.GetEntries()
+  bad_channels = 0
+  max_tdiff = 0.  
+  fitoptions = "0SQ"
+  time_max = 10.
+  low_limit = -0.3
+  high_limit = 0.3
+
+  for mod in range(1,h.GetNbinsX()):
+    p = h.ProjectionY("p",mod,mod)  
+    #p.Rebin(8)
+    if p.GetEntries() > min_counts:
+
+      # find the bin with max content, histo looks like spike on flat bg
+      tdiff = check_deltat(p, fitoptions, time_max, low_limit, high_limit)[1]
+      if tdiff is None:
+      	continue
+      if abs(tdiff) > abs(max_tdiff):
+        max_tdiff = tdiff 
+        bad_channels = bad_channels + 1
+
+  status = 1
+  if max_tdiff < diffmin or max_tdiff > diffmax:
+    status=0
+
+  values = [status, bad_channels, float('%.1f'%(max_tdiff)) ]
+  
+  return values
+
+
+def tagh_rf_channels(rootfile, diffmin=-0.1, diffmax=0.1) :
+
+  #print("in sc_rf_channels() ...")
+
+  titles = ['TAGH channel status', 'TAGH RF time number bad channels','TAGH RF time maximum difference']
+  names = ['tagh_channel_status','tagh_rftime_bad_channels','tagh_rftime_max_diff']
+  values = [-1, None, None]
+
+  if not rootfile :  # called by init function
+    return [names, titles, values]
+
+  dirname = '/HLDetectorTiming/Physics Triggers/TRACKING'
+  histoname = 'TAGH - RFBunch Time'
+
+  min_counts = 1000
+
+  h = get_histo(rootfile, dirname, histoname, min_counts)
+
+  if (not h) :
+    return values
+
+  n = h.GetEntries()
+  bad_channels = 0
+  max_tdiff = 0.
+  fitoptions = "0SQ"
+  time_max = 10.
+  low_limit = -0.15
+  high_limit = 0.15
+
+  for mod in range(1,h.GetNbinsX()):
+    p = h.ProjectionY("p",mod,mod)  
+    #p.Rebin(8)
+    if p.GetEntries() > min_counts:
+
+      # find the bin with max content, histo looks like spike on flat bg
+      tdiff = check_deltat(p, fitoptions, time_max, low_limit, high_limit)[1]
+      if tdiff is None:
+      	continue
+      if abs(tdiff) > abs(max_tdiff):
+        max_tdiff = tdiff 
+        bad_channels = bad_channels + 1
+
+  status = 1
+  if max_tdiff < diffmin or max_tdiff > diffmax:
+    status=0
+
+  values = [status, bad_channels, float('%.1f'%(max_tdiff)) ]
+  
+  return values
+
+
+def tagm_rf_channels(rootfile, diffmin=-0.1, diffmax=0.1) :
+
+  #print("in sc_rf_channels() ...")
+
+  titles = ['TAGM channel status', 'TAGM RF time number bad channels','TAGM RF time maximum difference']
+  names = ['tagm_channel_status','tagm_rftime_bad_channels','tagm_rftime_max_diff']
+  values = [-1, None, None]
+
+  if not rootfile :  # called by init function
+    return [names, titles, values]
+
+  dirname = '/HLDetectorTiming/Physics Triggers/TRACKING'
+  histoname = 'TAGM - RFBunch Time'
+
+  min_counts = 1000
+
+  h = get_histo(rootfile, dirname, histoname, min_counts)
+
+  if (not h) :
+    return values
+
+  n = h.GetEntries()
+  bad_channels = 0
+  max_tdiff = 0.
+  fitoptions = "0SQ"
+  time_max = 10.
+  low_limit = -0.3
+  high_limit = 0.3
+
+  for mod in range(1,h.GetNbinsX()):
+    p = h.ProjectionY("p",mod,mod)  
+    #p.Rebin(8)
+    if p.GetEntries() > min_counts:
+
+      # find the bin with max content, histo looks like spike on flat bg
+      tdiff = check_deltat(p, fitoptions, time_max, low_limit, high_limit)[1]
+      if tdiff is None:
+      	continue
+      if abs(tdiff) > abs(max_tdiff):
+        max_tdiff = tdiff 
+        bad_channels = bad_channels + 1
+
+  status = 1
+  if max_tdiff < diffmin or max_tdiff > diffmax:
+    status=0
+
+  values = [status, bad_channels, float('%.1f'%(max_tdiff)) ]
+  
+  return values
+
+def sc_adctdc_channels(rootfile, diffmin=-0.1, diffmax=0.1) :
+
+  #print("in sc_rf_channels() ...")
+
+  titles = ['SC ADC-TDC channel status', 'SC ADC-TDC time number bad channels','SC ADC-TDC time maximum difference']
+  names = ['sc_adctdc_channel_status','sc_adctdc_bad_channels','sc_adctdc_max_diff']
+  values = [-1, None, None]
+
+  if not rootfile :  # called by init function
+    return [names, titles, values]
+
+  dirname = '/HLDetectorTiming/Physics Triggers/SC'
+  histoname = 'SCHit TDC_ADC Difference'
+
+  min_counts = 1000
+
+  h = get_histo(rootfile, dirname, histoname, min_counts)
+
+  if (not h) :
+    return values
+
+  n = h.GetEntries()
+  bad_channels = 0
+  max_tdiff = 0.
+  fitoptions = "0SQ"
+  time_max = 10.
+  low_limit = -0.3
+  high_limit = 0.3
+
+  for mod in range(1,h.GetNbinsX()):
+    p = h.ProjectionY("p",mod,mod)  
+    #p.Rebin(8)
+    if p.GetEntries() > min_counts:
+
+      # find the bin with max content, histo looks like spike on flat bg
+      tdiff = check_deltat(p, fitoptions, time_max, low_limit, high_limit)[1]
+      if tdiff is None:
+      	continue
+      if abs(tdiff) > abs(max_tdiff):
+        max_tdiff = tdiff 
+        bad_channels = bad_channels + 1
+
+  status = 1
+  if max_tdiff < diffmin or max_tdiff > diffmax:
+    status=0
+
+  values = [status, bad_channels, float('%.1f'%(max_tdiff)) ]
+  
+  return values
+
+
+def tof_adctdc_channels(rootfile, diffmin=-0.5, diffmax=0.5) :
+
+  #print("in sc_rf_channels() ...")
+
+  titles = ['TOF ADC-TDC channel status', 'TOF ADC-TDC time number bad channels','TOF ADC-TDC time maximum difference']
+  names = ['tof_adctdc_channel_status','tof_adctdc_bad_channels','tof_adctdc_max_diff']
+  values = [-1, None, None]
+
+  if not rootfile :  # called by init function
+    return [names, titles, values]
+
+  dirname = '/HLDetectorTiming/Physics Triggers/TOF'
+  histoname = 'TOFHit TDC_ADC Difference'
+
+  min_counts = 1000
+
+  h = get_histo(rootfile, dirname, histoname, min_counts)
+
+  if (not h) :
+    return values
+
+  n = h.GetEntries()
+  bad_channels = 0
+  max_tdiff = 0.
+  fitoptions = "0SQ"
+  time_max = 10.
+  low_limit = -0.15
+  high_limit = 0.15
+
+  for mod in range(1,h.GetNbinsX()):
+    p = h.ProjectionY("p",mod,mod)  
+    #p.Rebin(8)
+    if p.GetEntries() > min_counts:
+
+      # find the bin with max content, histo looks like spike on flat bg
+      tdiff = check_deltat(p, fitoptions, time_max, low_limit, high_limit)[1]
+      if tdiff is None:
+      	continue
+      if abs(tdiff) > abs(max_tdiff):
+        max_tdiff = tdiff 
+        bad_channels = bad_channels + 1
+
+  status = 1
+  if max_tdiff < diffmin or max_tdiff > diffmax:
+    status=0
+
+  values = [status, bad_channels, float('%.1f'%(max_tdiff)) ]
+  
+  return values
+
+
+def tagh_adctdc_channels(rootfile, diffmin=-0.1, diffmax=0.1) :
+
+  #print("in sc_rf_channels() ...")
+
+  titles = ['TAGH ADC-TDC channel status', 'TAGH ADC-TDC time number bad channels','TAGH ADC-TDC time maximum difference']
+  names = ['tagh_adctdc_channel_status','tagh_adctdc_bad_channels','tagh_adctdc_max_diff']
+  values = [-1, None, None]
+
+  if not rootfile :  # called by init function
+    return [names, titles, values]
+
+  dirname = '/HLDetectorTiming/Physics Triggers/TAGH'
+  histoname = 'TAGHHit TDC_ADC Difference'
+
+  min_counts = 1000
+
+  h = get_histo(rootfile, dirname, histoname, min_counts)
+
+  if (not h) :
+    return values
+
+  n = h.GetEntries()
+  bad_channels = 0
+  max_tdiff = 0.
+  fitoptions = "0SQ"
+  time_max = 10.
+  low_limit = -0.15
+  high_limit = 0.15
+
+  for mod in range(1,h.GetNbinsX()):
+    p = h.ProjectionY("p",mod,mod)  
+    #p.Rebin(8)
+    if p.GetEntries() > min_counts:
+
+      # find the bin with max content, histo looks like spike on flat bg
+      tdiff = check_deltat(p, fitoptions, time_max, low_limit, high_limit)[1]
+      if tdiff is None:
+      	continue
+      if abs(tdiff) > abs(max_tdiff):
+        max_tdiff = tdiff 
+        bad_channels = bad_channels + 1
+
+  status = 1
+  if max_tdiff < diffmin or max_tdiff > diffmax:
+    status=0
+
+  values = [status, bad_channels, float('%.1f'%(max_tdiff)) ]
+  
+  return values
+
+
+def tagm_adctdc_channels(rootfile, diffmin=-0.1, diffmax=0.1) :
+
+  #print("in sc_rf_channels() ...")
+
+  titles = ['TAGM ADC-TDC channel status', 'TAGM ADC-TDC time number bad channels','TAGM ADC-TDC time maximum difference']
+  names = ['tagm_adctdc_channel_status','tagm_adctdc_bad_channels','tagm_adctdc_max_diff']
+  values = [-1, None, None]
+
+  if not rootfile :  # called by init function
+    return [names, titles, values]
+
+  dirname = '/HLDetectorTiming/Physics Triggers/TAGM'
+  histoname = 'TAGMHit TDC_ADC Difference'
+
+  min_counts = 1000
+
+  h = get_histo(rootfile, dirname, histoname, min_counts)
+
+  if (not h) :
+    return values
+
+  n = h.GetEntries()
+  bad_channels = 0
+  max_tdiff = 0.
+  fitoptions = "0SQ"
+  time_max = 10.
+  low_limit = -0.3
+  high_limit = 0.3
+
+  for mod in range(1,h.GetNbinsX()):
+    p = h.ProjectionY("p",mod,mod)  
+    #p.Rebin(8)
+    if p.GetEntries() > min_counts:
+
+      # find the bin with max content, histo looks like spike on flat bg
+      tdiff = check_deltat(p, fitoptions, time_max, low_limit, high_limit)[1]
+      if tdiff is None:
+      	continue
+      if abs(tdiff) > abs(max_tdiff):
+        max_tdiff = tdiff 
+        bad_channels = bad_channels + 1
+
+  status = 1
+  if max_tdiff < diffmin or max_tdiff > diffmax:
+    status=0
+
+  values = [status, bad_channels, float('%.1f'%(max_tdiff)) ]
+  
+  return values
 
 
 
