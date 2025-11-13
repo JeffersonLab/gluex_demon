@@ -51,9 +51,6 @@ def init() :
   things = [ sc, tof, bcal, ecal, fcal, cdc, fdc, ps, tagh, tagm ] 
   things += [ fdc_tdc, sc_chans, tagh_chans, tagm_chans, sc_adctdc, tof_adctdc, tagh_adctdc, tagm_adctdc ]
 
-#  things = [ fdc_tdc ]
-
-  print(len(things),' things registered')
   
   for thing in things :   # loop through the arrays returned from each function    
 
@@ -102,10 +99,6 @@ def check(run, rootfile) :
   tagm_adctdc = tagm_adctdc_channels(rootfile)
 
   things += [ fdc_tdc, sc_chans, tagh_chans, tagm_chans, sc_adctdc, tof_adctdc, tagh_adctdc, tagm_adctdc ]
-
- # things = [ fdc_tdc ]
-
-  print(len(things),' things registered')
 
     
   # set the overall status to the min value of each histogram status
