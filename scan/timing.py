@@ -51,6 +51,10 @@ def init() :
   things = [ sc, tof, bcal, ecal, fcal, cdc, fdc, ps, tagh, tagm ] 
   things += [ fdc_tdc, sc_chans, tagh_chans, tagm_chans, sc_adctdc, tof_adctdc, tagh_adctdc, tagm_adctdc ]
 
+#  things = [ fdc_tdc ]
+
+  print(len(things),' things registered')
+  
   for thing in things :   # loop through the arrays returned from each function    
 
     names.extend(thing[0])
@@ -99,6 +103,11 @@ def check(run, rootfile) :
 
   things += [ fdc_tdc, sc_chans, tagh_chans, tagm_chans, sc_adctdc, tof_adctdc, tagh_adctdc, tagm_adctdc ]
 
+ # things = [ fdc_tdc ]
+
+  print(len(things),' things registered')
+
+    
   # set the overall status to the min value of each histogram status
 
   statuslist = []
@@ -685,7 +694,7 @@ def tagm_rf_time(rootfile) :
 def fdc_tdc_diff(rootfile, tdcmin=-2, tdcmax=2) :
 
   titles = ['FDC TDC status','FDC hit wire time peak, max diff from mean (ns)']
-  names = ['fdc_tdc_status','tdc_max_diff']
+  names = ['fdc_tdc_status','fdc_tdc_max_diff']
   values = [-1, None]
 
   if not rootfile :  # called by init function
