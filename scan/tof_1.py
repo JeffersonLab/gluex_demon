@@ -103,7 +103,9 @@ def tof_1_dEdxP1(rootfile) :
     return values
   
   # code to check the histogram and find the status values
-  
+
+  h.GetXaxis().SetRangeUser(0.5,10) # exclude bin 1
+
   MAX = h.GetBinCenter(h.GetMaximumBin())
   r = h.Fit("landau","Q0","R", MAX*0.9, MAX*2.2)
 
@@ -135,7 +137,7 @@ def tof_1_dEdxP2(rootfile) :
   
   names = ['dEdxP2_status','dEdxP2','dEdxP2_err']  
   titles = ['dEdx Vertical Plane','Plane 2 dEdx [GeV]','#sigma dEdx [GeV]']      # These will be the graph titles
-  values = [-1,-1,-1]                                       # Default values, keep as -1
+  values = [-1, None, None]                                       # Default values, keep as -1
   
   if not rootfile :  # called by init function
     return [names, titles, values]
@@ -156,6 +158,8 @@ def tof_1_dEdxP2(rootfile) :
 
   # code to check the histogram and find the status values
 
+  h.GetXaxis().SetRangeUser(0.5,10) # exclude bin 1
+  
   MAX = h.GetBinCenter(h.GetMaximumBin())
 
   r = h.Fit("landau","Q0","R", MAX*0.9, MAX*2.2)
