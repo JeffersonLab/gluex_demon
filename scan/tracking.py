@@ -315,7 +315,7 @@ def bcal_matchrate(rootfile) :
       status=0
 
 
-  values = [status, float('%.2f'%(match_rate)) ]
+  values = [status, float('%.3f'%(match_rate)) ]
   
   return values       # return array of values, status first
 
@@ -353,7 +353,7 @@ def ecal_matchrate(rootfile) :
 
     if chances > 0 :
       match_rate = hits/chances
-      values[1] = float('%.2f'%(match_rate))
+      values[1] = float('%.3f'%(match_rate))
 
       if match_rate >= llim :
         status1 = 1
@@ -376,7 +376,7 @@ def ecal_matchrate(rootfile) :
 
     if chances > 0 :
       match_rate = hits/chances
-      values[2] = float('%.2f'%(match_rate))
+      values[2] = float('%.3f'%(match_rate))
       
       if match_rate >= llim2 :
         status2 = 1
@@ -418,7 +418,7 @@ def fcal_matchrate(rootfile) :
 
     if chances > 0 :
       match_rate = hits/chances
-      values[1] = float('%.2f'%(match_rate))
+      values[1] = float('%.3f'%(match_rate))
 
       if match_rate >= llim :
         status1 = 1
@@ -441,7 +441,7 @@ def fcal_matchrate(rootfile) :
 
     if chances > 0 :
       match_rate = hits/chances
-      values[2] = float('%.2f'%(match_rate))
+      values[2] = float('%.3f'%(match_rate))
       
       if match_rate >= llim2 :
         status2 = 1
@@ -484,7 +484,7 @@ def sc_matchrate(rootfile) :
 
     if chances > 0 :
       match_rate = hits/chances
-      values[1] = float('%.2f'%(match_rate))
+      values[1] = float('%.3f'%(match_rate))
 
       if match_rate >= llim :
         values[0] = 1
@@ -525,7 +525,7 @@ def tof_matchrate(rootfile) :
 
     if chances > 0 :
       match_rate = hits/chances
-      values[1] = float('%.2f'%(match_rate))
+      values[1] = float('%.3f'%(match_rate))
 
       if match_rate >= llim :
         status1 = 1
@@ -548,7 +548,7 @@ def tof_matchrate(rootfile) :
 
     if chances > 0 :
       match_rate = hits/chances
-      values[2] = float('%.2f'%(match_rate))
+      values[2] = float('%.3f'%(match_rate))
       
       if match_rate >= llim2 :
         status2 = 1

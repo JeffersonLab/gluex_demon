@@ -91,8 +91,9 @@ from glob import glob
 script = sys.argv.pop(0)
 nargs = len(sys.argv)
 
-if nargs<4 or nargs>6 or sys.argv[0] == "-h" or sys.argv[0] == "--h" or sys.argv[0] == "--help":
-    exit("This script scans GlueX/Hall D detector monitoring histograms to create graphs.\nUsage: python scan.py -r Year-Month -v VersionNumber [path_to_monitoring_histogram_directory] [anystatus]\n    eg python scan.py -r 2022-05 -v 06\nThe histogram directory is optional if it is the usual one. \nBy default, only runs with RCDB status >0 are checked. If the arg anystatus is supplied, the RCDB status check is skipped. ")
+if nargs<4 or nargs>7 or sys.argv[0] == "-h" or sys.argv[0] == "--h" or sys.argv[0] == "--help":
+    exit("\nThis script scans GlueX/Hall D detector monitoring histograms to create graphs.\n\nUsage: python scan.py -r Year-Month -v VersionNumber [-s CheckStatus] [path_to_monitoring_histogram_directory]\n    eg python scan.py -r 2022-05 -v 06 -s 1\n\nThe histogram directory is optional if it is the usual one. \n\nCheckStatus values act as follows:\n  -1: check all runs\n   0:check only runs with RCDB status >0 (this is the default)\n   1:check only runs with RCDB status=1")
+
 
 # detector monitoring modules
 import cdc 
@@ -117,11 +118,11 @@ import triggers
 
 modules_def = [photons, rho, omega, pi0, triggers, tracking, timing, rf, cdc, fdc, sc, tof_1]
 modules_cpp = [triggers, photons_cpp, timing, rf, ps_e, cdc_cpp, fdc, tof_1, fmwpc, ctof]   # modules for CPP
-#modules_def = [timing]
+#modules_def = [tracking]
 
 testing = 0  # stop after <runlimit> files, print diagnostics
 runlimit = 5 # process this number of runs if testing=1
-checkstatus = 0  # process runs with RCDB status>0
+checkstatus = 0  # process runs with RCDB status>0.  if =1, only process status=1 runs, if -1, process all runs
 
 RunPeriod=""
 VersionNumber=""
@@ -134,18 +135,19 @@ while len(sys.argv) > 0 :
         RunPeriod = sys.argv.pop(0)
     elif x == "-v" :
         VersionNumber = sys.argv.pop(0)
-    elif x == "anystatus" :
-        checkstatus = 0
+    elif x == "-s" :
+        checkstatus = sys.argv.pop(0)
     else :
         histdir = x
-  
+
 if RunPeriod == "" :
     exit('Please supply Run Period year and month, eg 2022-05')
 if VersionNumber == "" : 
     exit('Please supply Monitoring Version Number, eg 06')
 if histdir == "" : 
     histdir = '/work/halld/data_monitoring/RunPeriod-' + RunPeriod + '/mon_ver' + VersionNumber + '/rootfiles'
-
+if not (checkstatus == "-1" or checkstatus == "0" or checkstatus == "1" ) :
+    exit('CheckStatus is invalid, should be -1 (all runs), 0 (runs with status >0) or 1 (runs with status 1)')
 if RunPeriod == "2025-01" and VersionNumber == "01":
     checkstatus = 2025
     print('Starting from 131593, runs with at least 10M events, not checking RCDB status')
@@ -153,11 +155,14 @@ if RunPeriod == "2025-01" and VersionNumber == "01":
 if testing:
     print('Looking for monitoring histograms inside directory',histdir)
 
+checkstatus = int(checkstatus)
+    
 # Make sure the monitoring histogram directory exists
 
 if not os.path.isdir(histdir):
     exit('Cannot find ' + histdir + '\n  It might have been moved from /work/halld/data_monitoring to /cache/halld/offline_monitoring.')
 
+    
 # Make list of filenames
 
 cwd = os.getcwd()
@@ -289,7 +294,7 @@ for imod in range(len(modules)) :
        active_modules.append(modules[imod])
 
 
-if checkstatus != 0 :
+if checkstatus != -1 :
     import rcdb
     db = rcdb.RCDBProvider("mysql://rcdb@hallddb/rcdb2")
 
@@ -326,11 +331,17 @@ for filename in histofilelist:
                 elif condition.value <= 10000000:
                     skiprun = 1
                 
-        elif checkstatus != 0 :
+        elif checkstatus == 0 :
             condition = db.get_condition(run, "status")
             if condition.value <= 0:
                 skiprun = 1
 
+        elif checkstatus == 1 :
+            condition = db.get_condition(run, "status")
+            if condition.value != 1:
+                skiprun = 1 
+
+                
         if skiprun:
             continue
     
