@@ -1,132 +1,27 @@
-# Sean used min of 0.8 GeV for second BCAL photon graph.  Mark's plots use 1 GeV
-# Sean checked 2 different histos for neutrals
-#
-
-# regular
-#  histoname = 'BCALNeutralShowerDeltaTVsE'      # monitoring histogram to check
-#  dirname = '/Independent/Hist_Neutrals'          # directory containing that histogram
-
-#alt
-#  histoname = 'DeltaTVsShowerE_Photon'      # monitoring histogram to check
-#  dirname = '/Independent/Hist_DetectorPID/BCAL'          # directory containing that histogram
-
-
-from utils import get_histo     # demon's helper functions
+from utils import get_histo, default_values     # demon's helper functions
 from ROOT import gROOT,TF1
 
+# Define the page name
+PAGENAME = 'Timing'
 
-def init() : 
-
-# call each function to get the names, titles and array of defaults set to -1
-
-  pagename = 'Timing'
-  names = ['timing_status']    # This will be the overall status graph name for this module, must start with modulename_
-  titles = ['Timing status']   # This will be the status graph title
-  values = [-1]                 # Default status, keep it at -1
+# Provide the names of the custom functions in this module
+def declare_functions() : 
+  list_of_functions = [sc_rf_time, tof_rf_time, bcal_rf_time, ecal_rf_time, fcal_rf_time, cdc_rf_time, fdc_rf_time, ps_rf_time, tagh_rf_time, tagm_rf_time, fdc_tdc_diff, sc_rf_channels, tagh_rf_channels, tagm_rf_channels, sc_adctdc_channels, tof_adctdc_channels, tagh_adctdc_channels, tagm_adctdc_channels]
+  return list_of_functions
 
 
-  # list of functions to check, here they should be called with one argument: False, to return names, titles & defaults
-
-  sc = sc_rf_time(False)  # return names, titles, values
-  tof = tof_rf_time(False)  # return names, titles, values
-  bcal = bcal_rf_time(False)
-  ecal = ecal_rf_time(False)  
-  fcal = fcal_rf_time(False)
-
-  cdc = cdc_rf_time(False)
-  fdc = fdc_rf_time(False)
-  ps = ps_rf_time(False)
-  tagh = tagh_rf_time(False)
-  tagm = tagm_rf_time(False)
-  
-  fdc_tdc = fdc_tdc_diff(False)
-  sc_chans = sc_rf_channels(False)
-  tagh_chans = tagh_rf_channels(False)
-  tagm_chans = tagm_rf_channels(False)
-  sc_adctdc = sc_adctdc_channels(False)
-  tof_adctdc = tof_adctdc_channels(False)
-  tagh_adctdc = tagh_adctdc_channels(False)
-  tagm_adctdc = tagm_adctdc_channels(False)
-  
-  things = [ sc, tof, bcal, ecal, fcal, cdc, fdc, ps, tagh, tagm ] 
-  things += [ fdc_tdc, sc_chans, tagh_chans, tagm_chans, sc_adctdc, tof_adctdc, tagh_adctdc, tagm_adctdc ]
-
-  
-  for thing in things :   # loop through the arrays returned from each function    
-
-    names.extend(thing[0])
-    titles.extend(thing[1])
-    values.extend(thing[2])
-
-  return [pagename, names, titles, values]
+# Custom functions follow.
+# Quantities that could not be evaluated (not enough data/bad fit etc) should be assigned a value of None and status -1.
+# Quantities that were evaluated and compared with limits should have status code 1 if acceptable and 0 if not.
+# Quantities that were evaluated but not compared with limits should have a status code of 1.
 
 
-
-def check(run, rootfile) :
-
-  # call each function to get array of metrics, concatenate those into one list, add overall status and return the list
-  # the status checks are at the end of each function
-
-  # status codes: 1 (good), 0 (bad) or -1 (some other problem, eg histogram missing or not enough data)
-
-
-  # list of functions to check, here they should be called with rootfile, followed by the status limits, then the fit and momentum limits, then the error limit, and return an array of values
-
-  sc = sc_rf_time(rootfile)  
-  tof = tof_rf_time(rootfile)
-  bcal = bcal_rf_time(rootfile)
-  ecal = ecal_rf_time(rootfile)  
-  fcal = fcal_rf_time(rootfile)
-  cdc = cdc_rf_time(rootfile)
-  fdc = fdc_rf_time(rootfile)  
-  ps = ps_rf_time(rootfile)
-  tagh = tagh_rf_time(rootfile)
-  tagm = tagm_rf_time(rootfile)
-  
-  things = [ sc, tof, bcal, ecal, fcal, cdc, fdc, ps, tagh, tagm ] 
-
-
-  fdc_tdcmin = -10
-  fdc_tdcmax = 10
-
-  fdc_tdc = fdc_tdc_diff(rootfile, fdc_tdcmin, fdc_tdcmax)
-  sc_chans = sc_rf_channels(rootfile)
-  tagh_chans = tagh_rf_channels(rootfile)
-  tagm_chans = tagm_rf_channels(rootfile)
-  sc_adctdc = sc_adctdc_channels(rootfile)
-  tof_adctdc = tof_adctdc_channels(rootfile)
-  tagh_adctdc = tagh_adctdc_channels(rootfile)
-  tagm_adctdc = tagm_adctdc_channels(rootfile)
-
-  things += [ fdc_tdc, sc_chans, tagh_chans, tagm_chans, sc_adctdc, tof_adctdc, tagh_adctdc, tagm_adctdc ]
-
-    
-  # set the overall status to the min value of each histogram status
-
-  statuslist = []
-  
-  for thing in things : # loop through the arrays returned from each function
-    statuslist.append(thing[0])   # status is the first value in the array
-
-  status = min(statuslist)
-
-  # add overall status to the start of the lists before concatenating & returning.
-
-  allvals = [status]
-  for thing in things :
-    allvals.extend(thing) 
-    
-  return allvals
-
-
-#############
-  
 def sc_rf_time(rootfile) :
 
   #print("in sc_rf_time() ...")
   names = ['sc_rf_status', 'pim_SCRF_mg', 'pim_SCRF_mg_err', 'pip_SCRF_mg', 'pip_SCRF_mg_err', 'p_SCRF_mg', 'p_SCRF_mg_err']   
   titles = ['SC-RF time status', 'PiMinus #DeltaT(SC-RF) (ns)',  'PiMinus #DeltaT(SC-RF) width (ns)', 'PiPlus #DeltaT(SC-RF) (ns)',  'PiPlus #DeltaT(SC-RF) width (ns)', 'Proton #DeltaT(SC-RF) (ns)',  'Proton #DeltaT(SC-RF) width (ns)']   # Graph titles 
-  values = [-1, None, None, None, None, None, None ]   
+  values = default_values(names)
     
   if not rootfile :  # called by init function
     return [names, titles, values]
@@ -196,8 +91,7 @@ def tof_rf_time(rootfile) :
   #print("in tof_rf_time() ...")
   names = ['tof_rf_status', 'pim_TOFRF_mg', 'pim_TOFRF_mg_err', 'pip_TOFRF_mg', 'pip_TOFRF_mg_err', 'p_TOFRF_mg', 'p_TOFRF_mg_err']   
   titles = ['TOF-RF time status', 'PiMinus #DeltaT(TOF-RF) (ns)',  'PiMinus #DeltaT(TOF-RF) width (ns)', 'PiPlus #DeltaT(TOF-RF) (ns)',  'PiPlus #DeltaT(TOF-RF) width (ns)', 'Proton #DeltaT(TOF-RF) (ns)',  'Proton #DeltaT(TOF-RF) width (ns)']   # Graph titles 
-
-  values = [-1, None, None, None, None, None, None ]   
+  values = default_values(names)
   
   if not rootfile :  # called by init function
     return [names, titles, values]
@@ -268,10 +162,8 @@ def bcal_rf_time(rootfile) :
   #print("in bcal_rf_time() ...")
   names = ['bcal_rf_status', 'pim_BCALRF_mg', 'pim_BCALRF_mg_err', 'pip_BCALRF_mg', 'pip_BCALRF_mg_err', 'p_BCALRF_mg', 'p_BCALRF_mg_err', 'g_BCALRF_mg', 'g_BCALRF_mg_err', 'g_1GeV_BCALRF_mg', 'g_1GeV_BCALRF_mg_err']   
   titles = ['BCAL-RF time status', 'PiMinus #DeltaT(BCAL-RF) (ns)',  'PiMinus #DeltaT(BCAL-RF) width (ns)', 'PiPlus #DeltaT(BCAL-RF) (ns)',  'PiPlus #DeltaT(BCAL-RF) width (ns)', 'Proton #DeltaT(BCAL-RF) (ns)',  'Proton #DeltaT(BCAL-RF) width (ns)', 'Photon #DeltaT(BCAL-RF) (ns)',  'Photon #DeltaT(BCAL-RF) width (ns)', 'Photon > 1GeV #DeltaT(BCAL-RF) (ns)',  'Photon > 1GeV #DeltaT(BCAL-RF) width (ns)']   # Graph titles ]   # Graph titles ]   # Graph titles ]   # Graph titles 
+  values = default_values(names)
 
-  values = [-1, None, None, None, None, None, None, None, None, None, None ]   
-
-  
   if not rootfile :  # called by init function
     return [names, titles, values]
 
@@ -364,9 +256,8 @@ def ecal_rf_time(rootfile) :
   #print("in ecal_rf_time() ...")
   names = ['ecal_rf_status', 'pim_ECALRF_mg', 'pim_ECALRF_mg_err', 'pip_ECALRF_mg', 'pip_ECALRF_mg_err', 'g_ECALRF_mg', 'g_ECALRF_mg_err']   
   titles = ['ECAL-RF time status', 'PiMinus #DeltaT(ECAL-RF) (ns)',  'PiMinus #DeltaT(ECAL-RF) width (ns)', 'PiPlus #DeltaT(ECAL-RF) (ns)',  'PiPlus #DeltaT(ECAL-RF) width (ns)', 'Photon #DeltaT(ECAL-RF) (ns)',  'Photon #DeltaT(ECAL-RF) width (ns)']   # Graph titles 
+  values = default_values(names)
 
-  values = [-1, None, None, None, None, None, None ]   
-  
   if not rootfile :  # called by init function
     return [names, titles, values]
 
@@ -439,8 +330,7 @@ def fcal_rf_time(rootfile) :
   #print("in fcal_rf_time() ...")
   names = ['fcal_rf_status', 'pim_FCALRF_mg', 'pim_FCALRF_mg_err', 'pip_FCALRF_mg', 'pip_FCALRF_mg_err', 'g_FCALRF_mg', 'g_FCALRF_mg_err']   
   titles = ['FCAL-RF time status', 'PiMinus #DeltaT(FCAL-RF) (ns)',  'PiMinus #DeltaT(FCAL-RF) width (ns)', 'PiPlus #DeltaT(FCAL-RF) (ns)',  'PiPlus #DeltaT(FCAL-RF) width (ns)', 'Photon #DeltaT(FCAL-RF) (ns)',  'Photon #DeltaT(FCAL-RF) width (ns)']   # Graph titles 
-
-  values = [-1, None, None, None, None, None, None ]   
+  values = default_values(names)
   
   if not rootfile :  # called by init function
     return [names, titles, values]
@@ -512,8 +402,7 @@ def cdc_rf_time(rootfile) :
 
   names = ['cdc_sc_status','cdc_sc','cdc_sc_err']     # These will be unique graph names, start with modulename_status
   titles = ['CDC-SC time status','Earliest CDC - matched SC time, mean (ns)', 'Earliest CDC - matched SC time, width (ns)']  # Graph titles 
-
-  values = [-1, None, None]
+  values = default_values(names)
   
   if not rootfile :  # called by init function
     return [names, titles, values]
@@ -544,7 +433,7 @@ def fdc_rf_time(rootfile) :
   #print("in fdc_rf_time() ...")
   names = ['fdc_time_status','fdc_t0','fdc_t0_err']     # These will be unique graph names, start with modulename_status
   titles = ['FDC time status','FDC earliest flight-corrected time, mean (ns)', 'FDC earliest flight-corrected time, width (ns)']  # Graph titles 
-  values = [-1, None, None ]
+  values = default_values(names)
 
   if not rootfile :  # called by init function
     return [names, titles, values]
@@ -575,8 +464,8 @@ def ps_rf_time(rootfile) :
   #print("in ps_rf_time() ...")
   names = ['ps_tagh_status','ps_tagh','ps_tagh_err']     # These will be unique graph names, start with modulename_status
   titles = ['PS-TAGH time status','#DeltaT(PS-TAGH) (ns)', '#DeltaT(PS-TAGH) width (ns)']  # Graph titles 
-  values = [-1, None, None]
-
+  values = default_values(names)
+  
   if not rootfile :  # called by init function
     return [names, titles, values]
 
@@ -620,10 +509,10 @@ def ps_rf_time(rootfile) :
 # TODO: check size of resolution or error as well?
 def tagh_rf_time(rootfile) :
   #print("in tagh_rf_time() ...")
-  names = ['tagh_rf_status','tagh_rf','tagh_rf_err']     # These will be unique graph names, start with modulename_status
+  names = ['tagh_rf_status','tagh_rf','tagh_rf_err']  
   titles = ['TAGH-RF time status','#DeltaT(TAGH-RF) (ns)', '#DeltaT(TAGH-RF) width (ns)']  # Graph titles 
-  values = [-1, None, None]   
-
+  values = default_values(names)
+  
   if not rootfile :  # called by init function
     return [names, titles, values]
 
@@ -653,15 +542,14 @@ def tagh_rf_time(rootfile) :
 # TODO: check size of resolution or error as well?
 def tagm_rf_time(rootfile) :
   #print("in tagm_rf_time() ...")
-  names = ['tagm_rf_status','tagm_rf','tagm_rf_err']     # These will be unique graph names, start with modulename_status
+  names = ['tagm_rf_status','tagm_rf','tagm_rf_err']
   titles = ['TAGM-RF time status','#DeltaT(TAGM-RF) (ns)', '#DeltaT(TAGM-RF) width (ns)']  # Graph titles 
-  values = [-1, None, None]   
+  values = default_values(names)
 
   if not rootfile :  # called by init function
     return [names, titles, values]
   
   time_max = 0.03   # acceptability limits
-
   low_limit = -0.3    # fit range
   high_limit = 0.3
 
@@ -684,7 +572,7 @@ def tagm_rf_time(rootfile) :
   return values       # return array of values, status first
 
 
-def fdc_tdc_diff(rootfile, tdcmin=-2, tdcmax=2) :
+def fdc_tdc_diff(rootfile) :
 
   titles = ['FDC TDC status','FDC hit wire time peak, max diff from mean (ns)']
   names = ['fdc_tdc_status','fdc_tdc_max_diff']
@@ -695,6 +583,9 @@ def fdc_tdc_diff(rootfile, tdcmin=-2, tdcmax=2) :
 
   dirname = '/HLDetectorTiming/Physics Triggers/FDC'
   histoname = 'FDCHit Wire time vs. module'
+
+  tdcmin = -10
+  tdcmax = 10
 
   min_counts = 1000
 
@@ -741,7 +632,7 @@ def sc_rf_channels(rootfile, diffmin=-0.2, diffmax=0.2) :
 
   titles = ['SC channel status', 'SC RF time number bad channels','SC RF time maximum difference']
   names = ['sc_channel_status','sc_rftime_bad_channels','sc_rftime_max_diff']
-  values = [-1, None, None]
+  values = default_values(names)
 
   if not rootfile :  # called by init function
     return [names, titles, values]
@@ -792,7 +683,7 @@ def tagh_rf_channels(rootfile, diffmin=-0.1, diffmax=0.1) :
 
   titles = ['TAGH channel status', 'TAGH RF time number bad channels','TAGH RF time maximum difference']
   names = ['tagh_channel_status','tagh_rftime_bad_channels','tagh_rftime_max_diff']
-  values = [-1, None, None]
+  values = default_values(names)
 
   if not rootfile :  # called by init function
     return [names, titles, values]

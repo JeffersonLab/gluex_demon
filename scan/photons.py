@@ -1,94 +1,30 @@
 from utils import get_histo     # demon's helper functions
 from ROOT import gROOT, TF1,TH1I
+import math
 
-#
-# This module contains two control functions, 'init' and 'check', and the custom functions which inspect the histograms (one custom function for each histogram).
-#
-# 'init' and 'check' call the custom functions.  'init' returns graph names and titles. 'check' returns the numbers to be graphed.
+# Define the page name
+PAGENAME = 'PhotonBeam'
 
-
-def init() : 
-
-  pagename = 'Photon_beam'          # Title for the page of graphs.  Best avoid spaces.
-
-  # These lists are the headers for the overall status summary for this module
-  # Do not add any more list elements here
-
-  names = ['photon_beam_status']    # Graph name, rho_status 
-  titles = ['Photon beam status']   # Graph title
-  values = [-1]                 # Default status, keep it at -1
-  
-  # This is the list of custom functions, called with one argument: False
+# Provide the names of the custom functions in this module
+def declare_functions() : 
+  list_of_functions = [rho_psigma_pse] #, trigger_asymmetry]
+  return list_of_functions
 
 
-  ps = rho_psigma_pse(False)
-
-  things = [ ps ]
-
-  
-  for thing in things :   # loop through the arrays returned from each function
-
-    names.extend(thing[0])
-    titles.extend(thing[1])
-    values.extend(thing[2])
-
-  return [pagename,names,titles,values]
-
-
-
-def check(run, rootfile) :
-
-  # This calls the custom functions to get an array of metrics, concatenates those into one list, adds the overall status and returns the list
-
-  # Status codes are 1 (good), 0 (bad) or -1 (don't know/file problem/not enough data/some other error)
-
-  # List of custom functions, called with arguments rootfile followed by the value limits.
-  # Each function checks one histogram and returns a list, its status code followed by the values to be graphed.
-  # Add or remove custom functions from this list
-
-  ps = rho_psigma_pse(rootfile)
-  
-  things = [ps]
-
-  # This finds the overall status, setting it to the min value of each histogram status
-
-
-  statuslist = []
-  for thing in things :         # Add or remove the list names assigned above.  
-    statuslist.append(thing[0])   # status is the first value in the array
-
-  status = min(statuslist)
-
-  # add overall status to the start of the lists before concatenating & returning.
-
-  allvals = [status]
-
-  for thing in things :  # Add or remove the list names assigned above.  
-    allvals.extend(thing) 
-
-  return allvals
- 
-
-
-
+# Custom functions follow.
+# Quantities that could not be evaluated (not enough data/bad fit etc) should be assigned a value of None and status -1.
+# Quantities that were evaluated and compared with limits should have status code 1 if acceptable and 0 if not.
+# Quantities that were evaluated but not compared with limits should have a status code of 1.
 
 
 def rho_psigma_pse(rootfile) : 
 
-  
-  # Provide unique graph names. The first must be the status code from this function.
-
   names = ['photons_psigma_pse_status', 'diamond_PSe_mg', 'diamond_PSe_mg_err', 'amo_PSe_mg', 'amo_PSe_mg_err', 'rho_psigma',  'rho_psigma_err', 'rho_psigma_0', 'rho_psigma_0_err', 'rho_psigma_90', 'rho_psigma_90_err', 'rho_psigma_135', 'rho_psigma_135_err', 'rho_psigma_45', 'rho_psigma_45_err', 'rho_phi0_diamond', 'rho_phi0_diamond_err', 'rho_phi0_amo', 'rho_phi0_amo_err' ]
   titles = ['PS E and Rho P#Sigma status', 'Photon beam energy from PS pair E (GeV)', 'PS E err (diamond)', 'Photon beam energy (amo peak) from PS pair E (GeV)', 'PS E err (amo)', 'Abs(P#Sigma) from #rho(770) production', 'Abs(P#Sigma)_err', 'P#Sigma (0)', 'P#Sigma(0)err', 'P#Sigma (90)', 'P#Sigma(90)err', 'P#Sigma (135)', 'P#Sigma(135)err', 'P#Sigma (45)', 'P#Sigma(45)err','#phi_{0} diamond', '#phi_{0} diamond err', '#phi_{0} amo', '#phi_{0} amo err' ]   # Graph titles
-  values = [-1, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None]                      # Default values, keep as -1
+  values = [-1, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None]
 
   if not rootfile :  # called by init function
     return [names, titles, values]
-
-  # The following code finds the histogram, extracts metrics, checks them against the limits provided, assigns a status code and then returns a list of status code followed by the metrics. 
-  # Status codes are 1 (good), 0 (bad) or -1 (don't know/file problem/not enough data/some other error)
-  # Metrics can be None if unknown (no histo or bad fit)
-  # If you just want to plot a metric without comparing it to limits, set its status code to 1, so that it doesn't make the overall status look bad.
 
   histoname = 'PiPlusPsi_t'                       # monitoring histogram to check
   dirname = '/p2pi_preco/Custom_p2pi_hists/'      # directory containing the histogram
@@ -256,7 +192,6 @@ def test_for_amo(hps) :
 
 def find_edge(h):
   
-
   # rebin the histo to find out where the coherent edge is
   
   rebinfactor = 5
@@ -323,3 +258,37 @@ def find_edge(h):
 
 
 
+def trigger_asymmetry(rootfile) :
+
+  names = ['trig_asym_status','trig_asym','trig_asym_err']  
+  titles = ['Trigger asymmetry status','Beam asymmetry from the trigger', 'Beam asymmetry from the trigger err'] # graph titles
+  values = [-1, None, None]                                       # Default values, keep as -1
+
+  if not rootfile :  # called by init function
+    return [names, titles, values]
+
+
+  histoname = 'Heli_asym_gtp'
+  dirname = 'highlevel'
+
+  status = 1
+
+  min_counts=100
+  h = get_histo(rootfile, dirname, histoname, min_counts)
+
+  if (not h) :
+    return values
+
+  # Main Trigger BCAL+FCAL2: GTP Bit 1
+
+  bit = 1
+  num = h.GetBinContent(bit,1) - h.GetBinContent(bit,2);
+  den = h.GetBinContent(bit,1) + h.GetBinContent(bit,2);  
+
+  asym = num/den
+  err = 1/math.sqrt(den)
+
+  print(asym,err)
+  values = [status, float('%.5f'%(asym)), float('%.5f'%(err)) ]
+  
+  return values       # return array of values, status first

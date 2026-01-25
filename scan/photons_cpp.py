@@ -1,101 +1,22 @@
-import csv
-from utils import get_histo     # demon's helper functions
-import time
-from ROOT import gROOT, TF1,TH1I
+from utils import get_histo, default_values     # demon's helper functions
+from ROOT import gROOT, TF1, TH1I
 
-#
-# This module contains two control functions, 'init' and 'check', and the custom functions which inspect the histograms (one custom function for each histogram).
-#
-# 'init' and 'check' call the custom functions.  'init' returns graph names and titles. 'check' returns the numbers to be graphed.
-#
-#
-# Change all instances of new_module to your module's name 
-#
-# Adapt the example custom functions (new_module_occupancy and new_module_e) to retrieve the metrics needed from their histogram.
-# Add more custom functions, or remove one if it is not required.
-#
-# Add the custom functions to the list of functions in 'init' and 'check'.
-#
-# In 'check', provide the set of limits for each metric, and adapt the code to use these. 
-#
+# Define the page name
+PAGENAME = 'PhotonBeam'
+
+# Provide the names of the custom functions in this module
+def declare_functions() : 
+  list_of_functions = [rho_psigma_pse]
+  return list_of_functions
 
 
-
-def init() : 
-
-  pagename = 'Photon_beam'          # Title for the page of graphs.  Best avoid spaces.
-
-  # These lists are the headers for the overall status summary for this module
-  # Do not add any more list elements here
-
-  names = ['photon_beam_status']    # Graph name, rho_status 
-  titles = ['Photon beam status']   # Graph title
-  values = [-1]                 # Default status, keep it at -1
-  
-  # This is the list of custom functions, called with one argument: False
-
-
-  ps = rho_psigma_pse(False)
-
-  things = [ ps ]
-
-  
-  for thing in things :   # loop through the arrays returned from each function
-
-    names.extend(thing[0])
-    titles.extend(thing[1])
-    values.extend(thing[2])
-
-  return [pagename,names,titles,values]
-
-
-
-def check(run, rootfile) :
-
-  # This calls the custom functions to get an array of metrics, concatenates those into one list, adds the overall status and returns the list
-
-  # Status codes are 1 (good), 0 (bad) or -1 (don't know/file problem/not enough data/some other error)
-
-  # List of custom functions, called with arguments rootfile followed by the value limits.
-  # Each function checks one histogram and returns a list, its status code followed by the values to be graphed.
-  # Add or remove custom functions from this list
-
-  ps = rho_psigma_pse(rootfile)
-  
-  things = [ps]
-
-  # This finds the overall status, setting it to the min value of each histogram status
-
-
-  statuslist = []
-  for thing in things :         # Add or remove the list names assigned above.  
-    statuslist.append(thing[0])   # status is the first value in the array
-
-  status = min(statuslist)
-
-  # add overall status to the start of the lists before concatenating & returning.
-
-  allvals = [status]
-
-  for thing in things :  # Add or remove the list names assigned above.  
-    allvals.extend(thing) 
-
-  return allvals
- 
-
-
-
+# Custom functions follow.
+# Quantities that could not be evaluated (not enough data/bad fit etc) should be assigned a value of None and status -1.
+# Quantities that were evaluated and compared with limits should have status code 1 if acceptable and 0 if not.
+# Quantities that were evaluated but not compared with limits should have a status code of 1.
 
 
 def rho_psigma_pse(rootfile) : 
-
-  # Example custom function to check another histogram
-
-  # Acceptable value limits, defined here for accessibility
-  status = 1
-  # none yet
-  
-  # Provide unique graph names, starting with 'rho_'. The first must be the status code from this function.
 
   names = ['photons_psigma_pse_status', 'photons_ps_e', 'photons_ps_e_err', 'photons_rho_psigma', 'photons_rho_psigma_err', 'photons_rho_psigma_135', 'photons_rho_psigma_135_err', 'photons_rho_psigma_45', 'photons_rho_psigma_45_err', 'photons_rho_phi0_diamond', 'photons_rho_phi0_diamond_err', 'photons_rho_phi0_amo', 'photons_rho_phi0_amo_err' ]
   titles = ['PS E and Rho P#Sigma status', 'Photon beam energy (diamond edge, amo peak) from PS pair E (GeV)', 'PS E err','Abs(P#Sigma) from #rho(770) production', 'Abs(P#Sigma)_err', 'P#Sigma (135)', 'P#Sigma(135)err', 'P#Sigma (45)', 'P#Sigma(45)err','#phi_{0} diamond', '#phi_{0} diamond err', '#phi_{0} amo', '#phi_{0} amo err' ]   # Graph titles
@@ -103,10 +24,6 @@ def rho_psigma_pse(rootfile) :
 
   if not rootfile :  # called by init function
     return [names, titles, values]
-
-  # The following code finds the histogram, extracts metrics, checks them against the limits provided, assigns a status code and then returns a list of status code followed by the metrics. 
-  # Status codes are 1 (good), 0 (bad) or -1 (don't know/file problem/not enough data/some other error)
-  # If you just want to plot a metric without comparing it to limits, set its status code to 1, so that it doesn't make the overall status look bad.
 
   histoname = 'Psi_rho'                       # monitoring histogram to check
   dirname = '/cpp_hists/Custom_cpp_hists/'      # directory containing the histogram

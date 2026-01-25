@@ -1,112 +1,31 @@
-import csv
+from utils import get_histo     # demon's helper functions
+from ROOT import gROOT, TF1,TH1,TH2
 
-from ROOT import gROOT,TF1,TH1,TH2
+# Define the page name
+PAGENAME = 'CDC'
 
-
-def init() : 
-
-# call each function to get the names, titles and array of defaults set to -1
-
-  pagename = 'CDC_CPP'
-  titles = ['CDC status']   # add column at the start for overall CDC status
-  names = ['cdc_status']
-  values = [-1]
-
-  occ = cdc_occupancy_cpp(False)  # return names, titles, values
-  eff = cdc_efficiency_cpp(False)
-  dedx = cdc_dedx_cpp(False)
-  dedxmean = cdc_dedx_mean_cpp(False)
-  ttod = cdc_ttod(False)
-
-  for thing in [ occ, eff, dedx, dedxmean, ttod ] : 
-
-    names.extend(thing[0])
-    titles.extend(thing[1])
-    values.extend(thing[2])
-
-  return [pagename, names, titles, values]
+# Provide the names of the custom functions in this module
+def declare_functions() : 
+  list_of_functions = [cdc_occupancy_cpp, cdc_efficiency_cpp, cdc_dedx_cpp, cdc_dedx_mean_cpp, cdc_ttod]
+  return list_of_functions
 
 
-
-def check(run, rootfile) :
-
-  # call each function to get array of metrics, concatenate those into one list, add overall status and return the list
-  # the status checks are at the end of each function
-
-  # status codes: 1 (good), 0 (bad) or -1 (some other problem, eg histogram missing or not enough data)
-
-  # acceptable value limits, defined here for accessibility
-
-  # exit if this is not a CPP run
-  if run < 100000 or run > 109999 : 
-    print('\nERROR - this module is for CPP runs, 100000-109999, not for run %s\n'%run)
-    return 0
-
-  occmax = 50 # CPP - expect 11 dead, handful more missing from tracking, many more missing in ET runs
-
-#  dedxmin = 1.9998
-#  dedxmax = 2.0402
-#  dedxresmin = 0.25
-#  dedxresmax = 0.37
-
-  dedxmin = 1.82   # CPP limits
-  dedxmax = 2.22
-  dedxresmin = 0.25
-  dedxresmax = 0.5 
-
-#  e0min = 0.97
-#  e5min = 0.96
-#  e6min = 0.89
-
-  e0min = 0.8  #CPP
-  e5min = 0.7
-  e75min = 0.3
-
-#  ttodmeanmax = 15.0
-#  ttodsigmamax = 150.0
-
-  dedxmeanmin = 2.5  # for overall dedx, 0 to 10 GeV
-  dedxmeanmax = 4.5
-  dedxsigmin = 1.0
-  dedxsigmax = 4.0
-   
-
-  ttodmeanmax = 20.0
-  ttodsigmamax = 200.0
-
-  # these return an array [names, values] 
-
-  occ = cdc_occupancy_cpp(rootfile, occmax)
-  eff = cdc_efficiency_cpp(rootfile, e0min, e5min, e75min)
-  dedx = cdc_dedx_cpp(rootfile, dedxmin, dedxmax, dedxresmin, dedxresmax)
-  dedxmean = cdc_dedx_mean_cpp(rootfile, dedxmeanmin, dedxmeanmax, dedxsigmin, dedxsigmax)
-  ttod = cdc_ttod(rootfile, ttodmeanmax, ttodsigmamax)
-
-  # set the overall status to the min value of each histogram status
-
-  statuslist = []
-  for thing in [occ, eff, dedx, dedxmean, ttod] : 
-    statuslist.append(thing[0])   # status is the first value in the array
-
-  cdc_status = min(statuslist)
-
-  # add overall status to the start of the lists before concatenating & returning.
-
-  allvals = [cdc_status]
-  for thing in [occ, eff, dedx, dedxmean, ttod] : 
-    allvals.extend(thing) 
-
-  return allvals
+# Custom functions follow.
+# Quantities that could not be evaluated (not enough data/bad fit etc) should be assigned a value of None and status -1.
+# Quantities that were evaluated and compared with limits should have status code 1 if acceptable and 0 if not.
+# Quantities that were evaluated but not compared with limits should have a status code of 1.
 
 
-def cdc_occupancy_cpp(rootfile, occmax=9) :
+def cdc_occupancy_cpp(rootfile) :
 
   titles = ['Occupancy status','Missing straw count']
-  names = ['cdc_occ_status','cdc_missing']
-  values = [-1, -1]
+  names = ['occ_status','missing']
+  values = [-1, None]
 
   if not rootfile :  # called by init function
     return [names, titles, values]
+
+  occmax = 50 # CPP - expect 11 dead, handful more missing from tracking, many more missing in ET runs
 
   histoname = 'an30_100ns'
   dirname = '/CDC_amp'
@@ -187,15 +106,19 @@ def cdc_occupancy_cpp(rootfile, occmax=9) :
   
 
 
-def cdc_efficiency_cpp(rootfile, e0min=0.97, e5min=0.96, e75min=0.89) :
+def cdc_efficiency_cpp(rootfile) :
 
   titles = ['Efficiency status','Hit efficiency at 0.04mm','Hit efficiency at 5mm','Hit efficiency at 7.5mm']
-  names = ['cdc_eff_status','cdc_eff0','cdc_eff5','cdc_eff7']
-  values = [-1,-1,-1,-1]
+  names = ['eff_status','eff0','eff5','eff7']
+  values = [-1, None, None, None]
 
   if not rootfile :  # called by init function
     return [names, titles, values]
 
+  e0min = 0.8  #CPP
+  e5min = 0.7
+  e75min = 0.3
+  
   dirname = '/CDC_Efficiency/Online'
   histoname = 'Efficiency Vs DOCA'
 
@@ -230,15 +153,20 @@ def cdc_efficiency_cpp(rootfile, e0min=0.97, e5min=0.96, e75min=0.89) :
 
 
 
-def cdc_dedx_cpp(rootfile, dedxmin=1.9998, dedxmax=2.0402, dedxresmin=0.25, dedxresmax=0.37) :
+def cdc_dedx_cpp(rootfile) :
 
   titles = ['dE/dx status','dE/dx mean at 1.5 GeV/c (keV/cm)','dE/dx resolution at 1.5 GeV/c']
-  names = ['cdc_dedx_status','cdc_dedxmean','cdc_dedxres']
-  values = [-1,-1,-1]
+  names = ['dedx_status','dedxmean','dedxres']
+  values = [-1,None,None]
 
   if not rootfile :  # called by init function
     return [names, titles, values]
 
+  dedxmin = 1.82   # CPP limits
+  dedxmax = 2.22
+  dedxresmin = 0.25
+  dedxresmax = 0.5 
+  
   dirname = '/CDC_dedx'
   histoname = 'dedx_p'
 
@@ -368,14 +296,19 @@ def cdc_dedx_cpp(rootfile, dedxmin=1.9998, dedxmax=2.0402, dedxresmin=0.25, dedx
   return values
 
 
-def cdc_dedx_mean_cpp(rootfile, dedxmeanmin=1.5, dedxmeanmax=2.5, dedxsigmin=0.2, dedxsigmax=3.0) :
+def cdc_dedx_mean_cpp(rootfile) :
 
   titles = ['dE/dx (overall mean, 0-10 GeV/c) status','dE/dx mean (keV/cm)','dE/dx RMS (keV/cm)']
-  names = ['cdc_dedx_overallmean_status','cdc_dedx_overallmean','cdc_dedx_sigma']
-  values = [-1,-1,-1]
+  names = ['dedx_overallmean_status','dedx_overallmean','dedx_sigma']
+  values = [-1, None, None]
 
   if not rootfile :  # called by init function
     return [names, titles, values]
+
+  dedxmeanmin = 2.5  # for overall dedx, 0 to 10 GeV
+  dedxmeanmax = 4.5
+  dedxsigmin = 1.0
+  dedxsigmax = 4.0
 
   dirname = '/CDC_dedx'
   histoname = 'dedx_p'
@@ -404,14 +337,17 @@ def cdc_dedx_mean_cpp(rootfile, dedxmeanmin=1.5, dedxmeanmax=2.5, dedxsigmin=0.2
 
 
 
-def cdc_ttod(rootfile, ttodmeanmax=15.0, ttodsigmamax=150.0) :
+def cdc_ttod(rootfile) :
 
   titles = ['TTOD status','TTOD residual mean (#mum)','TTOD residual width (#mum)']
-  names = ['cdc_ttod_status','cdc_ttodmean','cdc_ttodres']
-  values = [-1,-1,-1]
+  names = ['ttod_status','ttodmean','ttodres']
+  values = [-1, None, None]
 
   if not rootfile :  # called by init function
     return [names, titles, values]
+
+  ttodmeanmax = 20.0
+  ttodsigmamax = 200.0
 
   dirname = '/CDC_TimeToDistance'
   histoname = 'Residual Vs. Drift Time'
@@ -434,25 +370,3 @@ def cdc_ttod(rootfile, ttodmeanmax=15.0, ttodsigmamax=150.0) :
   values = [status, float('%.3f'%(mean)), float('%.3f'%(sigma))]
   
   return values
-
-
-def get_histo(rootfile, dirname, histoname, min_counts) :
-
-  test = rootfile.GetDirectory(dirname) 
-
-  if (not test):
-    #print('Could not find ' + dirname)
-    return False
-
-  rootfile.cd(dirname)
-
-  h = gROOT.FindObject(histoname)
-
-  if (not h) :
-    #print('Could not find ' + histoname)
-    return False
-
-  if h.GetEntries() < min_counts:
-    return False
-
-  return h

@@ -1,89 +1,22 @@
+from utils import get_histo     # demon's helper functions
+from ROOT import gROOT, TF1
 
-from utils import get_histo
-from ROOT import gROOT,TF1
+# Define the page name
+PAGENAME = 'FDC'
 
-
-def init() : 
-
-# call each function to get the names, titles and array of defaults set to -1
-  pagename = 'FDC'
-  titles = ['FDC status']   # add column at the start for overall FDC status
-  names = ['fdc_status']
-  values = [-1]
-
-  eff = fdc_efficiency(False)
-  dedxpos = fdc_dedxpos(False)
-  dedxneg = fdc_dedxneg(False)
-
-  things = [ eff, dedxpos, dedxneg ]
-
-  #things = [ eff ]
-  
-  for thing in things :
-
-    names.extend(thing[0])
-    titles.extend(thing[1])
-    values.extend(thing[2])
-
-  return [pagename, names, titles, values]
+# Provide the names of the custom functions in this module
+def declare_functions() : 
+  list_of_functions = [fdc_efficiency, fdc_dedxpos, fdc_dedxneg]
+  return list_of_functions
 
 
-
-def check(run, rootfile) :
-
-  # call each function to get array of metrics, concatenate those into one list, add overall status and return the list
-  # the status checks are at the end of each function
-
-  # status codes: 1 (good), 0 (bad) or -1 (some other problem, eg histogram missing or not enough data)
-  # metrics can be None for unknown (no histo, bad fit)
-  
-  # acceptable value limits, defined here for accessibility
-
-  dedxmin = 1.5 # 1.9
-  dedxmax = 2.5 #2.0
-  dedxresmin = 0.2# 0.3
-  dedxresmax = 0.5
-
-  tdcmin = -10
-  tdcmax = 10
-
-  e0min=0.97
-  e2min=0.96
-  e4min=0.89
-  e5min = 0.85  
-
-  # these return an array [names, values] 
-
-  eff = fdc_efficiency(rootfile, e0min, e2min, e4min)
-  
-  dedxpos = fdc_dedxpos(rootfile, dedxmin, dedxmax, dedxresmin, dedxresmax)
-
-  dedxneg = fdc_dedxneg(rootfile, dedxmin, dedxmax, dedxresmin, dedxresmax)
-
-  # set the overall status to the min value of each histogram status
-
-  statuslist = []
-
-  things = [ eff, dedxpos, dedxneg ]
-  
-  for thing in things :
-
-    statuslist.append(thing[0])   # status is the first value in the array
-
-  fdc_status = min(statuslist)
-
-  # add overall status to the start of the lists before concatenating & returning.
-
-  allvals = [fdc_status]
-  for thing in things :
-
-    allvals.extend(thing) 
-
-  return allvals
+# Custom functions follow.
+# Quantities that could not be evaluated (not enough data/bad fit etc) should be assigned a value of None and status -1.
+# Quantities that were evaluated and compared with limits should have status code 1 if acceptable and 0 if not.
+# Quantities that were evaluated but not compared with limits should have a status code of 1.
 
 
-
-def fdc_dedxpos(rootfile, dedxmin=1.9998, dedxmax=2.0402, dedxresmin=0.25, dedxresmax=0.37) :
+def fdc_dedxpos(rootfile) :
 
   titles = ['q+ dE/dx status','FDC q+ dE/dx mean at 1.5 GeV/c (keV/cm)','FDC q+ dE/dx resolution at 1.5 GeV/c']
   names = ['dedxpos_status','dedxposmean','dedxposres']
@@ -92,6 +25,11 @@ def fdc_dedxpos(rootfile, dedxmin=1.9998, dedxmax=2.0402, dedxresmin=0.25, dedxr
   if not rootfile :  # called by init function
     return [names, titles, values]
 
+  dedxmin = 1.5 # 1.9
+  dedxmax = 2.5 #2.0
+  dedxresmin = 0.2# 0.3
+  dedxresmax = 0.5
+  
   dirname = '/Independent/Hist_DetectorPID/FDC'
   histoname = 'dEdXVsP_q+'
 
@@ -132,7 +70,7 @@ def fdc_dedxpos(rootfile, dedxmin=1.9998, dedxmax=2.0402, dedxresmin=0.25, dedxr
   return values
 
 
-def fdc_dedxneg(rootfile, dedxmin=1.9998, dedxmax=2.0402, dedxresmin=0.25, dedxresmax=0.37) :
+def fdc_dedxneg(rootfile) :
 
   titles = ['q- dE/dx status','FDC q- dE/dx mean at 1.5 GeV/c (keV/cm)','FDC q- dE/dx resolution at 1.5 GeV/c']
   names = ['dedxneg_status','dedxnegmean','dedxnegres']
@@ -141,6 +79,11 @@ def fdc_dedxneg(rootfile, dedxmin=1.9998, dedxmax=2.0402, dedxresmin=0.25, dedxr
   if not rootfile :  # called by init function
     return [names, titles, values]
 
+  dedxmin = 1.5 # 1.9
+  dedxmax = 2.5 #2.0
+  dedxresmin = 0.2# 0.3
+  dedxresmax = 0.5
+  
   dirname = '/Independent/Hist_DetectorPID/FDC'
   histoname = 'dEdXVsP_q-'
 
@@ -179,7 +122,7 @@ def fdc_dedxneg(rootfile, dedxmin=1.9998, dedxmax=2.0402, dedxresmin=0.25, dedxr
   return values
 
 
-def fdc_efficiency(rootfile, e0min=0.97, e2min=0.96, e4min=0.89, e5min=0.85) :
+def fdc_efficiency(rootfile) :
 
   titles = ['FDC efficiency status', 'FDC wire efficiency at 0.04mm', 'FDC wire efficiency at 0.04mm error', 'FDC wire efficiency at 2mm', 'FDC wire efficiency at 2mm error', 'FDC wire efficiency at 4mm', 'FDC wire efficiency at 4mm error', 'FDC wire efficiency at 5mm', 'FDC wire efficiency at 5mm error']
   names = ['eff_status', 'eff0_efficiency_mg', 'eff0_efficiency_mg_err', 'eff2_efficiency_mg', 'eff2_efficiency_mg_err', 'eff4_efficiency_mg', 'eff4_efficiency_mg_err', 'eff5_efficiency_mg', 'eff5_efficiency_mg_err']
@@ -187,6 +130,11 @@ def fdc_efficiency(rootfile, e0min=0.97, e2min=0.96, e4min=0.89, e5min=0.85) :
 
   if not rootfile :  # called by init function
     return [names, titles, values]
+
+  e0min=0.97
+  e2min=0.96
+  e4min=0.89
+  e5min = 0.85  
 
   dirname = '/FDC_Efficiency/Offline'
   histoname1 = 'Expected Hits Vs DOCA'

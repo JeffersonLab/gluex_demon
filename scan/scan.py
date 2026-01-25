@@ -15,6 +15,9 @@
 #   filename_pagenames = 'monitoring_pagenames_X.txt' # list of module page titles and graphs
 #
 
+from utils import init, check
+
+
 def make_graph(gname,gtitle,nruns,x,y) :
 
     xx, yy = array( 'd' ), array( 'd' )
@@ -114,11 +117,8 @@ import pi0
 import tracking
 import triggers
 
-
-
-modules_def = [photons, rho, omega, pi0, triggers, tracking, timing, rf, cdc, fdc, sc, tof_1]
-modules_cpp = [triggers, photons_cpp, timing, rf, ps_e, cdc_cpp, fdc, tof_1, fmwpc, ctof]   # modules for CPP
-#modules_def = [tracking]
+modules_cpp = [photons_cpp, ps_e, rf, timing, triggers, cdc_cpp, fdc, tof_1, fmwpc, ctof] # modules for CPP
+modules_def = [photons, rho, omega, pi0, rf, timing, tracking, triggers, cdc, fdc, sc, tof_1]
 
 testing = 0  # stop after <runlimit> files, print diagnostics
 runlimit = 5 # process this number of runs if testing=1
@@ -246,17 +246,19 @@ for imod in range(len(modules)) :
 
     if run_module[imod] :  
         try: 
-    
-          arrays = modules[imod].init() 
-        
+#          pagename = modules[imod].get_pagename()
+      #    arrays = modules[imod].init(pagename)
+          arrays = init(modules[imod])
+          print(modules[imod].PAGENAME)
         except:
     
           print('ERROR Init module %s failed' % (modules[imod].__name__) )   # don't suppress
           run_module[imod] = False
 
           print('Calling it again, to show the error')
-          arrays = modules[imod].init()
-
+          #arrays = modules[imod].init(pagename)
+          arrays = init(modules[imod])
+          
         else:
 
           if len(arrays[1]) != len(arrays[2]) or len(arrays[1]) != len(arrays[3]):
@@ -367,14 +369,16 @@ for filename in histofilelist:
                 print('Calling module %s' % (active_modules[imod].__name__) )
 
             try: 
-                newdata = active_modules[imod].check(run, rootfile)  # run, root file ptr
+#                newdata = active_modules[imod].check(run, rootfile)  # run, root file ptr
+                newdata = check(active_modules[imod], run, rootfile)  # run, root file ptr
 
             except:
                 if errcount < max_errcount:
                     print('ERROR run %i module %s ' % (run, active_modules[imod].__name__) )  
 
                 print('Calling the module again, to show the error')
-                newdata = active_modules[imod].check(run, rootfile)  # run, root file ptr
+                #newdata = active_modules[imod].check(run, rootfile)  # run, root file ptr
+                newdata = check(active_modules[imod], run, rootfile)  # run, root file ptr                
                 errcount = errcount + 1
                 newdata = defaults[imod] 
 

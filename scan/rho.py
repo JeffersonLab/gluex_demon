@@ -1,98 +1,34 @@
 from utils import get_histo     # demon's helper functions
 from ROOT import gROOT, TF1
 
-# 'init' and 'check' call the custom functions.  'init' returns graph names and titles. 'check' returns the numbers to be graphed.
+# Define the page name
+PAGENAME = 'Rho'
+
+# Provide the names of the custom functions in this module
+def declare_functions() : 
+  list_of_functions = [rho_mass_yield, rho_ps_triggers]
+  return list_of_functions
 
 
-def init() : 
-
-  pagename = 'Rho'          # Title for the page of graphs.  Best avoid spaces.
-
-  # These lists are the headers for the overall status summary for this module
-  # Do not add any more list elements here
-
-  names = ['rho_status']    # Graph name, rho_status 
-  titles = ['rho status']   # Graph title
-  values = [-1]                 # Default status, keep it at -1
-  
-  # This is the list of custom functions, called with one argument: False
-
-
-  m = rho_mass_yield(False)
-  ps = rho_ps_triggers(False)
-
-  things = [ m, ps ]
-
-  
-  for thing in things :   # loop through the arrays returned from each function
-
-    names.extend(thing[0])
-    titles.extend(thing[1])
-    values.extend(thing[2])
-
-  return [pagename,names,titles,values]
-
-
-
-def check(run, rootfile) :
-
-  # This calls the custom functions to get an array of metrics, concatenates those into one list, adds the overall status and returns the list
-
-  # Status codes are 1 (good), 0 (bad) or -1 (don't know/file problem/not enough data/some other error)
-
-  # List of custom functions, called with arguments rootfile followed by the value limits.
-  # Each function checks one histogram and returns a list, its status code followed by the values to be graphed.
-  # Add or remove custom functions from this list
-
-  m = rho_mass_yield(rootfile) 
-  ps = rho_ps_triggers(rootfile)
-  
-  things = [m, ps]
-
-  # This finds the overall status, setting it to the min value of each histogram status
-
-
-  statuslist = []
-  for thing in things :         # Add or remove the list names assigned above.  
-    statuslist.append(thing[0])   # status is the first value in the array
-
-  status = min(statuslist)
-
-  # add overall status to the start of the lists before concatenating & returning.
-
-  allvals = [status]
-
-  for thing in things :  # Add or remove the list names assigned above.  
-    allvals.extend(thing) 
-
-  return allvals
- 
+# Custom functions follow.
+# Quantities that could not be evaluated (not enough data/bad fit etc) should be assigned a value of None and status -1.
+# Quantities that were evaluated and compared with limits should have status code 1 if acceptable and 0 if not.
+# Quantities that were evaluated but not compared with limits should have a status code of 1.
 
 
 def rho_mass_yield(rootfile) : 
 
-  # Example custom function to check another histogram
+  names = ['rho_mass_and_yield_status','rho_yield','rho_mass','rho_mass_err','rho_width', 'rho_width_err']
+  titles = ['Rho status','Rho yield (counts, post kinfit)','Rho mass (GeV/c^{2})','Rho mass std dev','Rho width (GeV/c^{2})','Rho width std dev']   # Graph titles
+  values = [-1, None, None, None, None, None]
 
-  # Acceptable value limits, defined here for accessibility
+  if not rootfile :  # called by init function
+    return [names, titles, values]
 
   mmin = 0.766
   mmax = 0.774
   ymin = 1e3
   ymax = 1e6
-
-  
-  # Provide unique graph names, starting with 'rho_'. The first must be the status code from this function.
-
-  names = ['rho_mass_and_yield_status','rho_yield','rho_mass','rho_mass_err','rho_width', 'rho_width_err']
-  titles = ['Rho status','Rho yield (counts, post kinfit)','Rho mass (GeV/c^{2})','Rho mass std dev','Rho width (GeV/c^{2})','Rho width std dev']   # Graph titles
-  values = [-1, None, None, None, None, None]                                          # Default values, keep status as -1
-
-  if not rootfile :  # called by init function
-    return [names, titles, values]
-
-  # The following code finds the histogram, extracts metrics, checks them against the limits provided, assigns a status code and then returns a list of status code followed by the metrics. 
-  # Status codes are 1 (good), 0 (bad) or -1 (don't know/file problem/not enough data/some other error)
-  # If you just want to plot a metric without comparing it to limits, set its status code to 1, so that it doesn't make the overall status look bad.
 
   histoname = 'InvariantMass'                                      # monitoring histogram to check
   dirname = 'p2pi_preco_kinfit/Hist_InvariantMass_Rho_PostKinFitCut'    # directory containing the histogram
@@ -141,20 +77,12 @@ def rho_mass_yield(rootfile) :
 
 def rho_ps_triggers(rootfile) : 
 
-  # not using acceptability limits here, just set it to 1. 
-  
-  # Provide unique graph names, starting with 'rho_'. The first must be the status code from this function.
-
   names = ['rho_ps_pair_status','ps_pair_count','rho_per_kpspairs']
-  titles = ['Rho per k PS pair status','PS pair count','Rho yield per 1000 PS pairs']           # Graph titles
-  values = [-1, None, None]                                                        # Default values, keep status as -1
+  titles = ['Rho per k PS pair status','PS pair count','Rho yield per 1000 PS pairs']
+  values = [-1, None, None]
 
   if not rootfile :  # called by init function
     return [names, titles, values]
-
-  # The following code finds the histogram, extracts metrics, checks them against the limits provided, assigns a status code and then returns a list of status code followed by the metrics. 
-  # Status codes are 1 (good), 0 (bad) or -1 (don't know/file problem/not enough data/some other error)
-  # If you just want to plot a metric without comparing it to limits, set its status code to 1, so that it doesn't make the overall status look bad.
 
   histoname = 'PS_E'            # monitoring histogram to check
   dirname = 'PS_flux/PSC_PS'                        # directory containing the histogram

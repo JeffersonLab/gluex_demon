@@ -1,96 +1,30 @@
-from utils import get_histo
-from ROOT import gROOT
+from utils import get_histo     # demon's helper functions
+from ROOT import gROOT, TF1,TH1I
 
-#
-# This module contains two control functions, 'init' and 'check', and the custom functions which inspect the histograms
-#                                                                         (one custom function for each histogram).
-#
-# 'init' and 'check' call the custom functions.  'init' returns graph names and titles. 'check' returns the numbers to be graphed.
-#
+# Define the page name
+PAGENAME = 'TOF_1'
 
-
-def init() : 
-  
-  pagename = 'TOF_1'          # Title for the page of graphs.  Best avoid spaces.
-  
-  # These lists are the headers for the overall status summary for this module
-  # Do not add any more list elements here
-  
-  names = ['tof_1_status']    # Graph name, tof_1_status 
-  titles = ['tof_1 status']   # Graph title
-  values = [-1]                 # Default status, keep it at -1
-  
-  # This is the list of custom functions, called with one argument: False
-  
-  dEdxPlane1 = tof_1_dEdxP1(False)
-  dEdxPlane2 = tof_1_dEdxP2(False)
-  
-  dxpos = tof_1_dxpos(False) # xpos difference between horizontal plane dt data and tracking
-  dypos = tof_1_dypos(False) # ypos difference between vertical plane dt data and tracking
-  
-  
-  for thing in [ dEdxPlane1, dEdxPlane2, dxpos, dypos ] :   # loop through the arrays returned from each function
-
-    names.extend(thing[0])
-    titles.extend(thing[1])
-    values.extend(thing[2])
-    
-  return [pagename,names,titles,values]
+# Provide the names of the custom functions in this module
+def declare_functions() : 
+  list_of_functions = [tof_1_dEdxP1, tof_1_dEdxP2, tof_1_dxpos, tof_1_dypos]
+  return list_of_functions
 
 
-def check(run, rootfile) :
-  
-  # This calls the custom functions to get an array of metrics,
-  # concatenates those into one list, adds the overall status and returns the list
-  
-  # Status codes are 1 (good), 0 (bad) or -1 (don't know/file problem/not enough data/some other error)
-  # Metrics can be None if histo is missing or fit is bad
-  
-  # List of custom functions, called with arguments rootfile followed by the value limits.
-  # Each function checks one histogram and returns a list, its status code followed by the values to be graphed.
-  # Add or remove custom functions from this list
-  
-  dEdxPlane1 = tof_1_dEdxP1(rootfile)
-  dEdxPlane2 = tof_1_dEdxP2(rootfile)
-  
-  dxpos = tof_1_dxpos(rootfile)
-  dypos = tof_1_dypos(rootfile)
-    
-  # This finds the overall status, setting it to the min value of each histogram status
-    
-  statuslist = []
-  for thing in [dEdxPlane1, dEdxPlane2, dxpos, dypos] :         # Add or remove the list names assigned above.  
-    statuslist.append(thing[0])   # status is the first value in the array
+# Custom functions follow.
+# Quantities that could not be evaluated (not enough data/bad fit etc) should be assigned a value of None and status -1.
+# Quantities that were evaluated and compared with limits should have status code 1 if acceptable and 0 if not.
+# Quantities that were evaluated but not compared with limits should have a status code of 1.
 
-  status = min(statuslist)
-  
-  # add overall status to the start of the lists before concatenating & returning.
-  
-  allvals = [status]
-  
-  for thing in [dEdxPlane1, dEdxPlane2, dxpos, dypos] :  # Add or remove the list names assigned above.  
-    allvals.extend(thing) 
-
-  return allvals
- 
 
 # tof dEdX Horizontal Plane
 def tof_1_dEdxP1(rootfile) :
-  
-  # print('in tof_1_dEdxP1()...')
-  
-  # Provide unique graph names. The first must be the status code from this function.
 
   names = ['dEdxP1_status','dEdxP1','dEdxP1_err']  
-  titles = ['dEdx Horizontal Plane','Plane 1 dEdx [GeV]','#sigma dEdx [GeV]']      # These will be the graph titles
-  values = [-1, None, None]                                       # Default values, keep status as -1
+  titles = ['dEdx Horizontal Plane','Plane 1 dEdx [GeV]','#sigma dEdx [GeV]']    
+  values = [-1, None, None]
   
   if not rootfile :  # called by init function
     return [names, titles, values]
-
-  # The following code finds the histogram, extracts metrics, checks them against the limits provided, assigns a status code and then returns a list of status code followed by the metrics. 
-  # Status codes are 1 (good), 0 (bad) or -1 (don't know/file problem/not enough data/some other error)
-  # If you just want to plot a metric without comparing it to limits, set its status code to 1, so that it doesn't make the overall status look bad.
   
   histoname = 'TOFPointEnergyP1'   # monitoring histogram to check
   dirname = '/Independent/Hist_Reconstruction'      # directory containing the histogram
@@ -129,22 +63,12 @@ def tof_1_dEdxP1(rootfile) :
 # tof dEdX Vertical Plane
 def tof_1_dEdxP2(rootfile) :
   
-  # Example custom function to check another histogram
-  
-  #print('in tof_1_dEdxP2()...')
-  
-  # Provide unique graph names. The first must be the status code from this function.  
-  
   names = ['dEdxP2_status','dEdxP2','dEdxP2_err']  
-  titles = ['dEdx Vertical Plane','Plane 2 dEdx [MeV]','#sigma dEdx [MeV]']      # These will be the graph titles
-  values = [-1, None, None]                                       # Default values, keep as -1
+  titles = ['dEdx Vertical Plane','Plane 2 dEdx [MeV]','#sigma dEdx [MeV]']    
+  values = [-1, None, None] 
   
   if not rootfile :  # called by init function
     return [names, titles, values]
-
-  # The following code finds the histogram, extracts metrics, checks them against the limits provided, assigns a status code and then returns a list of status code followed by the metrics. 
-  # Status codes are 1 (good), 0 (bad) or -1 (don't know/file problem/not enough data/some other error)
-  # If you just want to plot a metric without comparing it to limits, set its status code to 1, so that it doesn't make the overall status look bad.
 
   histoname = 'TOFPointEnergyP2'   # monitoring histogram to check
   dirname = '/Independent/Hist_Reconstruction'      # directory containing the histogram
@@ -185,9 +109,6 @@ def tof_1_dEdxP2(rootfile) :
 def tof_1_dxpos(rootfile):                      
   
   #print('in tof_1_dxpos()...')
-
-  # Provide unique graph names. The first must be the status code from this function. 
-
   
   names = ['dx_status',
            'dx14','dx14_err',
@@ -256,10 +177,6 @@ def tof_1_dxpos(rootfile):
   if not rootfile :  # called by init function
     return [names, titles, values]
 
-  # The following code finds the histogram, extracts metrics, checks them against the limits provided, assigns a status code and then returns a list of status code followed by the metrics. 
-  # Status codes are 1 (good), 0 (bad) or -1 (don't know/file problem/not enough data/some other error)
-  # If you just want to plot a metric without comparing it to limits, set its status code to 1, so that it doesn't make the overall status look bad.
-  
   histoname = 'TOFTrackDeltaXVsHorizontalPaddle'   # monitoring histogram to check
   dirname = '/Independent/Hist_DetectorMatching/TimeBased/TOFPoint'      # directory containing the histogram
   
@@ -276,8 +193,8 @@ def tof_1_dxpos(rootfile):
 
   for n in range(14,34): 
     
-    POSval = -1   # default, meaning unknown
-    dPOSval = -1
+    POSval = None   # default, meaning unknown
+    dPOSval = None
 
     h1dnew = h.ProjectionY("pj",n,n)
   
@@ -317,8 +234,6 @@ def tof_1_dxpos(rootfile):
 def tof_1_dypos(rootfile):                      
   
   #print('in tof_1_dypos()...')
-  
-  # Provide unique graph names. The first must be the status code from this function.
   
   names = ['dy_status',
            'dy14','dy14_err',
@@ -407,9 +322,9 @@ def tof_1_dypos(rootfile):
 
   for n in range(14,34):
 
-    POSval = -1  # default, unknown
-    dPOSval = -1
-
+    POSval = None
+    dPOSval = None
+    
     h1dnew = h.ProjectionY("pj",n,n)
     
     if (h1dnew.GetEntries() >= 2000):
@@ -442,5 +357,3 @@ def tof_1_dypos(rootfile):
     values.append(float('%.5f'%(dPOS[n])))
     
   return values       # return array of values, status first
-
-

@@ -1,89 +1,22 @@
 from utils import get_histo     # demon's helper functions
 from ROOT import gROOT
 
-#
-# This module contains two control functions, 'init' and 'check', and the custom functions which inspect the histograms (one custom function for each histogram).
-#
-# 'init' and 'check' call the custom functions.  'init' returns graph names and titles. 'check' returns the numbers to be graphed.
+# Define the page name
+PAGENAME = 'Tracking'
 
-def init() : 
-
-  pagename = 'Tracking'          # Title for the page of graphs.  Best avoid spaces.
-
-  # These lists are the headers for the overall status summary for this module
-  # Do not add any more list elements here
-
-  names = ['tracking_status']    # Graph name, new_module_status 
-  titles = ['tracking status']   # Graph title
-  values = [-1]                 # Default status, keep it at -1
-  
-  # This is the list of custom functions, called with one argument: False
-
-  f = fom(False)  # return names, titles, values
-  nc = ncandidates(False)
-  nw = nwirebasedtracks(False)
-  nt = ntimebasedtracks(False)    
-  bcal = bcal_matchrate(False)
-  ecal = ecal_matchrate(False)
-  fcal = fcal_matchrate(False)
-  sc = sc_matchrate(False)
-  tof = tof_matchrate(False)
-  
-  
-
-  for thing in [ f, nc, nw, nt, bcal, ecal, fcal, sc, tof ] :   # loop through the arrays returned from each function
-
-    names.extend(thing[0])
-    titles.extend(thing[1])
-    values.extend(thing[2])
-
-  return [pagename,names,titles,values]
+# Provide the names of the custom functions in this module
+def declare_functions() : 
+  list_of_functions = [fom, ncandidates, nwirebasedtracks, ntimebasedtracks, bcal_matchrate, ecal_matchrate, fcal_matchrate, sc_matchrate, tof_matchrate]
+  return list_of_functions
 
 
-
-def check(run, rootfile) :
-
-  # This calls the custom functions to get an array of metrics, concatenates those into one list, adds the overall status and returns the list
-
-  # Status codes are 1 (good), 0 (bad) or -1 (don't know/file problem/not enough data/some other error)
-
-  # List of custom functions, called with argument rootfile
-  # Each function checks one histogram and returns a list, its status code followed by the values to be graphed.
-  # Add or remove custom functions from this list
-
-  f = fom(rootfile)
-
-  nc = ncandidates(rootfile)
-  nw = nwirebasedtracks(rootfile)
-  nt = ntimebasedtracks(rootfile)    
-
-  bcal = bcal_matchrate(rootfile)
-  ecal = ecal_matchrate(rootfile)
-  fcal = fcal_matchrate(rootfile)
-  sc = sc_matchrate(rootfile)
-  tof = tof_matchrate(rootfile)
-  
-  # This finds the overall status, setting it to the min value of each histogram status
+# Custom functions follow.
+# Quantities that could not be evaluated (not enough data/bad fit etc) should be assigned a value of None and status -1.
+# Quantities that were evaluated and compared with limits should have status code 1 if acceptable and 0 if not.
+# Quantities that were evaluated but not compared with limits should have a status code of 1.
 
 
-  statuslist = []
-  for thing in [f, nc, nw, nt, bcal, ecal, fcal, sc, tof] :         # Add or remove the list names assigned above.  
-    statuslist.append(thing[0])   # status is the first value in the array
-
-  status = min(statuslist)
-
-  # add overall status to the start of the lists before concatenating & returning.
-
-  allvals = [status]
-
-  for thing in [f, nc, nw, nt, bcal, ecal, fcal, sc, tof] :  # Add or remove the list names assigned above.  
-    allvals.extend(thing) 
-
-  return allvals
- 
-
-
-def fom(rootfile, llim=0.3, ulim=0.9 ) :
+def fom(rootfile) :
 
   names = ['fom_min_status','fom_min']            
   titles = ['Tracking FOM status','Tracking FOM histo minimum']   # Graph titles
@@ -92,14 +25,10 @@ def fom(rootfile, llim=0.3, ulim=0.9 ) :
   if not rootfile :  # called by init function
     return [names, titles, values]
 
-  # The following code finds the histogram, extracts metrics, checks them against the limits provided, assigns a status code and then returns a list of status code followed by the metrics. 
-  # Status codes are 1 (good), 0 (bad) or -1 (don't know/file problem/not enough data/some other error)
-  # If you just want to plot a metric without comparing it to limits, set its status code to 1, so that it doesn't make the overall status look bad.
-
   histoname = 'TrackingFOM'      # monitoring histogram to check
   dirname = '/Independent/Hist_Reconstruction/Tracking/'          # directory containing that histogram
-
-
+  llim=0.3
+  ulim=0.9
   
   min_counts = 1000
   h = get_histo(rootfile, dirname, histoname, min_counts)
@@ -125,28 +54,17 @@ def fom(rootfile, llim=0.3, ulim=0.9 ) :
 
 def ncandidates(rootfile) :
 
-  # Example custom function to check another histogram
-
-  #print('in tracking_candidates()...')
-
-# Provide unique graph names, starting with 'tracking_'. The first must be the status code from this function. Do not call it tracking_status - call it something else ending with _status, eg tracking_functionname_status.
-
   names = ['ncandidates_status','candidates']  
   titles = ['Track candidates status','Mean number of track candidates'] # graph titles
-  values = [-1, None]                                       # Default values, keep as -1
+  values = [-1, None]                                    
 
   if not rootfile :  # called by init function
     return [names, titles, values]
-
-  # The following code finds the histogram, extracts metrics, checks them against the limits provided, assigns a status code and then returns a list of status code followed by the metrics. 
-  # Status codes are 1 (good), 0 (bad) or -1 (don't know/file problem/not enough data/some other error)
-  # If you just want to plot a metric without comparing it to limits, set its status code to 1, so that it doesn't make the overall status look bad.
 
   histoname = 'NumTrackCandidates'   # monitoring histogram to check
   dirname = '/Independent/Hist_NumReconstructedObjects'      # directory containing the histogram
 
   llim = 3    # acceptability limit
-
   
   min_counts = 1000
   h = get_histo(rootfile, dirname, histoname, min_counts)
@@ -154,14 +72,11 @@ def ncandidates(rootfile) :
   if (not h) :
     return values
 
-  # code to check the histogram and find the status values
-
   mean = h.GetMean()
 
   status = 1
   if mean < llim : 
       status=0
-
 
   values = [status, float('%.1f'%(mean)) ]
   
@@ -171,28 +86,17 @@ def ncandidates(rootfile) :
 
 def nwirebasedtracks(rootfile) :
 
-  # Example custom function to check another histogram
-
-  #print('in nwirebasedtracks()...')
-
-# Provide unique graph names, starting with 'tracking_'. The first must be the status code from this function. Do not call it tracking_status - call it something else ending with _status, eg tracking_functionname_status.
-
   names = ['nwirebasedtracks_status','wire_based']  
   titles = ['Wire-based tracks status','Mean number of wire-based tracks'] # graph titles
-  values = [-1, None]                                       # Default values, keep as -1
+  values = [-1, None]                                    
 
   if not rootfile :  # called by init function
     return [names, titles, values]
-
-  # The following code finds the histogram, extracts metrics, checks them against the limits provided, assigns a status code and then returns a list of status code followed by the metrics. 
-  # Status codes are 1 (good), 0 (bad) or -1 (don't know/file problem/not enough data/some other error)
-  # If you just want to plot a metric without comparing it to limits, set its status code to 1, so that it doesn't make the overall status look bad.
 
   histoname = 'NumWireBasedTracks'   # monitoring histogram to check
   dirname = '/Independent/Hist_NumReconstructedObjects'      # directory containing the histogram
 
   llim = 3    # acceptability limit
-
   
   min_counts = 1000
   h = get_histo(rootfile, dirname, histoname, min_counts)
@@ -200,14 +104,11 @@ def nwirebasedtracks(rootfile) :
   if (not h) :
     return values
 
-  # code to check the histogram and find the status values
-
   mean = h.GetMean()
 
   status = 1
   if mean < llim : 
       status=0
-
 
   values = [status, float('%.1f'%(mean)) ]
   
@@ -217,28 +118,17 @@ def nwirebasedtracks(rootfile) :
 
 def ntimebasedtracks(rootfile) :
 
-  # Example custom function to check another histogram
-
-  #print('in ntimebasedtracks()...')
-
-# Provide unique graph names, starting with 'tracking_'. The first must be the status code from this function. Do not call it tracking_status - call it something else ending with _status, eg tracking_functionname_status.
-
   names = ['ntimebasedtracks_status','time_based']  
   titles = ['Time-based tracks status','Mean number of time-based tracks'] # graph titles
-  values = [-1, None]                                       # Default values, keep as -1
+  values = [-1, None]                                    
   
   if not rootfile :  # called by init function
     return [names, titles, values]
-
-  # The following code finds the histogram, extracts metrics, checks them against the limits provided, assigns a status code and then returns a list of status code followed by the metrics. 
-  # Status codes are 1 (good), 0 (bad) or -1 (don't know/file problem/not enough data/some other error)
-  # If you just want to plot a metric without comparing it to limits, set its status code to 1, so that it doesn't make the overall status look bad.
 
   histoname = 'NumTimeBasedTracks'   # monitoring histogram to check
   dirname = '/Independent/Hist_NumReconstructedObjects'      # directory containing the histogram
 
   llim = 3    # acceptability limit
-
   
   min_counts = 1000
   h = get_histo(rootfile, dirname, histoname, min_counts)
@@ -246,14 +136,11 @@ def ntimebasedtracks(rootfile) :
   if (not h) :
     return values
 
-  # code to check the histogram and find the status values
-
   mean = h.GetMean()
 
   status = 1
   if mean < llim : 
       status=0
-
 
   values = [status, float('%.1f'%(mean)) ]
   
@@ -263,22 +150,12 @@ def ntimebasedtracks(rootfile) :
 
 def bcal_matchrate(rootfile) :
 
-  # Example custom function to check another histogram
-
-  #print('in ntimebasedtracks()...')
-
-# Provide unique graph names, starting with 'tracking_'. The first must be the status code from this function. Do not call it tracking_status - call it something else ending with _status, eg tracking_functionname_status.
-
   names = ['bcalmatch_status','bcal_match']  
   titles = ['BCAL track match rate status','BCAL match rate'] # graph titles
-  values = [-1, None]                                       # Default values, keep as -1
+  values = [-1, None]                                    
 
   if not rootfile :  # called by init function
     return [names, titles, values]
-
-  # The following code finds the histogram, extracts metrics, checks them against the limits provided, assigns a status code and then returns a list of status code followed by the metrics. 
-  # Status codes are 1 (good), 0 (bad) or -1 (don't know/file problem/not enough data/some other error)
-  # If you just want to plot a metric without comparing it to limits, set its status code to 1, so that it doesn't make the overall status look bad.
 
   histoname = 'TrackBCALModuleVsZ_HasHit'
   dirname = '/Independent/Hist_DetectorMatching/TimeBased/BCAL'
@@ -497,7 +374,7 @@ def tof_matchrate(rootfile) :
 
   names = ['tof_match_status','tof_match','tof_match_1g']  
   titles = ['TOF track match rate status','TOF match rate','TOF match rate > 1GeV'] # graph titles
-  values = [-1, None, None]                                       # Defult values, keep as -1
+  values = [-1, None, None]
 
   if not rootfile :  # called by init function
     return [names, titles, values]
@@ -556,5 +433,5 @@ def tof_matchrate(rootfile) :
   values[0] = status1 and status2
 
   
-  return values       # return array of values, status first
+  return values
 

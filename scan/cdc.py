@@ -1,89 +1,31 @@
-from utils import get_histo
+from utils import get_histo, default_values     # demon's helper functions
+from ROOT import gROOT, TF1
 
-from ROOT import gROOT,TF1
+# Define the page name
+PAGENAME = 'CDC'
 
-
-def init() : 
-
-# call each function to get the names, titles and array of defaults set to -1
-  pagename = 'CDC'
-  titles = ['CDC status']   # add column at the start for overall CDC status
-  names = ['cdc_status']
-  values = [-1]
-
-  occ = occupancy(False)  # return names, titles, values
-  eff = efficiency(False)
-  d = dedx(False)
-  t = ttod(False)
-
-  for thing in [ occ, eff, d,  t ] : 
-
-    names.extend(thing[0])
-    titles.extend(thing[1])
-    values.extend(thing[2])
-
-  return [pagename, names, titles, values]
+# Provide the names of the custom functions in this module
+def declare_functions() : 
+  list_of_functions = [occupancy, efficiency, dedx, ttod]
+  return list_of_functions
 
 
-
-def check(run, rootfile) :
-
-  # call each function to get array of metrics, concatenate those into one list, add overall status and return the list
-  # the status checks are at the end of each function
-
-  # status codes: 1 (good), 0 (bad) or -1 (some other problem, eg histogram missing or not enough data)
-
-  # If the histogram is missing or the hit fails, status is set to -1 and data are set to None
-  
-  # acceptable value limits, defined here for accessibility
-
-  occmax = 25 # expect 9 dead but more look dead in ET runs
-
-  dedxmin = 1.9998
-  dedxmax = 2.0402
-  dedxresmin = 0.25
-  dedxresmax = 0.37
-
-  e0min = 0.97
-  e5min = 0.96
-  e6min = 0.89
-
-  ttodmeanmax = 15.0
-  ttodsigmamax = 150.0
-
-  # these return an array [names, values] 
-
-  occ = occupancy(rootfile, occmax)
-  eff = efficiency(rootfile, e0min, e5min, e6min)
-  d = dedx(rootfile, dedxmin, dedxmax, dedxresmin, dedxresmax)
-  t = ttod(rootfile, ttodmeanmax, ttodsigmamax)
-
-  # set the overall status to the min value of each histogram status
-
-  statuslist = []
-  for thing in [ occ, eff, d, t ] : 
-    statuslist.append(thing[0])   # status is the first value in the array
-
-  cdc_status = min(statuslist)
-
-  # add overall status to the start of the lists before concatenating & returning.
-
-  allvals = [cdc_status]
-  for thing in [ occ, eff, d, t ] :   
-    allvals.extend(thing) 
-
-  return allvals
+# Custom functions follow.
+# Quantities that could not be evaluated (not enough data/bad fit etc) should be assigned a value of None and status -1.
+# Quantities that were evaluated and compared with limits should have status code 1 if acceptable and 0 if not.
+# Quantities that were evaluated but not compared with limits should have a status code of 1.
 
 
-def occupancy(rootfile, occmax=9) :
+def occupancy(rootfile) :
 
   titles = ['Occupancy status','Missing straw count']
   names = ['occ_status','n_missing']
-  values = [-1, None]
+  values = default_values(names)
 
   if not rootfile :  # called by init function
     return [names, titles, values]
 
+  occmax = 25 # expect 9 dead but more look dead in ET runs  
   histoname = 'an30_100ns'
   dirname = '/CDC_amp'
 
@@ -149,14 +91,19 @@ def occupancy(rootfile, occmax=9) :
   
 
 
-def efficiency(rootfile, e0min=0.97, e5min=0.96, e6min=0.89) :
+def efficiency(rootfile) :
 
   titles = ['Efficiency status', 'CDC hit efficiency at 0.04mm', 'Hit efficiency at 0.04mm error', 'CDC hit efficiency at 5mm', 'Hit efficiency at 5mm error', 'CDC hit efficiency at 6.4mm', 'Hit efficiency at 6.4mm error']
   names = ['eff_status', 'eff0_hitefficiency_mg', 'eff0_hitefficiency_mg_err', 'eff5_hitefficiency_mg', 'eff5_hitefficiency_mg_err', 'eff6_hitefficiency_mg', 'eff6_hitefficiency_mg_err']
-  values = [-1, None, None, None, None, None, None]
+  values = default_values(names)
 
   if not rootfile :  # called by init function
     return [names, titles, values]
+
+
+  e0min = 0.97
+  e5min = 0.96
+  e6min = 0.89
 
   dirname = '/CDC_Efficiency/Online'
   histoname = 'Efficiency Vs DOCA'
@@ -189,14 +136,20 @@ def efficiency(rootfile, e0min=0.97, e5min=0.96, e6min=0.89) :
 
 
 
-def dedx(rootfile, dedxmin=1.9998, dedxmax=2.0402, resmin=0.25, resmax=0.37) :
+def dedx(rootfile) :
 
   titles = ['dE/dx status', 'CDC dE/dx q+ mean at 1.5 GeV/c (keV/cm)', 'CDC dE/dx q+ resolution at 1.5 GeV/c', 'CDC dE/dx q- mean at 1.5 GeV/c (keV/cm)', 'CDC dE/dx q- resolution at 1.5 GeV/c', 'CDC dE/dx q+ overall mean (keV/cm)', 'CDC dE/dx q+ overall width']
   names = ['dedx_status', 'qp_dedx_mean', 'qp_dedx_res', 'qm_dedx_mean', 'qm_dedx_res', 'qp_dedx_allmean', 'qp_dedx_allsig']
-  values = [-1, None, None, None, None, None, None]
+  values = default_values(names)
 
   if not rootfile :  # called by init function
     return [names, titles, values]
+
+  dedxmin = 1.9998
+  dedxmax = 2.0402
+  resmin = 0.25
+  resmax = 0.37
+
 
   # find out if CDC_dedx was run.  If not, use the monitoring_hists instead
 
@@ -293,15 +246,18 @@ def dedx(rootfile, dedxmin=1.9998, dedxmax=2.0402, resmin=0.25, resmax=0.37) :
 
 
 
-def ttod(rootfile, ttodmeanmax=15.0, ttodsigmamax=150.0) :
+def ttod(rootfile) :
 
   titles = ['TTOD status','CDC TTOD residual mean (#mum)','CDC TTOD residual width (#mum)']
   names = ['ttod_status','ttod_mean','ttod_res']
-  values = [-1, None, None]
+  values = default_values(names)
 
   if not rootfile :  # called by init function
     return [names, titles, values]
 
+  ttodmeanmax = 15.0
+  ttodsigmamax = 150.0
+  
   dirname = '/CDC_TimeToDistance'
   histoname = 'Residual Vs. Drift Time'
 
