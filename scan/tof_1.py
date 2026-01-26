@@ -38,17 +38,41 @@ def tof_1_dEdxP1(rootfile) :
   
   # code to check the histogram and find the status values
 
-  h.GetXaxis().SetRangeUser(0.5,10) # exclude bin 1
+#  h.GetXaxis().SetRangeUser(0.5,10) # exclude bin 1
+#
+#  MAX = h.GetBinCenter(h.GetMaximumBin())
+#  r = h.Fit("landau","Q0","R", MAX*0.9, MAX*2.2)
 
-  MAX = h.GetBinCenter(h.GetMaximumBin())
-  r = h.Fit("landau","Q0","R", MAX*0.9, MAX*2.2)
+  nbin = 5
+  slope = 1.
+  while (slope>0):
+    slope = h.GetBinContent(nbin+1) - h.GetBinContent(nbin)
+    nbin += 1
+    
+  slope = -1.
+  while (slope<0):
+    slope = h.GetBinContent(nbin+1) - h.GetBinContent(nbin)
+    nbin += 1
+    
+  start = h.GetBinCenter(nbin)
+  while (slope>0):
+    slope = h.GetBinContent(nbin+1) - h.GetBinContent(nbin)
+    nbin += 1
+
+  max = h.GetBinCenter(nbin)
+  h.Fit("landau","Q0","R", start, max+2.)
+  f2 = h.GetFunction("landau")
+  start = f2.GetParameter(1) - 1.1*f2.GetParameter(2)
+  uprange = f2.GetParameter(1) + 4.*f2.GetParameter(2)
+  r = h.Fit("landau","Q0","R", start, uprange)
+
 
   if int(r) != 0 :  # bad fit
     return values
 
   f1 = h.GetFunction("landau")
-  MPV = f1.GetParameter(1);
-  dMPV = f1.GetParError(1);  
+  MPV = f1.GetParameter(1)
+  dMPV = f1.GetParError(1)  
   
   dEdxP1 = MPV
   dEdxP1_err = dMPV
@@ -82,18 +106,44 @@ def tof_1_dEdxP2(rootfile) :
 
   # code to check the histogram and find the status values
 
-  h.GetXaxis().SetRangeUser(0.5,10) # exclude bin 1
+#  h.GetXaxis().SetRangeUser(0.5,10) # exclude bin 1
+#  
+#  MAX = h.GetBinCenter(h.GetMaximumBin())
+#
+#  r = h.Fit("landau","Q0","R", MAX*0.9, MAX*2.2)
+
+
+  nbin = 5
+  slope = 1.
+  while (slope>0):
+    slope = h.GetBinContent(nbin+1) - h.GetBinContent(nbin)
+    nbin += 1
+    
+  slope = -1.
+  while (slope<0):
+    slope = h.GetBinContent(nbin+1) - h.GetBinContent(nbin)
+    nbin += 1
+    
+    
+  start = h.GetBinCenter(nbin)
+  while (slope>0):
+    slope = h.GetBinContent(nbin+1) - h.GetBinContent(nbin)
+    nbin += 1
+
+  max = h.GetBinCenter(nbin)
+  h.Fit("landau","Q0","R", start, max+2.)
+  f2 = h.GetFunction("landau")
+  start = f2.GetParameter(1) - 1.1*f2.GetParameter(2)
+  uprange = f2.GetParameter(1) + 4.*f2.GetParameter(2)
+  r = h.Fit("landau","Q0","R", start, uprange)
+
   
-  MAX = h.GetBinCenter(h.GetMaximumBin())
-
-  r = h.Fit("landau","Q0","R", MAX*0.9, MAX*2.2)
-
   if int(r) != 0 :  # bad fit
     return values
 
   f1 = h.GetFunction("landau")
-  MPV = f1.GetParameter(1);
-  dMPV = f1.GetParError(1);
+  MPV = f1.GetParameter(1)
+  dMPV = f1.GetParError(1)
   
   dEdxP2 = MPV
   dEdxP2_err = dMPV
@@ -200,7 +250,7 @@ def tof_1_dxpos(rootfile):
   
     if (h1dnew.GetEntries() >= 2000):
 
-        h1d = h1dnew;
+        h1d = h1dnew
         if h1dnew.GetEntries()<5000:
           h1d = h1dnew.Rebin(2)
 
