@@ -1,5 +1,5 @@
 from utils import get_histo     # demon's helper functions
-from ROOT import gROOT, TF1,TH1I
+from ROOT import gROOT, TH1I, TF1,TMath
 import math
 
 # Define the page name
@@ -7,7 +7,7 @@ PAGENAME = 'PhotonBeam'
 
 # Provide the names of the custom functions in this module
 def declare_functions() : 
-  list_of_functions = [rho_psigma_pse] #, trigger_asymmetry]
+  list_of_functions = [rho_psigma_pse, trigger_asymmetry, rho_helicity_asymmetry]  
   return list_of_functions
 
 
@@ -271,8 +271,6 @@ def trigger_asymmetry(rootfile) :
   histoname = 'Heli_asym_gtp'
   dirname = 'highlevel'
 
-  status = 1
-
   min_counts=100
   h = get_histo(rootfile, dirname, histoname, min_counts)
 
@@ -285,10 +283,76 @@ def trigger_asymmetry(rootfile) :
   num = h.GetBinContent(bit,1) - h.GetBinContent(bit,2);
   den = h.GetBinContent(bit,1) + h.GetBinContent(bit,2);  
 
+  if den == 0 :
+    return values
+  
   asym = num/den
   err = 1/math.sqrt(den)
 
-  print(asym,err)
+  status = 1
+  
   values = [status, float('%.5f'%(asym)), float('%.5f'%(err)) ]
   
   return values       # return array of values, status first
+
+
+def rho_helicity_asymmetry(rootfile) :
+
+  names = ['rho_hel_asym_status','rho_hel_asym','rho_hel_asym_err']  
+  titles = ['Rho helicity asymmetry status','Rho helicity asymmetry', 'Rho helicity asymmetry err'] # graph titles
+  values = [-1, None, None]                                       # Default values, keep as -1
+
+  if not rootfile :  # called by init function
+    return [names, titles, values]
+
+  dirname = 'p2pi_preco/Custom_p2pi_hists'
+
+  min_counts=100
+
+  histoname = 'rhoDecPhipp'
+  hpp = get_histo(rootfile, dirname, histoname, min_counts)
+
+  histoname = 'rhoDecPhipm'
+  hpm = get_histo(rootfile, dirname, histoname, min_counts)
+
+  histoname = 'rhoDecPhimp'
+  hmp = get_histo(rootfile, dirname, histoname, min_counts)
+
+  histoname = 'rhoDecPhimm'
+  hmm = get_histo(rootfile, dirname, histoname, min_counts)
+    
+  if (not (hpp and hpm and hmp and hmm)) :
+    return values
+
+  hpp.Add(hmm)
+  hmp.Add(hpm)
+
+  sumEntries = hpp.GetEntries() + hmp.GetEntries()
+
+  if sumEntries < 40000 :
+    hpp.Rebin(2)
+    hmp.Rebin(2)
+
+  hA = hpp.GetAsymmetry(hmp)
+
+  if sumEntries < 10000 :
+    ff = "[0] + [1]*sin(2*x[0])"
+  else :
+    ff = "[0]+ ([1]*sin(2*x[0]))/(1 + 0.5*[2]*cos(2*x[0])+[3]*cos(x[0]))"
+
+  hfit2phi = TF1("x2phi",ff,-TMath.Pi(),TMath.Pi())              
+
+  hfit2phi.SetParameters(0,0.1,0,0,-0.3,0);
+
+  hA.Fit("x2phi","Q0")
+
+  amp = hfit2phi.GetParameter(1);
+  amp_err = hfit2phi.GetParError(1);  
+
+  status = 1
+  
+  values = [status, float('%.4f'%(amp)), float('%.4f'%(amp_err)) ]
+  
+  return values       # return array of values, status first
+
+

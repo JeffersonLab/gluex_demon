@@ -4,8 +4,8 @@
 #   import it
 #   add it to the lists of modules, modules_def etc
 #
-# Run this script with arguments -r Year-Month -v Version and (optionally) a non-standard monitoring histogram directory.
-# eg python scan.py -r 2022-05 -v 23 cpphists
+# Run this script with arguments -r Year-Month -v Version [-s rcdb_status] [non-standard monitoring histogram directory].
+# eg python scan.py -r 2022-05 -v 23 -s 1 cpphists
 #
 # It should create 4 files, with the suffix X denoting Year-Month_Version, eg 2022-05_ver23
 #
@@ -95,7 +95,7 @@ script = sys.argv.pop(0)
 nargs = len(sys.argv)
 
 if nargs<4 or nargs>7 or sys.argv[0] == "-h" or sys.argv[0] == "--h" or sys.argv[0] == "--help":
-    exit("\nThis script scans GlueX/Hall D detector monitoring histograms to create graphs.\n\nUsage: python scan.py -r Year-Month -v VersionNumber [-s CheckStatus] [path_to_monitoring_histogram_directory]\n    eg python scan.py -r 2022-05 -v 06 -s 1\n\nThe histogram directory is optional if it is the usual one. \n\nCheckStatus values act as follows:\n  -1: check all runs\n   0:check only runs with RCDB status >0 (this is the default)\n   1:check only runs with RCDB status=1")
+    exit("\nThis script scans GlueX/Hall D detector monitoring histograms to create graphs.\n\nUsage: python scan.py -r Year-Month -v VersionNumber [-s CheckStatus] [path_to_monitoring_histogram_directory]\n    eg python scan.py -r 2022-05 -v 06 -s 1\n\nThe histogram directory is optional if it is the usual one. \n\nCheckStatus values act as follows:\n  -1: check all runs\n   0: check only runs with RCDB status >0 (this is the default)\n   1: check only runs with RCDB status=1")
 
 
 # detector monitoring modules
@@ -119,6 +119,7 @@ import triggers
 
 modules_cpp = [photons_cpp, ps_e, rf, timing, triggers, cdc_cpp, fdc, tof_1, fmwpc, ctof] # modules for CPP
 modules_def = [photons, rho, omega, pi0, rf, timing, tracking, triggers, cdc, fdc, sc, tof_1]
+#modules_def = [photons]
 
 testing = 0  # stop after <runlimit> files, print diagnostics
 runlimit = 5 # process this number of runs if testing=1
@@ -685,8 +686,8 @@ for i in range(len(pagenames)):
 
         if gr == None :
             continue
-        
-        gr.GetXaxis().SetRangeUser(x[0],x[nruns-1])        
+
+        gr.GetXaxis().SetRangeUser(x[0],x[nruns-1])
         gr.Write()
         
         if thing in graphstomg:
@@ -715,8 +716,23 @@ for i in range(len(pagenames)):
         gr = make_graph_errs(gname,gtitles[igraph],nruns,x,y,dx,dy)
 
         if gr != None :
+
+            for ii in range(len(x)):
+                if y[ii] != None:
+                    firstx = x[ii]
+                    break
+
+#            print(firstx)
+#            if firstx != x[0] :
+#                print(gname)
+            
             gr.SetLineColor(17);
-            gr.GetXaxis().SetRangeUser(x[0],x[nruns-1])            
+
+            # https://root-forum.cern.ch/t/root-6-32-00-ulast-fxmax-fxmax-is-used-message/59573
+            # if y[0] = none then x[0] is not included in the graph and setting the range to start with x[0]
+            # generates a warning message, but it does set the axis range as specified.
+
+            gr.GetXaxis().SetRangeUser(x[0],x[nruns-1])
             gr.Write()
 
         if gname in graphstomg:
@@ -771,7 +787,7 @@ for i in range(len(pagenames)):
             print("No graphs were found for multigraph",mgname)
             continue
 
-        thismg.GetXaxis().SetRangeUser(x[0],x[nruns-1])      
+        thismg.GetXaxis().SetRangeUser(x[0],x[nruns-1])
         thismg.GetXaxis().SetNoExponent(True)           
         
         thismg.Write()
@@ -779,6 +795,8 @@ for i in range(len(pagenames)):
     f.cd("../")
 
 f.Close()
+
+print('TAxis::TAxis::SetRangeUser:0: RuntimeWarnings are harmless')
 
 if testing:
     print('Graphs saved to %s' % (filename_graphs) )
