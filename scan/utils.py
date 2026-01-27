@@ -44,7 +44,7 @@ def check(modulename, run, rootfile) :
 
 #-------------------------------------------------------------------------------------------------------------------------
 
-def get_histo(rootfile, dirname, histoname, min_counts) :
+def get_histo(rootfile, dirname, histoname, min_counts=100) :
 
   test = rootfile.GetDirectory(dirname) 
 

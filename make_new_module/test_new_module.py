@@ -13,7 +13,20 @@
 #   filename_badruns = 'test_new_module_badruns.txt'  # list of runs with overall status not good
 #   filename_pagenames = 'test_new_module_pagenames.txt' # list of module page titles and graphs
 #
+# Only graphs will be created (no multigraphs or graphs with errors).
+# This should be enough to see if the new module is performing correctly. 
+#
 # To test over more runs, adjust the variable runlimit
+
+import example        # import new module 
+
+modules = [example]   # list of module names
+run_module = [True]      # include the module if true
+
+testing = 1  # stop after <runlimit> files, print diagnostics
+runlimit = 2 # process this number of runs if testing=1
+
+# -------  no need to change anything below this line ---------
 
 import os
 import sys
@@ -22,20 +35,14 @@ import glob
 import re
 import csv
 
+from utils import init, check
+
 from ROOT import TFile, TGraph
 from ROOT import gROOT
 gROOT.SetBatch(True)
 
-import new_module        # import new module 
-
-modules = [new_module]   # list of module names
-run_module = [True]      # include the module if true
-
-testing = 1  # stop after <runlimit> files, print diagnostics
-runlimit = 2 # process this number of runs if testing=1
-
-max_errcount = 10 #set larger than the number of modules, suppress messages 
-max_file_errcount = 10 # for file errors, filenames
+max_errcount = 10*len(modules) #set larger than the number of modules, suppress messages 
+max_file_errcount = 5*len(modules) # for file errors, filenames
 err_mismatches = False  # set this true if there are value array length mismatches
 
 script = sys.argv.pop(0)
@@ -106,7 +113,7 @@ for imod in range(len(modules)) :
     if run_module[imod] :  
         try: 
     
-          arrays = modules[imod].init() 
+          arrays = init(modules[imod]) 
         
         except:
     
@@ -114,7 +121,7 @@ for imod in range(len(modules)) :
           run_module[imod] = False
 
           print('Calling it again, to show the error')
-          arrays = modules[imod].init()
+          arrays = init(modules[imod])
 
         else:
 
@@ -201,15 +208,14 @@ for filename in histofilelist:
                 print('Calling %s' % (str(active_modules[imod])) )
 
             try: 
-
-                newdata = active_modules[imod].check(run, rootfile)  # run, root file ptr
+                newdata = check(active_modules[imod], run, rootfile)  # run, root file ptr
 
             except:
                 if errcount < max_errcount:
                     print('ERROR run %i %s ' % (run, str(active_modules[imod])) )  
 
                 print('Calling the module again, to show the error')
-                newdata = active_modules[imod].check(run, rootfile)  # run, root file ptr
+                newdata = check(active_modules[imod], run, rootfile)  # run, root file ptr
 
                 errcount = errcount + 1
 
