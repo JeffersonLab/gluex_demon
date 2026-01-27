@@ -11,6 +11,3 @@ These scan GlueX/HallD monitoring histograms and make root graphs to show on [ha
 * scan contains the operational modules and the script to run them, and more documentation.
 
 * web contains the files for halldweb.
-
-### Caveat
-This is fledgling code, under development by Naomi Jarvis.
