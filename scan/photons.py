@@ -299,7 +299,7 @@ def trigger_asymmetry(rootfile) :
 def rho_helicity_asymmetry(rootfile) :
 
   names = ['rho_hel_asym_status','rho_hel_asym','rho_hel_asym_err']  
-  titles = ['Rho helicity asymmetry status','Rho helicity asymmetry', 'Rho helicity asymmetry err'] # graph titles
+  titles = ['Rho beam-meson helicity asymmetry status','Rho beam-meson helicity asymmetry', 'Rho beam-meson helicity asymmetry err'] # graph titles
   values = [-1, None, None]                                       # Default values, keep as -1
 
   if not rootfile :  # called by init function
