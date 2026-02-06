@@ -333,7 +333,7 @@ def fcal_matchrate(rootfile) :
 def sc_matchrate(rootfile) :
 
   names = ['sc_match_status','sc_match']  
-  titles = ['SC track match rate status','SC match rate']
+  titles = ['SC track match rate status','SC match rate (z = 60 to 95cm)']
   values = [-1, None]
 
   if not rootfile :  # called by init function
@@ -341,8 +341,8 @@ def sc_matchrate(rootfile) :
 
   dirname = '/Independent/Hist_DetectorMatching/TimeBased/SC'
   
-  llim = 0.86    # acceptability limit
-
+  llim = 0.9    # acceptability limit
+  
   min_counts=100
 
   histoname = 'SCPaddleVsZ_HasHit'
@@ -351,11 +351,17 @@ def sc_matchrate(rootfile) :
   histoname = 'SCPaddleVsZ_NoHit'
   h2 = get_histo(rootfile, dirname, histoname, min_counts)
 
-  status1 = 0
+  status = 0
   
   if h1 and h2 :
-    hits = h1.GetEntries()
-    nohits = h2.GetEntries()
+    bin1 = h1.GetXaxis().FindBin(60)
+    bin2 = h1.GetXaxis().FindBin(95)
+
+    p1 = h1.ProjectionY('p1',bin1,bin2)
+    p2 = h2.ProjectionY('p2',bin1,bin2)
+
+    hits = p1.GetEntries()
+    nohits = p2.GetEntries()
 
     chances = hits + nohits
 
@@ -364,16 +370,18 @@ def sc_matchrate(rootfile) :
       values[1] = float('%.3f'%(match_rate))
 
       if match_rate >= llim :
-        values[0] = 1
-  
+        status = 1
+
+    values[0] = status
+        
   return values       # return array of values, status first
 
 
 
 def tof_matchrate(rootfile) :
 
-  names = ['tof_match_status','tof_match','tof_match_1g']  
-  titles = ['TOF track match rate status','TOF match rate','TOF match rate > 1GeV'] # graph titles
+  names = ['tof_match_status','tof_match_4_6g','tof_match_20_60cm']  
+  titles = ['TOF track match rate status','TOF match rate (4 to 6GeV)','TOF match rate (20 to 60cm)'] # graph titles
   values = [-1, None, None]
 
   if not rootfile :  # called by init function
@@ -381,9 +389,9 @@ def tof_matchrate(rootfile) :
 
   dirname = '/Independent/Hist_DetectorMatching/TimeBased/TOFPoint'
   
-  llim = 0.25    # acceptability limit
-  llim2 = 0.36
-
+  limg = 0.6  # acceptability limit
+  limr = 0.7
+  
   min_counts=100
 
   histoname = 'TrackTOFP_HasHit'
@@ -395,8 +403,11 @@ def tof_matchrate(rootfile) :
   status1 = 0
   
   if h1 and h2 :
-    hits = h1.GetEntries()
-    nohits = h2.GetEntries()
+    bin1 = h1.GetXaxis().FindBin(4.0)
+    bin2 = h1.GetXaxis().FindBin(6.0)
+
+    hits = h1.Integral(bin1,bin2)
+    nohits = h2.Integral(bin1,bin2)
 
     chances = hits + nohits
 
@@ -404,9 +415,9 @@ def tof_matchrate(rootfile) :
       match_rate = hits/chances
       values[1] = float('%.3f'%(match_rate))
 
-      if match_rate >= llim :
+      if match_rate >= limg :
         status1 = 1
-
+        
         
   # repeat for > 1 GeV histos
   histoname = 'TrackTOFR_HasHit'
@@ -418,18 +429,22 @@ def tof_matchrate(rootfile) :
   status2 = 0
   
   if h1 and h2 :
-    hits = h1.GetEntries()
-    nohits = h2.GetEntries()
+    bin1 = h1.GetXaxis().FindBin(20)
+    bin2 = h1.GetXaxis().FindBin(60)
+
+    hits = h1.Integral(bin1,bin2)
+    nohits = h2.Integral(bin1,bin2)
 
     chances = hits + nohits
 
     if chances > 0 :
       match_rate = hits/chances
       values[2] = float('%.3f'%(match_rate))
-      
-      if match_rate >= llim2 :
+
+      if match_rate >= limr :
         status2 = 1
 
+        
   values[0] = status1 and status2
 
   
