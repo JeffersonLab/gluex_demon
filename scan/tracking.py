@@ -150,49 +150,63 @@ def ntimebasedtracks(rootfile) :
 
 def bcal_matchrate(rootfile) :
 
-  names = ['bcalmatch_status','bcal_match']  
-  titles = ['BCAL track match rate status','BCAL match rate'] # graph titles
-  values = [-1, None]                                    
+  names = ['bcalmatch_status','bcal_match','bcal_match_160_190cm']  
+  titles = ['BCAL track match rate status','BCAL match rate','BCAL match rate (160 to 190cm)'] # graph titles
+  values = [-1, None, None]
 
   if not rootfile :  # called by init function
     return [names, titles, values]
 
-  histoname = 'TrackBCALModuleVsZ_HasHit'
+
   dirname = '/Independent/Hist_DetectorMatching/TimeBased/BCAL'
   
-  llim = 0.77    # acceptability limit
+  llim1 = 0.75    # acceptability limit
+  llim2 = 0.85    # acceptability limit  
 
   min_counts=100
-  h = get_histo(rootfile, dirname, histoname, min_counts)
 
-  if (not h) :
-    return values
-
-  # code to check the histogram and find the status values
-
-  hits = h.GetEntries()
+  histoname = 'TrackBCALModuleVsZ_HasHit'
+  h1 = get_histo(rootfile, dirname, histoname, min_counts)
 
   histoname = 'TrackBCALModuleVsZ_NoHit'
-  h = get_histo(rootfile, dirname, histoname, min_counts)
+  h2 = get_histo(rootfile, dirname, histoname, min_counts)
 
-  if (not h) :
-    return values
-
-  nohits = h.GetEntries()
-
-  chances = hits + nohits
-
-  if chances == 0:
-    return values
+  status1 = 0
+  status2 = 0
   
-  match_rate = hits/chances
+  if h1 and h2 :
+    hits = h1.GetEntries()
+    nohits = h2.GetEntries()
 
-  status = 1
-  if match_rate < llim : 
-      status=0
+    chances = hits + nohits
 
+    if chances > 0 :
+      match_rate = hits/chances
+      values[1] = float('%.3f'%(match_rate))
 
-  values = [status, float('%.3f'%(match_rate)) ]
+      if match_rate >= llim1 :
+        status1 = 1
+
+    bin1 = h1.GetXaxis().FindBin(160)
+    bin2 = h1.GetXaxis().FindBin(190)
+    
+    p1 = h1.ProjectionX('p1')
+    p2 = h2.ProjectionX('p2')
+
+    hits = p1.Integral(bin1,bin2)
+    nohits = p2.Integral(bin1,bin2)
+
+    chances = hits + nohits
+    
+    if chances > 0 :
+      match_rate = hits/chances
+      values[2] = float('%.3f'%(match_rate))
+
+      if match_rate >= llim2 :
+        status2 = 1
+        
+  values[0] = status1 and status2
+    
   
   return values       # return array of values, status first
 
@@ -200,9 +214,9 @@ def bcal_matchrate(rootfile) :
 
 def ecal_matchrate(rootfile) :
 
-  names = ['ecal_match_status','ecal_match','ecal_match_1g']  
-  titles = ['ECAL track match rate status','ECAL match rate','ECAL match rate > 1GeV'] 
-  values = [-1, None, None]                                      
+  names = ['ecal_match_status','ecal_match','ecal_match_1g', 'ecal_match_1g_45_65cm']  
+  titles = ['ECAL track match rate status','ECAL match rate','ECAL match rate > 1GeV', 'ECAL match rate > 1 GeV (20-40cm)'] # graph titles] # graph titles
+  values = [-1, None, None, None]
 
   if not rootfile :  # called by init function
     return [names, titles, values]
@@ -210,7 +224,8 @@ def ecal_matchrate(rootfile) :
   dirname = '/Independent/Hist_DetectorMatching/TimeBased/ECAL'
   
   llim = 0.3    # acceptability limit
-  llim2 = 0.55
+  llim2 = 0.4
+  llim3 = 0.55
 
   min_counts=100
 
@@ -244,6 +259,7 @@ def ecal_matchrate(rootfile) :
   h2 = get_histo(rootfile, dirname, histoname, min_counts)
 
   status2 = 0
+  status3 = 0
   
   if h1 and h2 :
     hits = h1.GetEntries()
@@ -258,25 +274,42 @@ def ecal_matchrate(rootfile) :
       if match_rate >= llim2 :
         status2 = 1
 
-  values[0] = status1 and status2
+    bin1 = h1.GetXaxis().FindBin(20)
+    bin2 = h1.GetXaxis().FindBin(40)
+
+    hits = h1.Integral(bin1,bin2)
+    nohits = h2.Integral(bin1,bin2)
+
+    chances = hits + nohits
+
+    if chances > 0 :
+      match_rate = hits/chances
+      values[3] = float('%.3f'%(match_rate))
+
+      if match_rate >= llim3 :
+        status3 = 1
+
+  values[0] = status1 and status2 and status3
   
   return values       # return array of values, status first
 
 
+
 def fcal_matchrate(rootfile) :
 
-  names = ['fcal_match_status','fcal_match','fcal_match_1g']  
-  titles = ['FCAL track match rate status','FCAL match rate','FCAL match rate > 1GeV'] # graph titles
-  values = [-1, None, None]                                       # Defult values, keep as -1
+  names = ['fcal_match_status','fcal_match','fcal_match_1g','fcal_match_1g_45_65cm']  
+  titles = ['FCAL track match rate status','FCAL match rate','FCAL match rate > 1GeV','FCAL match rate > 1 GeV (45-65cm)'] # graph titles] # graph titles
+  values = [-1, None, None, None]                                       # Defult values, keep as -1
 
   if not rootfile :  # called by init function
     return [names, titles, values]
 
   dirname = '/Independent/Hist_DetectorMatching/TimeBased/FCAL'
   
-  llim = 0.33    # acceptability limit
-  llim2 = 0.42
-
+  llim = 0.3    # acceptability limit
+  llim2 = 0.4
+  llim3 = 0.65
+  
   min_counts=100
 
   histoname = 'TrackFCALP_HasHit'
@@ -309,6 +342,7 @@ def fcal_matchrate(rootfile) :
   h2 = get_histo(rootfile, dirname, histoname, min_counts)
 
   status2 = 0
+  status3 = 0
   
   if h1 and h2 :
     hits = h1.GetEntries()
@@ -323,8 +357,22 @@ def fcal_matchrate(rootfile) :
       if match_rate >= llim2 :
         status2 = 1
 
-  values[0] = status1 and status2
+    bin1 = h1.GetXaxis().FindBin(45)
+    bin2 = h1.GetXaxis().FindBin(65)
 
+    hits = h1.Integral(bin1,bin2)
+    nohits = h2.Integral(bin1,bin2)
+
+    chances = hits + nohits
+
+    if chances > 0 :
+      match_rate = hits/chances
+      values[3] = float('%.3f'%(match_rate))
+
+      if match_rate >= llim3 :
+        status3 = 1
+
+  values[0] = status1 and status2 and status3
   
   return values       # return array of values, status first
 
@@ -357,11 +405,11 @@ def sc_matchrate(rootfile) :
     bin1 = h1.GetXaxis().FindBin(60)
     bin2 = h1.GetXaxis().FindBin(95)
 
-    p1 = h1.ProjectionY('p1',bin1,bin2)
-    p2 = h2.ProjectionY('p2',bin1,bin2)
+    p1 = h1.ProjectionX('p1')
+    p2 = h2.ProjectionX('p2')
 
-    hits = p1.GetEntries()
-    nohits = p2.GetEntries()
+    hits = p1.Integral(bin1,bin2)
+    nohits = p2.Integral(bin1,bin2)
 
     chances = hits + nohits
 
@@ -380,9 +428,9 @@ def sc_matchrate(rootfile) :
 
 def tof_matchrate(rootfile) :
 
-  names = ['tof_match_status','tof_match_4_6g','tof_match_20_60cm']  
-  titles = ['TOF track match rate status','TOF match rate (4 to 6GeV)','TOF match rate (20 to 60cm)'] # graph titles
-  values = [-1, None, None]
+  names = ['tof_match_status','tof_match_4_6g','tof_match_20_60cm','tof_match_20_60cm_per_tbtracks']  
+  titles = ['TOF track match rate status','TOF match rate (4 to 6GeV)','TOF match rate (20 to 60cm)', 'TOF match rate (20 to 60cm) / Mean time based track count'] # graph titles
+  values = [-1, None, None, None]
 
   if not rootfile :  # called by init function
     return [names, titles, values]
@@ -413,6 +461,7 @@ def tof_matchrate(rootfile) :
 
     if chances > 0 :
       match_rate = hits/chances
+
       values[1] = float('%.3f'%(match_rate))
 
       if match_rate >= limg :
@@ -444,8 +493,20 @@ def tof_matchrate(rootfile) :
       if match_rate >= limr :
         status2 = 1
 
+
+
+  tbt = ntimebasedtracks(rootfile)
+
+  ntbt = tbt[1]
+
+  status3 = 0
+  ratio = 0
+  if ntbt > 0:
+    ratio = match_rate/ntbt
+    values[3] = float('%.4f'%(ratio))
+    status3 = 1
         
-  values[0] = status1 and status2
+  values[0] = status1 and status2 and status3
 
   
   return values
