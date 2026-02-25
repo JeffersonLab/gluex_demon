@@ -119,7 +119,6 @@ import triggers
 
 modules_cpp = [photons_cpp, ps_e, rf, timing, triggers, cdc_cpp, fdc, tof_1, fmwpc, ctof] # modules for CPP
 modules_def = [photons, rho, omega, pi0, rf, timing, tracking, triggers, cdc, fdc, sc, tof_1]
-#modules_def = [photons]
 
 testing = 0  # stop after <runlimit> files, print diagnostics
 runlimit = 5 # process this number of runs if testing=1
@@ -495,7 +494,7 @@ f.close()
 if testing:
     print('Results saved to %s' % (filename_csv) )
 
-
+    
 
 # list of bad runs
 
@@ -816,7 +815,7 @@ for i in range(len(pagenames)):
     line.extend(newlistofgraphs[i])
     
     writer.writerow(line)
-    
+
 f.close()
 
 if testing:
@@ -825,4 +824,49 @@ if testing:
 ################################################################################
 
 
+# write out one csv file per page
 
+###  NB the pagenames file contains page name and then a reordered list of multigraphs, etc, sorted for display
+
+# read the csv file back into one giant 2D array
+data = []
+with open(filename_csv, newline='', encoding='utf-8') as csvfile:
+    reader = csv.reader(csvfile)
+    data = list(reader)
+
+
+# write out to separate file for each page.  include run for each. 
+
+startfield = 2
+with open(filename_pagenames, newline='', encoding='utf-8') as csvfile:
+    reader = csv.reader(csvfile)
+
+    for fieldlist in reader:
+        page = fieldlist[0]
+
+        lastfield = startfield
+        
+        for x in range(startfield,len(data[0])) :     # find the last graphname for this page
+            if not data[0][x].startswith(page+"/") :
+                break
+            lastfield = x
+
+        filename_thispage = 'monitoring_data_' + page + tag + '.csv'
+        
+        with open(filename_thispage,'w') as f:
+            writer = csv.writer(f)
+
+            for row in data:
+                collection = [row[0]]
+                
+                for x in range(startfield,lastfield+1) :
+                    thing = row[x]
+                    if thing.endswith("_mg") :
+                        thing = thing[:-3]
+                    if thing.startswith(page) :
+                        thing = thing[len(page)+1:]
+                    collection.append(thing)
+
+                writer.writerow(collection)
+    
+            startfield = lastfield + 1
