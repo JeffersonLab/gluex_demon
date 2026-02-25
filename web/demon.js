@@ -18,6 +18,7 @@ var graphs_filename = "";  // root file
 var csv_filename = "";
 var pagenames = "";  // file containing lists of graphs
 
+var year_month = "";
 
 import { openFile, draw, create, settings } from 'https://root.cern/js/latest/modules/main.mjs';
 
@@ -68,7 +69,7 @@ $(document).ready(async function () {
     document.getElementById("Version").innerHTML = 'Version ' + Version;
 
 
-    let year_month = RunPeriod.substring(10,17);
+    year_month = RunPeriod.substring(10,17);
 
     graphs_filename = `./${RunPeriod}/${Version}/monitoring_graphs_${year_month}_ver${Version}.root`;
     csv_filename = `./${RunPeriod}/${Version}/monitoring_data_${year_month}_ver${Version}.csv`;
@@ -153,7 +154,7 @@ function get_url_args() {
 
 
 
-async function fetchfiledata(filename) {
+async function fetchfiledata(filename, quiet=true) {
 
     const response = await fetch(filename+'?'+Math.random());   // requesting filename?random avoids the data being cached
 
@@ -162,10 +163,14 @@ async function fetchfiledata(filename) {
     //console.log(text);
 
     if (text.includes('404 Not Found')) {
-        console.log('ERROR: ' + filename + ' not found!');
-        show_problem(filename + ' is missing!');
         text = false;
+	if (!quiet) {
+            console.log('ERROR: ' + filename + ' not found!');
+            show_problem(filename + ' is missing!');
+	}
     }
+
+
 
     return text;
 
@@ -216,7 +221,16 @@ async function getgraphnames() {
     console.log('Detector: '+Detector)
     
     if (Detector != "") {  // detector page
-
+//        let year_month = `${RunPeriod}.substring(10,17)`;
+        let page_csv_filename = `./${RunPeriod}/${Version}/monitoring_page_${Detector}_${year_month}_ver${Version}.csv`;
+	const file_exists = await fetchfiledata(page_csv_filename,true);
+        let csv_link = '';
+	if (file_exists) {
+	    csv_link = `<a href="${page_csv_filename}">CSV file for this page</a>`;
+        }
+	//let csv_link = `<a href="${page_csv_filename}">CSV file for this page</a>`;
+        document.getElementById("csv").innerHTML = csv_link;
+	
         let j = det_list.indexOf(Detector) - 1;   // because det_list starts w overview
 
         const gdir = graph_collection[j][0]; 
@@ -250,7 +264,10 @@ async function getgraphnames() {
 
     } else  {    // overview page
 
-        let npages = det_list.length;  // NB it starts with "" for overview
+        let csv_link = `<a href="${csv_filename}">CSV file</a>`;
+        document.getElementById("csv").innerHTML = csv_link;    
+
+	let npages = det_list.length;  // NB it starts with "" for overview
 
         // start at -1 for readiness
         for (let i = 0; i < npages; i++) {
