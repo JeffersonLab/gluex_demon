@@ -21,9 +21,10 @@ def occupancy(rootfile) :
   titles = ['Occupancy status','Missing straw count']
   names = ['occ_status','n_missing']
   values = default_values(names)
-
+  png = ['CDC_occupancy']
+  
   if not rootfile :  # called by init function
-    return [names, titles, values]
+    return [names, titles, values, png]
 
   occmax = 25 # expect 9 dead but more look dead in ET runs  
   histoname = 'an30_100ns'
@@ -96,9 +97,10 @@ def efficiency(rootfile) :
   titles = ['Efficiency status', 'CDC hit efficiency at 0.04mm', 'Hit efficiency at 0.04mm error', 'CDC hit efficiency at 5mm', 'Hit efficiency at 5mm error', 'CDC hit efficiency at 6.4mm', 'Hit efficiency at 6.4mm error']
   names = ['eff_status', 'eff0_hitefficiency_mg', 'eff0_hitefficiency_mg_err', 'eff5_hitefficiency_mg', 'eff5_hitefficiency_mg_err', 'eff6_hitefficiency_mg', 'eff6_hitefficiency_mg_err']
   values = default_values(names)
+  png = ['CDC_eff']
 
   if not rootfile :  # called by init function
-    return [names, titles, values]
+    return [names, titles, values, png]
 
 
   e0min = 0.97
@@ -141,9 +143,10 @@ def dedx(rootfile) :
   titles = ['dE/dx status', 'CDC dE/dx q+ mean at 1.5 GeV/c (keV/cm)', 'CDC dE/dx q+ resolution at 1.5 GeV/c', 'CDC dE/dx q- mean at 1.5 GeV/c (keV/cm)', 'CDC dE/dx q- resolution at 1.5 GeV/c', 'CDC dE/dx q+ overall mean (keV/cm)', 'CDC dE/dx q+ overall width']
   names = ['dedx_status', 'qp_dedx_mean', 'qp_dedx_res', 'qm_dedx_mean', 'qm_dedx_res', 'qp_dedx_allmean', 'qp_dedx_allsig']
   values = default_values(names)
+  png = ['CDC_dedx']
 
   if not rootfile :  # called by init function
-    return [names, titles, values]
+    return [names, titles, values, png]
 
   dedxmin = 1.9998
   dedxmax = 2.0402
@@ -251,9 +254,10 @@ def ttod(rootfile) :
   titles = ['TTOD status','CDC TTOD residual mean (#mum)','CDC TTOD residual width (#mum)']
   names = ['ttod_status','ttod_mean','ttod_res']
   values = default_values(names)
-
+  png = ['HistMacro_CDCTimeToDistance']
+  
   if not rootfile :  # called by init function
-    return [names, titles, values]
+    return [names, titles, values, png]
 
   ttodmeanmax = 15.0
   ttodsigmamax = 150.0

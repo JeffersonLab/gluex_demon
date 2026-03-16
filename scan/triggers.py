@@ -21,9 +21,10 @@ def triggers(rootfile) :
   names = ['trig_status','main_trig','bcal_trig','bcal_trigratio_mg','ps_trig','ps_trigratio_mg','random_trig','random_trigratio_mg']
   titles = ['tr_status','Main triggers','BCAL triggers','BCAL triggers/Main triggers (%)','PS triggers','PS triggers/Main triggers (%)','Random triggers','Random triggers/Main triggers (%)']
   values = [-1, None, None, None, None, None, None, None ]
+  png = ['HistMacro_Trigger']
 
   if not rootfile :  # called by init function
-    return [names, titles, values]
+    return [names, titles, values, png]
 
   # Main Trigger BCAL+FCAL: GTP Bit 1
   # BCAL Trigger: GTP Bit 3            

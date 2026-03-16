@@ -21,9 +21,10 @@ def rho_mass_yield(rootfile) :
   names = ['rho_mass_and_yield_status','rho_yield','rho_mass','rho_mass_err','rho_width', 'rho_width_err']
   titles = ['Rho status','Rho yield (counts, post kinfit)','Rho mass (GeV/c^{2})','Rho mass std dev','Rho width (GeV/c^{2})','Rho width std dev']   # Graph titles
   values = [-1, None, None, None, None, None]
-
+  png = ['HistMacro_p2pi']
+  
   if not rootfile :  # called by init function
-    return [names, titles, values]
+    return [names, titles, values, png]
 
   mmin = 0.766
   mmax = 0.774
@@ -80,9 +81,10 @@ def rho_ps_triggers(rootfile) :
   names = ['rho_ps_pair_status','ps_pair_count','rho_per_kpspairs']
   titles = ['Rho per k PS pair status','PS pair count','Rho yield per 1000 PS pairs']
   values = [-1, None, None]
+  png = ['HistMacro_p2pi','__PSPair_PSC_PS_PS_E','HistMacro_p2pi']
 
   if not rootfile :  # called by init function
-    return [names, titles, values]
+    return [names, titles, values, png]
 
   histoname = 'PS_E'            # monitoring histogram to check
   dirname = 'PS_flux/PSC_PS'                        # directory containing the histogram

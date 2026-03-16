@@ -1,4 +1,4 @@
-from utils import get_histo     # demon's helper functions
+from utils import get_histo,default_values     # demon's helper functions
 from ROOT import gROOT, TF1
 
 # Define the page name
@@ -20,10 +20,11 @@ def sc_dedx(rootfile) :
 
   titles = ['SC dE/dx status', 'SC dE/dx q+ MPV at 1.5 GeV/c (keV/cm)','SC dE/dx q+ width at 1.5 GeV/c (keV/cm)', 'SC dE/dx q- MPV at 1.5 GeV/c (keV/cm)','SC dE/dx q- width at 1.5 GeV/c (keV/cm)']
   names = ['dedx_status', 'qp_dedx_mpv', 'qp_dedx_sig', 'qm_dedx_mpv','qm_dedx_sig']
-  values = [-1, None, None, None, None ]
-
+  values = default_values(names)
+  png = ['HistMacro_SCReconstruction_p1']
+  
   if not rootfile :  # called by init function
-    return [names, titles, values]
+    return [names, titles, values, png]
 
   dirname = '/Independent/Hist_DetectorPID/SC'
   min_counts = 1.1e5

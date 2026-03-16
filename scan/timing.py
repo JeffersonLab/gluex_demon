@@ -22,9 +22,10 @@ def sc_rf_time(rootfile) :
   names = ['sc_rf_status', 'pim_SCRF_mg', 'pim_SCRF_mg_err', 'pip_SCRF_mg', 'pip_SCRF_mg_err', 'p_SCRF_mg', 'p_SCRF_mg_err']   
   titles = ['SC-RF time status', 'PiMinus #DeltaT(SC-RF) (ns)',  'PiMinus #DeltaT(SC-RF) width (ns)', 'PiPlus #DeltaT(SC-RF) (ns)',  'PiPlus #DeltaT(SC-RF) width (ns)', 'Proton #DeltaT(SC-RF) (ns)',  'Proton #DeltaT(SC-RF) width (ns)']   # Graph titles 
   values = default_values(names)
+  png = ['HistMacro_SCReconstruction_p2']
     
   if not rootfile :  # called by init function
-    return [names, titles, values]
+    return [names, titles, values, png]
 
   pi_low_limit = -0.3     # fit ranges
   pi_high_limit = 0.3
@@ -92,9 +93,10 @@ def tof_rf_time(rootfile) :
   names = ['tof_rf_status', 'pim_TOFRF_mg', 'pim_TOFRF_mg_err', 'pip_TOFRF_mg', 'pip_TOFRF_mg_err', 'p_TOFRF_mg', 'p_TOFRF_mg_err']   
   titles = ['TOF-RF time status', 'PiMinus #DeltaT(TOF-RF) (ns)',  'PiMinus #DeltaT(TOF-RF) width (ns)', 'PiPlus #DeltaT(TOF-RF) (ns)',  'PiPlus #DeltaT(TOF-RF) width (ns)', 'Proton #DeltaT(TOF-RF) (ns)',  'Proton #DeltaT(TOF-RF) width (ns)']   # Graph titles 
   values = default_values(names)
+  png = ['HistMacro_TOFReconstruction_p2']  
   
   if not rootfile :  # called by init function
-    return [names, titles, values]
+    return [names, titles, values, png]
 
   pi_low_limit = -0.3     # fit ranges
   pi_high_limit = 0.3
@@ -163,9 +165,10 @@ def bcal_rf_time(rootfile) :
   names = ['bcal_rf_status', 'pim_BCALRF_mg', 'pim_BCALRF_mg_err', 'pip_BCALRF_mg', 'pip_BCALRF_mg_err', 'p_BCALRF_mg', 'p_BCALRF_mg_err', 'g_BCALRF_mg', 'g_BCALRF_mg_err', 'g_1GeV_BCALRF_mg', 'g_1GeV_BCALRF_mg_err']   
   titles = ['BCAL-RF time status', 'PiMinus #DeltaT(BCAL-RF) (ns)',  'PiMinus #DeltaT(BCAL-RF) width (ns)', 'PiPlus #DeltaT(BCAL-RF) (ns)',  'PiPlus #DeltaT(BCAL-RF) width (ns)', 'Proton #DeltaT(BCAL-RF) (ns)',  'Proton #DeltaT(BCAL-RF) width (ns)', 'Photon #DeltaT(BCAL-RF) (ns)',  'Photon #DeltaT(BCAL-RF) width (ns)', 'Photon > 1GeV #DeltaT(BCAL-RF) (ns)',  'Photon > 1GeV #DeltaT(BCAL-RF) width (ns)']   # Graph titles ]   # Graph titles ]   # Graph titles ]   # Graph titles 
   values = default_values(names)
+  png = ['HistMacro_BCALReconstruction_p2']    
 
   if not rootfile :  # called by init function
-    return [names, titles, values]
+    return [names, titles, values, png]
 
   pi_low_limit = -0.5     # fit ranges
   pi_high_limit = 0.5
@@ -257,9 +260,10 @@ def ecal_rf_time(rootfile) :
   names = ['ecal_rf_status', 'pim_ECALRF_mg', 'pim_ECALRF_mg_err', 'pip_ECALRF_mg', 'pip_ECALRF_mg_err', 'g_ECALRF_mg', 'g_ECALRF_mg_err']   
   titles = ['ECAL-RF time status', 'PiMinus #DeltaT(ECAL-RF) (ns)',  'PiMinus #DeltaT(ECAL-RF) width (ns)', 'PiPlus #DeltaT(ECAL-RF) (ns)',  'PiPlus #DeltaT(ECAL-RF) width (ns)', 'Photon #DeltaT(ECAL-RF) (ns)',  'Photon #DeltaT(ECAL-RF) width (ns)']   # Graph titles 
   values = default_values(names)
-
+  png = ['HistMacro_ECALReconstruction_p2']
+  
   if not rootfile :  # called by init function
-    return [names, titles, values]
+    return [names, titles, values, png]
 
   pi_low_limit = -0.7     # fit ranges
   pi_high_limit = 0.7
@@ -331,9 +335,10 @@ def fcal_rf_time(rootfile) :
   names = ['fcal_rf_status', 'pim_FCALRF_mg', 'pim_FCALRF_mg_err', 'pip_FCALRF_mg', 'pip_FCALRF_mg_err', 'g_FCALRF_mg', 'g_FCALRF_mg_err']   
   titles = ['FCAL-RF time status', 'PiMinus #DeltaT(FCAL-RF) (ns)',  'PiMinus #DeltaT(FCAL-RF) width (ns)', 'PiPlus #DeltaT(FCAL-RF) (ns)',  'PiPlus #DeltaT(FCAL-RF) width (ns)', 'Photon #DeltaT(FCAL-RF) (ns)',  'Photon #DeltaT(FCAL-RF) width (ns)']   # Graph titles 
   values = default_values(names)
+  png = ['HistMacro_FCALReconstruction_p2']      
   
   if not rootfile :  # called by init function
-    return [names, titles, values]
+    return [names, titles, values, png]
 
   pi_low_limit = -0.7     # fit ranges
   pi_high_limit = 0.7
@@ -403,9 +408,10 @@ def cdc_rf_time(rootfile) :
   names = ['cdc_sc_status','cdc_sc','cdc_sc_err']     # These will be unique graph names, start with modulename_status
   titles = ['CDC-SC time status','Earliest CDC - matched SC time, mean (ns)', 'Earliest CDC - matched SC time, width (ns)']  # Graph titles 
   values = default_values(names)
+  png = ['HistMacro_TrackMatchedTiming']
   
   if not rootfile :  # called by init function
-    return [names, titles, values]
+    return [names, titles, values, png]
 
   time_max = 0.5  # acceptability limits
 
@@ -434,9 +440,10 @@ def fdc_rf_time(rootfile) :
   names = ['fdc_time_status','fdc_t0','fdc_t0_err']     # These will be unique graph names, start with modulename_status
   titles = ['FDC time status','FDC earliest flight-corrected time, mean (ns)', 'FDC earliest flight-corrected time, width (ns)']  # Graph titles 
   values = default_values(names)
-
+  png = ['HistMacro_TrackMatchedTiming']
+  
   if not rootfile :  # called by init function
-    return [names, titles, values]
+    return [names, titles, values, png]
 
   time_max = 0.5  # acceptability limits
 
@@ -465,9 +472,10 @@ def ps_rf_time(rootfile) :
   names = ['ps_tagh_status','ps_tagh','ps_tagh_err']     # These will be unique graph names, start with modulename_status
   titles = ['PS-TAGH time status','#DeltaT(PS-TAGH) (ns)', '#DeltaT(PS-TAGH) width (ns)']  # Graph titles 
   values = default_values(names)
+  png = ['HistMacro_PSTimingAlignment']
   
   if not rootfile :  # called by init function
-    return [names, titles, values]
+    return [names, titles, values, png]
 
   time_max = 0.1   # acceptability limits
 
@@ -512,9 +520,10 @@ def tagh_rf_time(rootfile) :
   names = ['tagh_rf_status','tagh_rf','tagh_rf_err']  
   titles = ['TAGH-RF time status','#DeltaT(TAGH-RF) (ns)', '#DeltaT(TAGH-RF) width (ns)']  # Graph titles 
   values = default_values(names)
+  png = ['HistMacro_TaggerRFAlignment']
   
   if not rootfile :  # called by init function
-    return [names, titles, values]
+    return [names, titles, values, png]
 
   time_max = 0.03   # acceptability limits
 
@@ -545,9 +554,10 @@ def tagm_rf_time(rootfile) :
   names = ['tagm_rf_status','tagm_rf','tagm_rf_err']
   titles = ['TAGM-RF time status','#DeltaT(TAGM-RF) (ns)', '#DeltaT(TAGM-RF) width (ns)']  # Graph titles 
   values = default_values(names)
+  png = ['HistMacro_TaggerRFAlignment2']  
 
   if not rootfile :  # called by init function
-    return [names, titles, values]
+    return [names, titles, values, png]
   
   time_max = 0.03   # acceptability limits
   low_limit = -0.3    # fit range
@@ -577,9 +587,10 @@ def fdc_tdc_diff(rootfile) :
   titles = ['FDC TDC status','FDC hit wire time peak, max diff from mean (ns)']
   names = ['fdc_tdc_status','fdc_tdc_max_diff']
   values = [-1, None]
+  png = ['HistMacro_TrackingTiming']
 
   if not rootfile :  # called by init function
-    return [names, titles, values]
+    return [names, titles, values, png]
 
   dirname = '/HLDetectorTiming/Physics Triggers/FDC'
   histoname = 'FDCHit Wire time vs. module'
@@ -633,9 +644,10 @@ def sc_rf_channels(rootfile, diffmin=-0.2, diffmax=0.2) :
   titles = ['SC channel status', 'SC RF time number bad channels','SC RF time maximum difference']
   names = ['sc_channel_status','sc_rftime_bad_channels','sc_rftime_max_diff']
   values = default_values(names)
+  png = ['HistMacro_TrackMatchedTiming']
 
   if not rootfile :  # called by init function
-    return [names, titles, values]
+    return [names, titles, values, png]
 
   dirname = '/HLDetectorTiming/Physics Triggers/TRACKING'
   histoname = 'SC - RF Time vs. Sector'
@@ -679,14 +691,15 @@ def sc_rf_channels(rootfile, diffmin=-0.2, diffmax=0.2) :
 
 def tagh_rf_channels(rootfile, diffmin=-0.1, diffmax=0.1) :
 
-  #print("in sc_rf_channels() ...")
+  #print("in tagh_rf_channels() ...")
 
   titles = ['TAGH channel status', 'TAGH RF time number bad channels','TAGH RF time maximum difference']
   names = ['tagh_channel_status','tagh_rftime_bad_channels','tagh_rftime_max_diff']
   values = default_values(names)
+  png = ['HistMacro_TaggerRFAlignment']
 
   if not rootfile :  # called by init function
-    return [names, titles, values]
+    return [names, titles, values, png]
 
   dirname = '/HLDetectorTiming/Physics Triggers/TRACKING'
   histoname = 'TAGH - RFBunch Time'
@@ -735,9 +748,10 @@ def tagm_rf_channels(rootfile, diffmin=-0.1, diffmax=0.1) :
   titles = ['TAGM channel status', 'TAGM RF time number bad channels','TAGM RF time maximum difference']
   names = ['tagm_channel_status','tagm_rftime_bad_channels','tagm_rftime_max_diff']
   values = [-1, None, None]
+  png = ['HistMacro_TaggerRFAlignment2']  
 
   if not rootfile :  # called by init function
-    return [names, titles, values]
+    return [names, titles, values, png]
 
   dirname = '/HLDetectorTiming/Physics Triggers/TRACKING'
   histoname = 'TAGM - RFBunch Time'
@@ -785,9 +799,10 @@ def sc_adctdc_channels(rootfile, diffmin=-0.1, diffmax=0.1) :
   titles = ['SC ADC-TDC channel status', 'SC ADC-TDC time number bad channels','SC ADC-TDC time maximum difference']
   names = ['sc_adctdc_channel_status','sc_adctdc_bad_channels','sc_adctdc_max_diff']
   values = [-1, None, None]
-
+  png = ['HistMacro_PIDSystemTiming']
+  
   if not rootfile :  # called by init function
-    return [names, titles, values]
+    return [names, titles, values, png]
 
   dirname = '/HLDetectorTiming/Physics Triggers/SC'
   histoname = 'SCHit TDC_ADC Difference'
@@ -836,9 +851,10 @@ def tof_adctdc_channels(rootfile, diffmin=-0.5, diffmax=0.5) :
   titles = ['TOF ADC-TDC channel status', 'TOF ADC-TDC time number bad channels','TOF ADC-TDC time maximum difference']
   names = ['tof_adctdc_channel_status','tof_adctdc_bad_channels','tof_adctdc_max_diff']
   values = [-1, None, None]
+  png = ['HistMacro_PIDSystemTiming']  
 
   if not rootfile :  # called by init function
-    return [names, titles, values]
+    return [names, titles, values, png]
 
   dirname = '/HLDetectorTiming/Physics Triggers/TOF'
   histoname = 'TOFHit TDC_ADC Difference'
@@ -887,9 +903,10 @@ def tagh_adctdc_channels(rootfile, diffmin=-0.1, diffmax=0.1) :
   titles = ['TAGH ADC-TDC channel status', 'TAGH ADC-TDC time number bad channels','TAGH ADC-TDC time maximum difference']
   names = ['tagh_adctdc_channel_status','tagh_adctdc_bad_channels','tagh_adctdc_max_diff']
   values = [-1, None, None]
+  png = ['HistMacro_TaggerTiming'] 
 
   if not rootfile :  # called by init function
-    return [names, titles, values]
+    return [names, titles, values, png]
 
   dirname = '/HLDetectorTiming/Physics Triggers/TAGH'
   histoname = 'TAGHHit TDC_ADC Difference'
@@ -938,9 +955,10 @@ def tagm_adctdc_channels(rootfile, diffmin=-0.1, diffmax=0.1) :
   titles = ['TAGM ADC-TDC channel status', 'TAGM ADC-TDC time number bad channels','TAGM ADC-TDC time maximum difference']
   names = ['tagm_adctdc_channel_status','tagm_adctdc_bad_channels','tagm_adctdc_max_diff']
   values = [-1, None, None]
+  png = ['HistMacro_TaggerTiming']   
 
   if not rootfile :  # called by init function
-    return [names, titles, values]
+    return [names, titles, values, png]
 
   dirname = '/HLDetectorTiming/Physics Triggers/TAGM'
   histoname = 'TAGMHit TDC_ADC Difference'

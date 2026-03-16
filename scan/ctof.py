@@ -21,9 +21,10 @@ def ctof_t(rootfile) :
   names = ['t_status','t_1','t_2', 't_3', 't_4']
   titles = ['TDC time status', 'Mean TDC time, bar 1', 'Mean TDC time, bar 2','Mean TDC time, bar 3', 'Mean TDC time, bar 4'] 
   values = default_values(names)
+  png = ['']
   
   if not rootfile :  # called by init function
-    return [names, titles, values]
+    return [names, titles, values, png]
 
   tmin = 0
   tmax = 100
@@ -69,9 +70,10 @@ def ctof_dt(rootfile) :
   names = ['dt_status','dt_1','dt_2', 'dt_3', 'dt_4']
   titles = ['TDC-ADC time status', 'Mean TDC-ADC time, bar 1', 'Mean TDC-ADC time, bar 2','Mean TDC-ADC time, bar 3', 'Mean TDC-ADC time, bar 4']   # These will be the graph titles
   values = default_values(names)
+  png = ['']
   
   if not rootfile :  # called by init function
-    return [names, titles, values]
+    return [names, titles, values, png]
 
   tmin = 0
   tmax = 100

@@ -21,9 +21,10 @@ def omega_3pi_mass(rootfile) :
   names = ['3pi_mass_and_yield_status','3pi_mass','3pi_yield_per_k_ps','3pi_resolution']
   titles = ['Omega->3pi status','3pi mass (GeV/c^{2})','Omega->3pi yield per 1000 PS pairs','Omega->3pi width (sigma, GeV)']   # Graph titles
   values = [-1, None, None, None]                                          # Default values, keep status as -1
-
+  png = ['HistMacro_p3pi']
+  
   if not rootfile :  # called by init function
-    return [names, titles, values]
+    return [names, titles, values, png]
 
   mmin = 0.750
   mmax = 0.800
@@ -92,9 +93,10 @@ def omega_3pi_mass_prekinfit(rootfile) :
   names = ['3pi_prekinfit_status','3pi_prekinfit_resolution']
   titles = ['Omega->3pi pre kin fit status','Omega->3pi width, pre kin fit (sigma, GeV)']   # Graph titles
   values = [-1, None]                                          # Default values, keep as -1
-
+  png = ['HistMacro_p3pi']
+  
   if not rootfile :  # called by init function
-    return [names, titles, values]
+    return [names, titles, values, png]
 
   mmin = 0.750
   mmax = 0.800
@@ -142,9 +144,10 @@ def omega_pi0g_mass(rootfile) :
   names = ['pi0g_mass_and_yield_status','pi0g_mass','pi0g_yield_ps']
   titles = ['Omega->pi0gamma status','Omega->pi0gamma mass (GeV/c^{2})','Omega->pi0gamma yield per 1000 PS triggers'] # Graph titles
   values = [-1, None, None]                                          # Default values, keep status as -1
-
+  png = ['HistMacro_ppi0gamma']
+  
   if not rootfile :  # called by init function
-    return [names, titles, values]
+    return [names, titles, values, png]
 
   mmin = 0.750
   mmax = 0.800

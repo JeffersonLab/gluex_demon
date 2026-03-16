@@ -23,7 +23,7 @@ def ps_e(rootfile) :
   values = default_values(names)
 
   if not rootfile :  # called by init function
-    return [names, titles, values]
+    return [names, titles, values, png]
 
   histoname = 'PS_E'   # monitoring histogram to check
   dirname = '/PS_flux/PSC_PS'      # directory containing the histogram

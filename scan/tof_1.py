@@ -22,9 +22,10 @@ def tof_1_dEdxP1(rootfile) :
   names = ['dEdxP1_status','dEdxP1','dEdxP1_err']  
   titles = ['dEdx Horizontal Plane','Plane 1 dEdx [GeV]','#sigma dEdx [GeV]']    
   values = [-1, None, None]
+  png = ['HistMacro_TOFReconstruction_p1']
   
   if not rootfile :  # called by init function
-    return [names, titles, values]
+    return [names, titles, values, png]
   
   histoname = 'TOFPointEnergyP1'   # monitoring histogram to check
   dirname = '/Independent/Hist_Reconstruction'      # directory containing the histogram
@@ -89,10 +90,11 @@ def tof_1_dEdxP2(rootfile) :
   
   names = ['dEdxP2_status','dEdxP2','dEdxP2_err']  
   titles = ['dEdx Vertical Plane','Plane 2 dEdx [MeV]','#sigma dEdx [MeV]']    
-  values = [-1, None, None] 
+  values = [-1, None, None]
+  png = ['HistMacro_TOFReconstruction_p1']  
   
   if not rootfile :  # called by init function
-    return [names, titles, values]
+    return [names, titles, values, png]
 
   histoname = 'TOFPointEnergyP2'   # monitoring histogram to check
   dirname = '/Independent/Hist_Reconstruction'      # directory containing the histogram
@@ -224,8 +226,10 @@ def tof_1_dxpos(rootfile):
             None, None,
             None, None]                                       # Default values, keep status as -1
 
+  png = ['HistMacro_TOFReconstruction_p1']
+
   if not rootfile :  # called by init function
-    return [names, titles, values]
+    return [names, titles, values, png]
 
   histoname = 'TOFTrackDeltaXVsHorizontalPaddle'   # monitoring histogram to check
   dirname = '/Independent/Hist_DetectorMatching/TimeBased/TOFPoint'      # directory containing the histogram
@@ -349,8 +353,10 @@ def tof_1_dypos(rootfile):
             None, None,
             None, None]                                       # Default values, keep status as -1
 
+  png = ['HistMacro_TOFReconstruction_p1']  
+
   if not rootfile :  # called by init function
-    return [names, titles, values]
+    return [names, titles, values, png]
 
   # The following code finds the histogram, extracts metrics, checks them against the limits provided, assigns a status code and then returns a list of status code followed by the metrics. 
   # Status codes are 1 (good), 0 (bad) or -1 (don't know/file problem/not enough data/some other error)

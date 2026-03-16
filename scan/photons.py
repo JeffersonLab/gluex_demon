@@ -1,4 +1,4 @@
-from utils import get_histo     # demon's helper functions
+from utils import get_histo, default_values     # demon's helper functions
 from ROOT import gROOT, TH1I, TF1,TMath
 import math
 
@@ -21,10 +21,12 @@ def rho_psigma_pse(rootfile) :
 
   names = ['photons_psigma_pse_status', 'diamond_PSe_mg', 'diamond_PSe_mg_err', 'amo_PSe_mg', 'amo_PSe_mg_err', 'rho_psigma',  'rho_psigma_err', 'rho_psigma_0', 'rho_psigma_0_err', 'rho_psigma_90', 'rho_psigma_90_err', 'rho_psigma_135', 'rho_psigma_135_err', 'rho_psigma_45', 'rho_psigma_45_err', 'rho_phi0_diamond', 'rho_phi0_diamond_err', 'rho_phi0_amo', 'rho_phi0_amo_err' ]
   titles = ['PS E and Rho P#Sigma status', 'Photon beam energy from PS pair E (GeV)', 'PS E err (diamond)', 'Photon beam energy (amo peak) from PS pair E (GeV)', 'PS E err (amo)', 'Abs(P#Sigma) from #rho(770) production', 'Abs(P#Sigma)_err', 'P#Sigma (0)', 'P#Sigma(0)err', 'P#Sigma (90)', 'P#Sigma(90)err', 'P#Sigma (135)', 'P#Sigma(135)err', 'P#Sigma (45)', 'P#Sigma(45)err','#phi_{0} diamond', '#phi_{0} diamond err', '#phi_{0} amo', '#phi_{0} amo err' ]   # Graph titles
-  values = [-1, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None]
-
+  #values = [-1, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None]
+  values = default_values(names)
+  png = ['HistMacro_p2pi','__PSPair_PSC_PS_PS_E','__PSPair_PSC_PS_PS_E','__PSPair_PSC_PS_PS_E','__PSPair_PSC_PS_PS_E','HistMacro_p2pi','HistMacro_p2pi','HistMacro_p2pi','HistMacro_p2pi','HistMacro_p2pi','HistMacro_p2pi','HistMacro_p2pi','HistMacro_p2pi','HistMacro_p2pi','HistMacro_p2pi','HistMacro_p2pi','HistMacro_p2pi','HistMacro_p2pi','HistMacro_p2pi']
+  
   if not rootfile :  # called by init function
-    return [names, titles, values]
+    return [names, titles, values, png]
 
   histoname = 'PiPlusPsi_t'                       # monitoring histogram to check
   dirname = '/p2pi_preco/Custom_p2pi_hists/'      # directory containing the histogram
@@ -263,9 +265,10 @@ def trigger_asymmetry(rootfile) :
   names = ['trig_asym_status','trig_asym','trig_asym_err']  
   titles = ['Trigger asymmetry status','Beam asymmetry from the trigger', 'Beam asymmetry from the trigger err'] # graph titles
   values = [-1, None, None]                                       # Default values, keep as -1
-
+  png = ['HistMacro_Trigger']
+  
   if not rootfile :  # called by init function
-    return [names, titles, values]
+    return [names, titles, values, png]
 
 
   histoname = 'Heli_asym_gtp'
@@ -301,9 +304,10 @@ def rho_helicity_asymmetry(rootfile) :
   names = ['rho_hel_asym_status','rho_hel_asym','rho_hel_asym_err']  
   titles = ['Rho beam-meson helicity asymmetry status','Rho beam-meson helicity asymmetry', 'Rho beam-meson helicity asymmetry err'] # graph titles
   values = [-1, None, None]                                       # Default values, keep as -1
-
+  png = ['HistMacro_CircMonitor']
+  
   if not rootfile :  # called by init function
-    return [names, titles, values]
+    return [names, titles, values, png]
 
   dirname = 'p2pi_preco/Custom_p2pi_hists'
 

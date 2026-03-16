@@ -21,9 +21,10 @@ def cdc_occupancy_cpp(rootfile) :
   titles = ['Occupancy status','Missing straw count']
   names = ['occ_status','missing']
   values = [-1, None]
-
+  png = ['CDC_occupancy']
+  
   if not rootfile :  # called by init function
-    return [names, titles, values]
+    return [names, titles, values, png]
 
   occmax = 50 # CPP - expect 11 dead, handful more missing from tracking, many more missing in ET runs
 
@@ -111,9 +112,10 @@ def cdc_efficiency_cpp(rootfile) :
   titles = ['Efficiency status','Hit efficiency at 0.04mm','Hit efficiency at 5mm','Hit efficiency at 7.5mm']
   names = ['eff_status','eff0','eff5','eff7']
   values = [-1, None, None, None]
-
+  png = ['CDC_eff']
+  
   if not rootfile :  # called by init function
-    return [names, titles, values]
+    return [names, titles, values, png]
 
   e0min = 0.8  #CPP
   e5min = 0.7
@@ -158,9 +160,10 @@ def cdc_dedx_cpp(rootfile) :
   titles = ['dE/dx status','dE/dx mean at 1.5 GeV/c (keV/cm)','dE/dx resolution at 1.5 GeV/c']
   names = ['dedx_status','dedxmean','dedxres']
   values = [-1,None,None]
-
+  png = ['CDC_dedx']
+  
   if not rootfile :  # called by init function
-    return [names, titles, values]
+    return [names, titles, values, png]
 
   dedxmin = 1.82   # CPP limits
   dedxmax = 2.22
@@ -301,9 +304,10 @@ def cdc_dedx_mean_cpp(rootfile) :
   titles = ['dE/dx (overall mean, 0-10 GeV/c) status','dE/dx mean (keV/cm)','dE/dx RMS (keV/cm)']
   names = ['dedx_overallmean_status','dedx_overallmean','dedx_sigma']
   values = [-1, None, None]
+  png = ['CDC_dedx']
 
   if not rootfile :  # called by init function
-    return [names, titles, values]
+    return [names, titles, values, png]
 
   dedxmeanmin = 2.5  # for overall dedx, 0 to 10 GeV
   dedxmeanmax = 4.5
@@ -342,9 +346,10 @@ def cdc_ttod(rootfile) :
   titles = ['TTOD status','TTOD residual mean (#mum)','TTOD residual width (#mum)']
   names = ['ttod_status','ttodmean','ttodres']
   values = [-1, None, None]
-
+  png = ['HistMacro_CDCTimeToDistance']
+  
   if not rootfile :  # called by init function
-    return [names, titles, values]
+    return [names, titles, values, png]
 
   ttodmeanmax = 20.0
   ttodsigmamax = 200.0

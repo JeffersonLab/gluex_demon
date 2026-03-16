@@ -21,9 +21,10 @@ def rf_tagh_tof(rootfile) :
   names = ['rf_tagh_tof_status','tagh_tof','tagh_tof_err']
   titles = ['DeltaT (RF_TAGH - RF_TOF) status', 'DeltaT (RF_TAGH - RF_TOF)', '#sigma DeltaT (RF_TAGH - RF_TOF)' ]
   values = [-1, None, None] 
-
+  png = ['HistMacro_RF_p2']
+  
   if not rootfile :  # called by init function
-    return [names, titles, values]
+    return [names, titles, values, png]
 
   tmax = 0.1
   
@@ -48,10 +49,11 @@ def rf_psc_tof(rootfile) :
 
   names = ['rf_psc_tof_status','psc_tof','psc_tof_err']
   titles = ['DeltaT(RF_PSC - RF_TOF) status', 'DeltaT (RF_PSC - RF_TOF)', '#sigma DeltaT (RF_PSC - RF_TOF)' ]
-  values = [-1, None, None] 
+  values = [-1, None, None]
+  png = ['HistMacro_RF_p2']  
 
   if not rootfile :  # called by init function
-    return [names, titles, values]
+    return [names, titles, values, png]
 
   tmax = 0.1
 
@@ -78,9 +80,10 @@ def rf_fdc_tof(rootfile) :
   names = ['rf_fdc_tof_status','fdc_tof','fdc_tof_err']
   titles = ['DeltaT (RF_FDC - RF_TOF) status', 'DeltaT (RF_FDC - RF_TOF)', '#sigma DeltaT (RF_FDC - RF_TOF)' ]
   values = [-1, None, None]
+  png = ['HistMacro_RF_p2']  
 
   if not rootfile :  # called by init function
-    return [names, titles, values]
+    return [names, titles, values, png]
 
   tmax = 0.1
   
@@ -105,9 +108,10 @@ def rf_fdc_tagh(rootfile) :
   names = ['rf_fdc_tagh_status','fdc_tagh','fdc_tagh_err']
   titles = ['DeltaT (RF_FDC - RF_TAGH) status', 'DeltaT (RF_FDC - RF_TAGH)', '#sigma DeltaT (RF_FDC - RF_TAGH)' ]
   values = [-1, None, None]
-
+  png = ['HistMacro_RF_p2']
+  
   if not rootfile :  # called by init function
-    return [names, titles, values]
+    return [names, titles, values, png]
 
   tmax = 0.1
 
@@ -131,9 +135,10 @@ def rf_fdc_psc(rootfile) :
   names = ['rf_fdc_psc_status','fdc_psc','fdc_psc_err']
   titles = ['DeltaT (RF_FDC - RF_PSC) status', 'DeltaT (RF_FDC - RF_PSC)', '#sigma DeltaT (RF_FDC - RF_PSC)' ]
   values = [-1, None, None]
+  png = ['HistMacro_RF_p2']  
 
   if not rootfile :  # called by init function
-    return [names, titles, values]
+    return [names, titles, values, png]
 
   tmax = 0.1
   
@@ -156,9 +161,10 @@ def rf_psc_tagh(rootfile) :
   names = ['rf_psc_tagh_status','psc_tagh','psc_tagh_err']
   titles = ['DeltaT (RF_PSC - RF_TAGH) status', 'DeltaT (RF_PSC - RF_TAGH)', '#sigma DeltaT (RF_PSC - RF_TAGH)' ]
   values = [-1, None, None]
+  png = ['HistMacro_RF_p2']  
 
   if not rootfile :  # called by init function
-    return [names, titles, values]
+    return [names, titles, values, png]
 
   tmax = 0.1
 

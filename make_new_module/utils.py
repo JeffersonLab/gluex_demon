@@ -11,6 +11,7 @@ def init(modulename) :
   names = [pagename.lower() + '_status']  # Graph name
   titles = [pagename + ' status']                 # Graph title
   values = [-1]                                          # Default to unknown
+  pngs = ['']
   
   list_of_functions = modulename.declare_functions()
 
@@ -19,8 +20,16 @@ def init(modulename) :
     names.extend(arr[0])
     titles.extend(arr[1])
     values.extend(arr[2])
+
+    if len(arr[3]) == 1:
+      for i in range(len(arr[2])):
+        pngs.extend(arr[3])
+    else :
+      pngs.extend(arr[3])
     
-  return [pagename, names, titles, values]
+    #print(arr[0],len(arr[2]),len(arr[3]))
+    
+  return [pagename, names, titles, values, pngs]
 
 #-------------------------------------------------------------------------------------------------------------------------
 
@@ -51,7 +60,7 @@ def get_histo(rootfile, dirname, histoname, min_counts=100) :
   # file pointer contains tobj if dir exists, set false if not
 
   if (not test):
-    print('Could not find ' + dirname)
+    #print('Could not find ' + dirname)
     return False
 
   rootfile.cd(dirname)
@@ -59,7 +68,7 @@ def get_histo(rootfile, dirname, histoname, min_counts=100) :
   h = gROOT.FindObject(histoname)
 
   if (not h) :
-    print('Could not find ' + histoname)
+    #print('Could not find ' + histoname)
     return False
 
   if h.GetEntries() < min_counts :

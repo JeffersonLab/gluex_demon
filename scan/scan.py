@@ -13,7 +13,7 @@
 #   filename_csv = 'monitoring_data_X.csv'         # csv file of metrics
 #   filename_badruns = 'monitoring_badruns_X.txt'  # list of runs with overall status not good
 #   filename_pagenames = 'monitoring_pagenames_X.txt' # list of module page titles and graphs
-#
+#   filename_plotnames = 'monitoring_plotnames_X.txt' # list of plot names to construct png urls
 
 from utils import init, check
 
@@ -202,6 +202,7 @@ filename_graphs = 'monitoring_graphs' + tag + '.root'      # graphs
 filename_csv = 'monitoring_data' + tag + '.csv'            # graph data as one big csv file
 filename_badruns = 'monitoring_badruns' + tag + '.txt'     # list of runs with overall status not good
 filename_pagenames = 'monitoring_pagenames' + tag + '.txt' # list of module page titles and graphs
+filename_plotnames = 'monitoring_plotnames' + tag + '.txt' # list of png file names
 
 # remove old output files
 
@@ -223,6 +224,7 @@ pagenames = []       # title for each module's set of graphs, eg "CDC","FDC", et
 gcount = []          # number of graphs for each module
 gnames = ['run']            # graph names eg cdc_dedx.  Start the list with run.
 gtitles = ['Run number']    # graph titles 
+plotnames = ['']      # png names
 
 allruns_values = []   # giant array of all metrics
 combined_status = []  # status indicator for all metrics for each run
@@ -246,8 +248,6 @@ for imod in range(len(modules)) :
 
     if run_module[imod] :  
         try: 
-#          pagename = modules[imod].get_pagename()
-      #    arrays = modules[imod].init(pagename)
           arrays = init(modules[imod])
           print(modules[imod].PAGENAME)
         except:
@@ -256,13 +256,15 @@ for imod in range(len(modules)) :
           run_module[imod] = False
 
           print('Calling it again, to show the error')
-          #arrays = modules[imod].init(pagename)
           arrays = init(modules[imod])
           
         else:
 
-          if len(arrays[1]) != len(arrays[2]) or len(arrays[1]) != len(arrays[3]):
+          if len(arrays[1]) != len(arrays[2]) or len(arrays[1]) != len(arrays[3]) : #or len(arrays[1]) != len(arrays[4]) :
               print('ERROR Init module %s array length mismatch ' % (modules[imod].__name__) )  # don't suppress
+              for x in range(5) :
+                  print(len(arrays[x]))
+                  
               run_module[imod] = False
           else : 
               pagenames.append(arrays[0])   # page title
@@ -270,23 +272,28 @@ for imod in range(len(modules)) :
               gnames.extend(arrays[1])  # 1D list
               gtitles.extend(arrays[2])
               defaults.append(arrays[3]) # list of lists
-
+              plotnames.extend(arrays[4])
+              
               if testing:
                   print('\nInitialisation for module %s' % (modules[imod].__name__) )
                   print('Page name:')
                   print('%s'%(arrays[0]))
-                  print('Graph names:')
+                  print('Graph names (',len(arrays[1]),') :')
                   print('%s'%(arrays[1]))
-                  print('Graph titles:')
+                  print('Graph titles (',len(arrays[2]),') :')
                   print('%s'%(arrays[2]))
-                  print('Defaults (array of -1) :')
+                  print('Defaults (array of -1) (',len(arrays[3]),') :')
                   print('%s'%(arrays[3]))
+                  print('Plot names (',len(arrays[4]),') :')
+                  print('%s'%(arrays[4]))
 
 
 # add overall readiness to the end of the names & titles 
 gnames.append('readiness')
 gtitles.append('Run readiness')
+plotnames.append('')
 
+print('# plotnames:',len(plotnames))
 
 # make a list of the active modules, then run over these from now on
 active_modules=[]
@@ -543,6 +550,8 @@ if gr != None :
 newlistofgraphs=[] # list of list of graph names for all pages
 gstart=1
 
+dictofpngdicts ={}
+
 for i in range(len(pagenames)):
 
     thisdir = f.mkdir(pagenames[i])
@@ -555,11 +564,13 @@ for i in range(len(pagenames)):
     newlist = [] # eventual list of graph names for this page
 
     mgdict = {}    # dict of multigraph names and graph members
-
+    
     # mgdict.update({'BCAL':[]})
     # mgdict['BCAL'].append("pip")
     # mgdict.update({'FCAL':[]})
 
+    pngdict = {}
+    
     graphstomg = [] # graphs to put onto multigraphs
     
     compositestatusgraphname = pagenames[i]+'_status_all'
@@ -568,6 +579,8 @@ for i in range(len(pagenames)):
 
         gname = gnames[j]
 
+        print(j, gname, plotnames[j])
+        
         if (j>gstart and gname.endswith("_status")) or gname.endswith("mg") :   # multigraph components
             # don't put overall status (j=gstart) in status composite
 
@@ -592,6 +605,8 @@ for i in range(len(pagenames)):
 
         graphs.update({gname:j})
 
+        pngdict.update({gname:plotnames[j]})
+
     if testing:
         print()
         print('mgdict:')
@@ -605,8 +620,12 @@ for i in range(len(pagenames)):
         print('graphstomg:')
         print(graphstomg)
         print()
+        print('pngdict:')
+        print(pngdict)
 
 
+    dictofpngdicts.update({pagenames[i]:pngdict})
+    
     #  create the list of graphs to show on this page, it will be written into the pagenames file
 
     # overall status first
@@ -763,7 +782,7 @@ for i in range(len(pagenames)):
             gindex = graphname_store.index(gname)            
             gr = graph_store[gindex]
             gr.SetMarkerColor(mg_colours[n_g % 5])
-            gr.SetMarkerStyle(mg_symbols[int(n_g/5) % 4])
+            gr.SetMarkerStyle(mg_symbols[n_g % 4])
             gr.SetMarkerSize(0.5)
             gr.SetLineWidth(0)      # Hide the errorbars on tgrapherror multigraphs
 
@@ -821,6 +840,19 @@ f.close()
 if testing:
     print('List of page titles and graph names saved to %s' % (filename_pagenames) )
 
+
+
+# write out list of plot names
+
+import json
+
+with open(filename_plotnames, 'w') as f:
+    json.dump(dictofpngdicts, f, indent=4) # 'indent=4' makes the file human-readable
+
+if testing:
+    print('List of plot names saved to %s' % (filename_plotnames) )
+
+    
 ################################################################################
 
 

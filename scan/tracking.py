@@ -21,9 +21,10 @@ def fom(rootfile) :
   names = ['fom_min_status','fom_min']            
   titles = ['Tracking FOM status','Tracking FOM histo minimum']   # Graph titles
   values = [-1, None]
-
+  png = ['HistMacro_Tracking_p1']
+  
   if not rootfile :  # called by init function
-    return [names, titles, values]
+    return [names, titles, values, png]
 
   histoname = 'TrackingFOM'      # monitoring histogram to check
   dirname = '/Independent/Hist_Reconstruction/Tracking/'          # directory containing that histogram
@@ -56,10 +57,11 @@ def ncandidates(rootfile) :
 
   names = ['ncandidates_status','candidates']  
   titles = ['Track candidates status','Mean number of track candidates'] # graph titles
-  values = [-1, None]                                    
+  values = [-1, None]
+  png = ['HistMacro_Tracking_p1']
 
   if not rootfile :  # called by init function
-    return [names, titles, values]
+    return [names, titles, values, png]
 
   histoname = 'NumTrackCandidates'   # monitoring histogram to check
   dirname = '/Independent/Hist_NumReconstructedObjects'      # directory containing the histogram
@@ -89,9 +91,10 @@ def ntracks(rootfile) :
   names = ['ntracks_status','wire_ntracks_mg','time_ntracks_mg']  
   titles = ['Number of tracks status','Mean number of wire-based tracks','Mean number of time-based tracks']
   values = [-1, None, None]
+  png = ['HistMacro_Tracking_p1']
   
   if not rootfile :  # called by init function
-    return [names, titles, values]
+    return [names, titles, values, png]
 
   histoname = 'NumWireBasedTracks'   # monitoring histogram to check
   dirname = '/Independent/Hist_NumReconstructedObjects'      # directory containing the histogram
@@ -137,9 +140,10 @@ def bcal_matchrate(rootfile) :
   names = ['bcal_status','all_bcal_mg','z_160_190cm_bcal_mg','bcal_matchpertrack_mg']  
   titles = ['BCAL track match rate status','BCAL match rate','BCAL match rate (160 to 190cm)','BCAL match rate (160 to 190cm) / N time-based tracks'] # graph titles
   values = [-1, None, None, None]
-
+  png = ['HistMacro_Matching_BCAL']
+  
   if not rootfile :  # called by init function
-    return [names, titles, values]
+    return [names, titles, values, png]
 
 
   dirname = '/Independent/Hist_DetectorMatching/TimeBased/BCAL'
@@ -209,12 +213,13 @@ def bcal_matchrate(rootfile) :
 
 def ecal_matchrate(rootfile) :
 
-  names = ['ecal_match_status','all_ecal_mg','z45_65cm_1g_ecal_mg','ecal_matchpertrack_mg']
+  names = ['ecal_match_status','all_ecal_mg','r20_40cm_1GeV_ecal_mg','ecal_matchpertrack_mg']
   titles = ['ECAL track match rate status','ECAL match rate', 'ECAL match rate > 1 GeV (20-40cm)', 'ECAL match rate > 1 GeV (20-40cm) / N time-based tracks'] # graph titles] # graph titles
   values = [-1, None, None, None]
-
+  png = ['HistMacro_Matching_ECAL']
+  
   if not rootfile :  # called by init function
-    return [names, titles, values]
+    return [names, titles, values, png]
 
   dirname = '/Independent/Hist_DetectorMatching/TimeBased/ECAL'
   
@@ -290,12 +295,13 @@ def ecal_matchrate(rootfile) :
 
 def fcal_matchrate(rootfile) :
 
-  names = ['fcal_match_status','all_fcal_mg','r45_65cm_1g_fcal_mg','fcal_matchpertrack_mg']
+  names = ['fcal_match_status','all_fcal_mg','r45_65cm_1GeV_fcal_mg','fcal_matchpertrack_mg']
   titles = ['FCAL track match rate status','FCAL match rate','FCAL match rate > 1 GeV (45-65cm)', 'FCAL match rate > 1 GeV (45-65cm) / N time-based tracks']
   values = [-1, None, None, None]
-
+  png = ['HistMacro_Matching_FCAL']
+  
   if not rootfile :  # called by init function
-    return [names, titles, values]
+    return [names, titles, values, png]
 
   dirname = '/Independent/Hist_DetectorMatching/TimeBased/FCAL'
   
@@ -375,9 +381,10 @@ def sc_matchrate(rootfile) :
   names = ['sc_match_status','sc_match', 'sc_matchpertrack_mg']
   titles = ['SC track match rate status','SC match rate (z = 60 to 95cm)','SC match rate (z = 60 to 95cm) / N time-based tracks']
   values = [-1, None, None]
-
+  png = ['HistMacro_Matching_SC']
+  
   if not rootfile :  # called by init function
-    return [names, titles, values]
+    return [names, titles, values, png]
 
   dirname = '/Independent/Hist_DetectorMatching/TimeBased/SC'
   
@@ -432,12 +439,13 @@ def sc_matchrate(rootfile) :
 
 def tof_matchrate(rootfile) :
 
-  names = ['tof_match_status','tof_match_4_6g','tof_match_20_60cm','tof_matchpertrack_mg']  
+  names = ['tof_match_status','4_6GeV_tof_mg','20_60cm_tof_mg','tof_matchpertrack_mg']  
   titles = ['TOF track match rate status','TOF match rate (4 to 6GeV)','TOF match rate (20 to 60cm)', 'TOF match rate (20 to 60cm) / Mean time-based track count'] # graph titles
   values = [-1, None, None, None]
+  png = ['HistMacro_Matching_TOF']
 
   if not rootfile :  # called by init function
-    return [names, titles, values]
+    return [names, titles, values, png]
 
   dirname = '/Independent/Hist_DetectorMatching/TimeBased/TOFPoint'
   

@@ -21,9 +21,10 @@ def fdc_dedxpos(rootfile) :
   titles = ['q+ dE/dx status','FDC q+ dE/dx mean at 1.5 GeV/c (keV/cm)','FDC q+ dE/dx resolution at 1.5 GeV/c']
   names = ['dedxpos_status','dedxposmean','dedxposres']
   values = [-1, None, None]
-
+  png = ['HistMacro_Tracking_p3']
+  
   if not rootfile :  # called by init function
-    return [names, titles, values]
+    return [names, titles, values, png]
 
   dedxmin = 1.5 # 1.9
   dedxmax = 2.5 #2.0
@@ -75,9 +76,10 @@ def fdc_dedxneg(rootfile) :
   titles = ['q- dE/dx status','FDC q- dE/dx mean at 1.5 GeV/c (keV/cm)','FDC q- dE/dx resolution at 1.5 GeV/c']
   names = ['dedxneg_status','dedxnegmean','dedxnegres']
   values = [-1, None, None]
-
+  png = ['HistMacro_Tracking_p3']  
+  
   if not rootfile :  # called by init function
-    return [names, titles, values]
+    return [names, titles, values, png]
 
   dedxmin = 1.5 # 1.9
   dedxmax = 2.5 #2.0
@@ -127,9 +129,10 @@ def fdc_efficiency(rootfile) :
   titles = ['FDC efficiency status', 'FDC wire efficiency at 0.04mm', 'FDC wire efficiency at 0.04mm error', 'FDC wire efficiency at 2mm', 'FDC wire efficiency at 2mm error', 'FDC wire efficiency at 4mm', 'FDC wire efficiency at 4mm error', 'FDC wire efficiency at 5mm', 'FDC wire efficiency at 5mm error']
   names = ['eff_status', 'eff0_efficiency_mg', 'eff0_efficiency_mg_err', 'eff2_efficiency_mg', 'eff2_efficiency_mg_err', 'eff4_efficiency_mg', 'eff4_efficiency_mg_err', 'eff5_efficiency_mg', 'eff5_efficiency_mg_err']
   values = [-1, None, None, None, None, None, None, None, None]
+  png = ['FDC_eff']  
 
   if not rootfile :  # called by init function
-    return [names, titles, values]
+    return [names, titles, values, png]
 
   e0min=0.97
   e2min=0.96

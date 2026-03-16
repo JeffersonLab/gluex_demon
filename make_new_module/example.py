@@ -40,9 +40,10 @@ def declare_functions() :
 #    titles = ['Status','Thing']
 #    names = ['status','thing']
 #    values = default_values(names)  # defaults are -1 for status and None for all other values
+#    png = ['']                      # optional name of monitoring plot to link to 
 #
 #    if not rootfile :  # called by init function
-#        return [names, titles, values]
+#        return [names, titles, values, png]
 #
 #    # code to read the histogram and extract values goes here    
 #    # values = [mystatus, myvalue]
@@ -59,9 +60,10 @@ def example_graph(rootfile):
     titles = ['Bin 1 efficiency status','Bin 1 efficiency']
     names = ['bin1eff_status','bin1eff']
     values = default_values(names)  # defaults are -1 for status and None for all other values
+    png = ['CDC_eff']
 
     if not rootfile :  # called by init function
-        return [names, titles, values]
+        return [names, titles, values, png]
 
     dirname = '/CDC_Efficiency/Online'
     histoname = 'Efficiency Vs DOCA'
@@ -95,9 +97,10 @@ def example_graph_with_errors(rootfile):
     titles = ['Mean efficiency status','Mean efficiency','Std dev efficiency']
     names = ['meaneff_status','meaneff','meaneff_err']
     values = default_values(names)  # defaults are -1 for status and None for all other values
-
+    png = ['CDC_eff']
+    
     if not rootfile :  # called by init function
-        return [names, titles, values]
+        return [names, titles, values, png]
               
     dirname = '/CDC_Efficiency/Online'
     histoname = 'Efficiency Vs DOCA'
@@ -129,9 +132,10 @@ def example_multigraph(rootfile) :
     titles = ['Efficiency status', 'CDC hit efficiency at 0.04mm', 'Std dev 0.04mm', 'CDC hit efficiency at 5mm', 'Std dev 5mm', 'CDC hit efficiency at 6.4mm', 'Std dev 6.4mm']
     names = ['eff_status', 'eff0_hitefficiency_mg', 'eff0_hitefficiency_mg_err', 'eff5_hitefficiency_mg', 'eff5_hitefficiency_mg_err', 'eff6_hitefficiency_mg', 'eff6_hitefficiency_mg_err']
     values = default_values(names)
+    png = ['CDC_eff']    
 
     if not rootfile :  # called by init function
-        return [names, titles, values]
+        return [names, titles, values, png]
 
     e0min = 0.97
     e5min = 0.96

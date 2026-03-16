@@ -9,6 +9,9 @@ var det_list = []; // list of available detectors/modules   in pagenames
 var graph_collection = [];  // vast 2D list of graphs             in pagenames
 var graphs_this_page = [];   // list of graphs on the current page
 
+var plot_collection = '';
+var plots_this_page = [];
+
 var RunPeriod = "";
 var Version = "";
 var Detector = "";
@@ -17,17 +20,18 @@ var Graph = "";
 var graphs_filename = "";  // root file
 var csv_filename = "";
 var pagenames = "";  // file containing lists of graphs
+var plotnames = "";  // list of png files for each straightforward graph
 
 var year_month = "";
 
-import { openFile, draw, create, settings } from 'https://root.cern/js/latest/modules/main.mjs';
+import { openFile, draw, create, settings } from 'https://jsroot.gsi.de/dev/modules/main.mjs';
 
 
 $(document).ready(async function () {
 
     await get_url_args();
 
-    RP_list = await readlist(RP_file);
+    RP_list = await readlist(RP_file, true);
 
     if ( RunPeriod === "" ) {
 
@@ -48,7 +52,7 @@ $(document).ready(async function () {
 
     ver_list = [];
 
-    ver_list = await readlist(`${RunPeriod}/versions.txt`);
+    ver_list = await readlist(`${RunPeriod}/versions.txt`, true);
 
     if (Version === "") { 
 
@@ -74,6 +78,7 @@ $(document).ready(async function () {
     graphs_filename = `./${RunPeriod}/${Version}/monitoring_graphs_${year_month}_ver${Version}.root`;
     csv_filename = `./${RunPeriod}/${Version}/monitoring_data_${year_month}_ver${Version}.csv`;
     pagenames = `./${RunPeriod}/${Version}/monitoring_pagenames_${year_month}_ver${Version}.txt`;
+    plotnames = `./${RunPeriod}/${Version}/monitoring_plotnames_${year_month}_ver${Version}.txt`;
 
     let compare_link = `https://halldweb.jlab.org/gluex_demon/compare.html?RunPeriod=${RunPeriod}&Version=${Version}`;
 
@@ -170,9 +175,23 @@ async function fetchfiledata(filename, quiet=true) {
 	}
     }
 
-
-
     return text;
+
+}
+
+async function fetchjson(filename, quiet=true) {
+
+    const response = await fetch(filename+'?'+Math.random());   // requesting filename?random avoids the data being cached
+
+    if (!response.ok) {
+        console.log('ERROR: ' + filename + ' not found!');
+        show_problem(filename + ' is missing!');
+	return false;
+    }
+    
+    let data = await response.json();
+
+    return data;
 
 }
 
@@ -200,8 +219,10 @@ async function getdetectornames() {
 //        statusgraphs.push((graph_collection[i][2]));   // overall readiness is first
     }
 
-}
 
+    plot_collection = await fetchjson(plotnames);
+
+}
 
 
 async function getgraphnames() {
@@ -212,7 +233,7 @@ async function getgraphnames() {
     let statusgraphs = ['readiness'];
     let styletext = ' class="graphpanel"';
     let styletext2 = ' class="statusgraphpanel"';
-    let divtext = '';
+    let divtext = '<div class="user_tooltip"></div>';
     let linkfile = '';
     let listoflinks = '<ul>';
 
@@ -236,28 +257,63 @@ async function getgraphnames() {
         const gdir = graph_collection[j][0]; 
         const ngraphs = Number(graph_collection[j][1]); 
 
+	let mg_constituent_found = false;
+        let first_mg = false;
+	
+        // find first multigraph
+        for (let i = 2; i < ngraphs+2 ; i++) {
+
+            let thisgraph =  graph_collection[j][i];
+            if (thisgraph.endsWith("_status_all")) continue; 	    
+            if (thisgraph.endsWith("_status")) continue;
+	    first_mg = thisgraph;
+	    break;
+	}
+
+        console.log(first_mg);
+	
         for (let i = 2; i < ngraphs+2 ; i++) {
 
             let thisgraph =  graph_collection[j][i];
             let rootgraph =  gdir + '/' + thisgraph;
             let style = styletext
 
+	    
             // only show composite status_all graphs, hide the other status graphs
             if (thisgraph.endsWith('status')) continue; 
 
             graphs_this_page.push(rootgraph);  // copy graph name into array for this page
 
+	    if (plot_collection.length>0) {
+		let thisplot = plot_collection[j][i];
+   	        plots_this_page.push(thisplot);
+            }
+	    
 	    let anchorname = thisgraph;
 	    if (thisgraph.endsWith("_status_all")) {
 		anchorname = thisgraph.substring(0,thisgraph.length-4);  // trim _all
 	    }
 	    
-            divtext += `<div id="${anchorname}" class="graph_top"></div>`;
+            console.log(graph_collection[j]);
+	    console.log('first mg: '+first_mg ) ;
+	    
+	    // The graphs are ordered Overall Status, Multigraphs, other graphs, graphs belonging to multigraphs
+            if ((!mg_constituent_found) && ngraphs>3) {
+		if ( thisgraph.endsWith("_"+first_mg) ) {
+	            listoflinks += '</ul>Graphs included in MultiGraphs:<ul>';
+		    mg_constituent_found = true;
+		    divtext += '<div class="before_mg_constituents"></div>';
+		}
+            }
 
-            divtext += '<div id=gdiv_' + thisgraph + style + '>';
+
+	    divtext += `<div id="${anchorname}" class="graph_top"></div>`;
+            divtext += '<div id="gdiv_' + thisgraph + '" ' + style + '>';
             divtext += '</div>';
 
-            divtext += `<div class="graph_names"><a href="#${anchorname}">${anchorname}</a>&nbsp;&nbsp;<a href="#selectors">Top of page</a></div>`;
+            divtext += `<div class="graph_names"><a href="#${anchorname}">${anchorname}</a>&nbsp;&nbsp;<a href="#selectors">Top of page</a>`;
+            divtext += '&nbsp;&nbsp;<span id="gdiv2_' + thisgraph + '" class="graph_info"></span></div>';
+
             listoflinks += `<li><a href = "#${anchorname}">${anchorname}</a></li> `;
 
         }
@@ -295,7 +351,7 @@ async function getgraphnames() {
 
             divtext += `<div class="graph_names"><a href="#${anchorname}">${anchorname}</a>&nbsp;&nbsp;<a href="#selectors">Top of page</a>`; //</div>`;
 
-            listoflinks += `<a href = "#${anchorname}">${anchorname}</a> `;
+            listoflinks += `&nbsp;&nbsp;<a href = "#${anchorname}">${anchorname}</a> `;
 
             if (i>0) { // no detector link for overall readiness
 
@@ -321,10 +377,10 @@ async function getgraphnames() {
 
     
 
-async function readlist(listfile) {
+async function readlist(listfile, reverse=false) {
 
     const text = await fetchfiledata(listfile);
-
+    
     let returntext = '';
 
     if (!text) {  // file not found
@@ -334,8 +390,13 @@ async function readlist(listfile) {
 
     } else {
 
-        returntext = text.split('\n');    // array of lines,  with '' in last place        
+        returntext = text.split('\n');    // array of lines,  with '' in last place
+
         if (returntext[returntext.length-1] === '') returntext.pop();
+
+	if (reverse) {
+	    returntext.reverse();
+	}
     }
 
     return returntext;
@@ -393,8 +454,8 @@ async function drawGraphs() {
         for (let i = 0; i < graphs_this_page.length; i++) {
 
             const gname = graphs_this_page[i];  //graphnames[i]
-
             const divname = 'gdiv_' + gname.split('/')[1];      // the divname doesnt include the directory
+	    const divname2 = 'gdiv2_' + gname.split('/')[1];      // the divname doesnt include the directory
 	    
             // only show composite status graphs, hide the others
             if (gname.endsWith('status')) continue;
@@ -411,7 +472,7 @@ async function drawGraphs() {
 		thisdiv.classList.add("graphmissing"); 
 		continue;  
 	    }
-	    
+
 	    Object.assign(obj[i], {fMarkerSize: 0.5, fMarkerStyle: 8, fMarkerColor: 890, fEditable: 0});
 	    
             if (gname.includes('status')) {
@@ -428,7 +489,6 @@ async function drawGraphs() {
 		if (obj[i].fGraphs) {
 		    if (obj[i].fGraphs.arr) {
 			if (obj[i].fGraphs.arr.length>1 ) drawlegend = true;      // don't draw legend on the status composite multigraph made in JS bc it kills the graph
-			console.log('set drawlegend');
 		    }
 		}
 	    }
@@ -446,15 +506,36 @@ async function drawGraphs() {
 		for (let j=0; j < garr.length; j++) {
 		
 		    entry[j] = await create('TLegendEntry');
-		    Object.assign(entry[j], {fObject: garr[j], fLabel: garr[j].fName, fOption: 'p'});
+		    //		    Object.assign(entry[j], {fObject: garr[j], fLabel: garr[j].fName+"_"+obj[i].fName, fOption: 'p'});
+    		    Object.assign(entry[j], {fObject: garr[j], fLabel: garr[j].fName, fOption: 'p'});
 			
    		    await leg[i].fPrimitives.Add(entry[j]);
 
 		}
             }
 
-            let gpainter = await draw(divname, obj[i], 'ap;gridx;gridy;');     // draw the graph first, otherwise xmin gets reset to 0  !
-            if (drawlegend) await draw(divname,leg[i]);	    
+            let painter = await draw(divname, obj[i], 'ap;gridx;gridy;').then(painter => {     // draw the graph first, otherwise xmin gets reset to 0  !
+		painter.configureUserClickHandler(info => UserHandler(info,divname2));
+	    });
+
+	    //console.log(gname);
+	    
+/*	    
+	    if (plots_this_page[i] != '' && obj[i]._typename == 'TGraph') {
+
+		console.log(obj[i]);
+		gpainter.originalgetTooltips = gpainter.getTooltips;
+		gpainter.getTooltips = function(d) {
+		    const res = this.originalgetTooltips(d);
+		    res.push(obj[i].fX[d.indx]);
+		    return res;
+		}
+	
+
+	    }
+*/
+
+	    if (drawlegend) await draw(divname,leg[i]);	    
 
            // TMultiGraphPainter has array of Painters with xmin and xmax set to range   autorange set to true
 	    // data are in arrays fX  fY
@@ -469,7 +550,52 @@ async function drawGraphs() {
 
 }
 
+function UserHandler(info,divname) {
 
+    //console.log('click: divname: '+divname);
+
+    let mgname = divname.slice(6);   // start after gdiv2_   => name of graph or multigraph owning the minicanvas
+
+    if (!info) {
+        return true;
+    }
+
+    //console.log('click: info:');
+    //console.log(info);
+    //console.log('click: mgname: ' + mgname);
+    
+    let run=info.obj.fX[info.bin];
+    let gname=info.name;
+    let plotname = '';
+
+    if (gname != mgname) {
+	gname = gname + '_' + mgname;
+    }
+
+    //console.log('click: plot_collection[Detector]');
+    //console.log(plot_collection[Detector]);
+
+    
+    if (plot_collection[Detector][gname]) {
+	    plotname = plot_collection[Detector][gname];
+	    //console.log('click: plotname: ' +plotname);
+    }
+
+    if (plotname) {
+
+	//        let divname = `gdiv2_${mgname}`;
+	let rcdburl = `https://halldweb.jlab.org/rcdb/runs/info/${run}`;
+        let ploturl = `https://halldweb.jlab.org/work/halld2/data_monitoring/RunPeriod-2025-01/mon_ver16/Run${run}/${plotname}.png`;
+        let linktext = `<a href=${rcdburl}>RCDB (${run})</a>`;
+        linktext += `&nbsp;&nbsp;<a href=${ploturl}>Monitoring histogram (${run})</a>`;
+    
+         // show info
+        document.getElementById(divname).innerHTML = linktext;
+	//`Name: ${info.name} Bin: ${info.bin}`;
+     }
+    
+     return true; // means event is handled and can be ignored
+ }
 
 
 select_rp.addEventListener('change', async function () {

@@ -21,9 +21,10 @@ def fmwpc_e(rootfile) :
   names = ['fmwpc_e_status','fmwpc_e_1','fmwpc_e_2', 'fmwpc_e_3', 'fmwpc_e_4', 'fmwpc_e_5', 'fmwpc_e_6']  
   titles = ['E status','E chamber 1 (GeV)','E chamber 2 (GeV)', 'E chamber 3 (GeV)', 'E chamber 4 (GeV)', 'E chamber 5 (GeV)', 'E chamber 6 (GeV)']         # These will be the graph titles
   values = default_values(names)
+  png = ['']
   
   if not rootfile :  # called by init function
-    return [names, titles, values]
+    return [names, titles, values, png]
 
   emin = 500
   emax = 600
