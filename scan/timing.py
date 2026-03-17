@@ -20,7 +20,7 @@ def sc_rf_time(rootfile) :
 
   #print("in sc_rf_time() ...")
   names = ['sc_rf_status', 'pim_SCRF_mg', 'pim_SCRF_mg_err', 'pip_SCRF_mg', 'pip_SCRF_mg_err', 'p_SCRF_mg', 'p_SCRF_mg_err']   
-  titles = ['SC-RF time status', 'PiMinus #DeltaT(SC-RF) (ns)',  'PiMinus #DeltaT(SC-RF) width (ns)', 'PiPlus #DeltaT(SC-RF) (ns)',  'PiPlus #DeltaT(SC-RF) width (ns)', 'Proton #DeltaT(SC-RF) (ns)',  'Proton #DeltaT(SC-RF) width (ns)']   # Graph titles 
+  titles = ['SC-RF time status', '#DeltaT(SC-RF) (ns) [PiMinus]',  '#DeltaT(SC-RF) width (ns) [PiMinus]', '#DeltaT(SC-RF) (ns) [PiPlus]',  '#DeltaT(SC-RF) width (ns) [PiPlus]', '#DeltaT(SC-RF) (ns) [Proton]',  '#DeltaT(SC-RF) width (ns) [Proton]']   # Graph titles 
   values = default_values(names)
   png = ['HistMacro_SCReconstruction_p2']
     
@@ -91,7 +91,7 @@ def tof_rf_time(rootfile) :
 
   #print("in tof_rf_time() ...")
   names = ['tof_rf_status', 'pim_TOFRF_mg', 'pim_TOFRF_mg_err', 'pip_TOFRF_mg', 'pip_TOFRF_mg_err', 'p_TOFRF_mg', 'p_TOFRF_mg_err']   
-  titles = ['TOF-RF time status', 'PiMinus #DeltaT(TOF-RF) (ns)',  'PiMinus #DeltaT(TOF-RF) width (ns)', 'PiPlus #DeltaT(TOF-RF) (ns)',  'PiPlus #DeltaT(TOF-RF) width (ns)', 'Proton #DeltaT(TOF-RF) (ns)',  'Proton #DeltaT(TOF-RF) width (ns)']   # Graph titles 
+  titles = ['TOF-RF time status', '#DeltaT(TOF-RF) (ns) [PiMinus]',  '#DeltaT(TOF-RF) width (ns) [PiMinus]', '#DeltaT(TOF-RF) (ns) [PiPlus]',  '#DeltaT(TOF-RF) width (ns) [PiPlus]', '#DeltaT(TOF-RF) (ns) [Proton]',  '#DeltaT(TOF-RF) width (ns) [Proton]']   # Graph titles 
   values = default_values(names)
   png = ['HistMacro_TOFReconstruction_p2']  
   
@@ -163,7 +163,7 @@ def bcal_rf_time(rootfile) :
   
   #print("in bcal_rf_time() ...")
   names = ['bcal_rf_status', 'pim_BCALRF_mg', 'pim_BCALRF_mg_err', 'pip_BCALRF_mg', 'pip_BCALRF_mg_err', 'p_BCALRF_mg', 'p_BCALRF_mg_err', 'g_BCALRF_mg', 'g_BCALRF_mg_err', 'g_1GeV_BCALRF_mg', 'g_1GeV_BCALRF_mg_err']   
-  titles = ['BCAL-RF time status', 'PiMinus #DeltaT(BCAL-RF) (ns)',  'PiMinus #DeltaT(BCAL-RF) width (ns)', 'PiPlus #DeltaT(BCAL-RF) (ns)',  'PiPlus #DeltaT(BCAL-RF) width (ns)', 'Proton #DeltaT(BCAL-RF) (ns)',  'Proton #DeltaT(BCAL-RF) width (ns)', 'Photon #DeltaT(BCAL-RF) (ns)',  'Photon #DeltaT(BCAL-RF) width (ns)', 'Photon > 1GeV #DeltaT(BCAL-RF) (ns)',  'Photon > 1GeV #DeltaT(BCAL-RF) width (ns)']   # Graph titles ]   # Graph titles ]   # Graph titles ]   # Graph titles 
+  titles = ['BCAL-RF time status', '#DeltaT(BCAL-RF) (ns) [PiMinus]',  '#DeltaT(BCAL-RF) width (ns) [PiMinus]', '#DeltaT(BCAL-RF) (ns) [PiPlus]',  '#DeltaT(BCAL-RF) width (ns) [PiPlus]', '#DeltaT(BCAL-RF) (ns) [Proton]',  '#DeltaT(BCAL-RF) width (ns) [Proton]', '#DeltaT(BCAL-RF) (ns) [Photon]',  '#DeltaT(BCAL-RF) width (ns) [Photon]', '#DeltaT(BCAL-RF) (ns) [Photon > 1GeV]',  '#DeltaT(BCAL-RF) width (ns) [Photon > 1GeV]']   # Graph titles
   values = default_values(names)
   png = ['HistMacro_BCALReconstruction_p2']    
 
@@ -258,7 +258,7 @@ def ecal_rf_time(rootfile) :
 
   #print("in ecal_rf_time() ...")
   names = ['ecal_rf_status', 'pim_ECALRF_mg', 'pim_ECALRF_mg_err', 'pip_ECALRF_mg', 'pip_ECALRF_mg_err', 'g_ECALRF_mg', 'g_ECALRF_mg_err']   
-  titles = ['ECAL-RF time status', 'PiMinus #DeltaT(ECAL-RF) (ns)',  'PiMinus #DeltaT(ECAL-RF) width (ns)', 'PiPlus #DeltaT(ECAL-RF) (ns)',  'PiPlus #DeltaT(ECAL-RF) width (ns)', 'Photon #DeltaT(ECAL-RF) (ns)',  'Photon #DeltaT(ECAL-RF) width (ns)']   # Graph titles 
+  titles = ['ECAL-RF time status', '#DeltaT(ECAL-RF) (ns) [PiMinus]',  '#DeltaT(ECAL-RF) width (ns) [PiMinus]', '#DeltaT(ECAL-RF) (ns) [PiPlus]',  '#DeltaT(ECAL-RF) width (ns) [PiPlus]', '#DeltaT(ECAL-RF) (ns) [Photon]',  '#DeltaT(ECAL-RF) width (ns) [Photon]']   # Graph titles 
   values = default_values(names)
   png = ['HistMacro_ECALReconstruction_p2']
   
@@ -333,7 +333,7 @@ def fcal_rf_time(rootfile) :
 
   #print("in fcal_rf_time() ...")
   names = ['fcal_rf_status', 'pim_FCALRF_mg', 'pim_FCALRF_mg_err', 'pip_FCALRF_mg', 'pip_FCALRF_mg_err', 'g_FCALRF_mg', 'g_FCALRF_mg_err']   
-  titles = ['FCAL-RF time status', 'PiMinus #DeltaT(FCAL-RF) (ns)',  'PiMinus #DeltaT(FCAL-RF) width (ns)', 'PiPlus #DeltaT(FCAL-RF) (ns)',  'PiPlus #DeltaT(FCAL-RF) width (ns)', 'Photon #DeltaT(FCAL-RF) (ns)',  'Photon #DeltaT(FCAL-RF) width (ns)']   # Graph titles 
+  titles = ['FCAL-RF time status', '#DeltaT(FCAL-RF) (ns) [PiMinus]',  '#DeltaT(FCAL-RF) width (ns) [PiMinus]', '#DeltaT(FCAL-RF) (ns) [PiPlus]',  '#DeltaT(FCAL-RF) width (ns) [PiPlus]', '#DeltaT(FCAL-RF) (ns) [Photon]',  '#DeltaT(FCAL-RF) width (ns) [Photon]']   # Graph titles 
   values = default_values(names)
   png = ['HistMacro_FCALReconstruction_p2']      
   

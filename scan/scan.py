@@ -249,7 +249,7 @@ for imod in range(len(modules)) :
     if run_module[imod] :  
         try: 
           arrays = init(modules[imod])
-          print(modules[imod].PAGENAME)
+          #print(modules[imod].PAGENAME)
         except:
     
           print('ERROR Init module %s failed' % (modules[imod].__name__) )   # don't suppress
@@ -293,7 +293,7 @@ gnames.append('readiness')
 gtitles.append('Run readiness')
 plotnames.append('')
 
-print('# plotnames:',len(plotnames))
+#print('# plotnames:',len(plotnames))
 
 # make a list of the active modules, then run over these from now on
 active_modules=[]
@@ -564,7 +564,8 @@ for i in range(len(pagenames)):
     newlist = [] # eventual list of graph names for this page
 
     mgdict = {}    # dict of multigraph names and graph members
-    
+
+    mgtitles = {}
     # mgdict.update({'BCAL':[]})
     # mgdict['BCAL'].append("pip")
     # mgdict.update({'FCAL':[]})
@@ -579,7 +580,7 @@ for i in range(len(pagenames)):
 
         gname = gnames[j]
 
-        print(j, gname, plotnames[j])
+        #print(j, gname, plotnames[j])
         
         if (j>gstart and gname.endswith("_status")) or gname.endswith("mg") :   # multigraph components
             # don't put overall status (j=gstart) in status composite
@@ -592,6 +593,11 @@ for i in range(len(pagenames)):
             
             if not mgname in mgdict:
                 mgdict.update({mgname:[gname]})
+                if not mgname == compositestatusgraphname:
+                    title = gtitles[j].split("[")[0].strip()
+                    
+                    mgtitles.update({mgname:title})
+
             else:
                 mgdict[mgname].append(gname)
 
@@ -622,6 +628,8 @@ for i in range(len(pagenames)):
         print()
         print('pngdict:')
         print(pngdict)
+        print('mgtitles:')
+        print(mgtitles)
 
 
     dictofpngdicts.update({pagenames[i]:pngdict})
@@ -768,8 +776,9 @@ for i in range(len(pagenames)):
 
         if mgname == compositestatusgraphname :
             mgtitle = pagenames[i]+' status'
-        else :
-            mgtitle = mgname
+
+        else :  
+            mgtitle = mgtitles[mgname]
         
         thismg = make_multigraph(mgname, mgtitle)
         n_g = 0
@@ -814,7 +823,7 @@ for i in range(len(pagenames)):
 
 f.Close()
 
-print('TAxis::TAxis::SetRangeUser:0: RuntimeWarnings are harmless')
+#print('TAxis::TAxis::SetRangeUser:0: RuntimeWarnings are harmless')
 
 if testing:
     print('Graphs saved to %s' % (filename_graphs) )

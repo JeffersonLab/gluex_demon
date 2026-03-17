@@ -126,7 +126,7 @@ def fdc_dedxneg(rootfile) :
 
 def fdc_efficiency(rootfile) :
 
-  titles = ['FDC efficiency status', 'FDC wire efficiency at 0.04mm', 'FDC wire efficiency at 0.04mm error', 'FDC wire efficiency at 2mm', 'FDC wire efficiency at 2mm error', 'FDC wire efficiency at 4mm', 'FDC wire efficiency at 4mm error', 'FDC wire efficiency at 5mm', 'FDC wire efficiency at 5mm error']
+  titles = ['FDC efficiency status', 'FDC wire efficiency [0.04mm]', 'FDC wire efficiency error [0.04mm]', 'FDC wire efficiency [2mm]', 'FDC wire efficiency error [2mm]', 'FDC wire efficiency [4mm]', 'FDC wire efficiency error [4mm]', 'FDC wire efficiency [5mm]', 'FDC wire efficiency error [5mm]']
   names = ['eff_status', 'eff0_efficiency_mg', 'eff0_efficiency_mg_err', 'eff2_efficiency_mg', 'eff2_efficiency_mg_err', 'eff4_efficiency_mg', 'eff4_efficiency_mg_err', 'eff5_efficiency_mg', 'eff5_efficiency_mg_err']
   values = [-1, None, None, None, None, None, None, None, None]
   png = ['FDC_eff']  

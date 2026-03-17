@@ -19,7 +19,7 @@ def declare_functions() :
 def bcal_inv_mass(rootfile, llim=130, ulim=140) :
 
   names = ['bcal_2g_mass_status', '300_bcal_mg', '500_bcal_mg', '700_bcal_mg', '900_bcal_mg']
-  titles = ['BCAL diphoton mass status', 'BCAL diphoton mass (cluster E > 300 MeV)', 'BCAL diphoton mass (cluster E > 500 MeV)', 'BCAL diphoton mass (cluster E > 700 MeV)', 'BCAL diphoton mass (cluster E > 900 MeV)']   # Graph titles
+  titles = ['BCAL diphoton mass status', 'BCAL diphoton mass [cluster E > 300 MeV]', 'BCAL diphoton mass [cluster E > 500 MeV]', 'BCAL diphoton mass [cluster E > 700 MeV]', 'BCAL diphoton mass [cluster E > 900 MeV]']   # Graph titles
   values = [-1, None, None, None, None]
   png = ['bcal_inv_mass']
   
@@ -85,7 +85,7 @@ def bcal_inv_mass(rootfile, llim=130, ulim=140) :
 def bcal_fcal_inv_mass(rootfile, llim=110, ulim=135) :
 
   names = ['bcal_fcal_2g_mass_status', '300_bcalfcal_mg', '500_bcalfcal_mg', '700_bcalfcal_mg', '900_bcalfcal_mg']
-  titles = ['BCAL_FCAL diphoton mass status', 'BCAL_FCAL diphoton mass (cluster E > 300 MeV)', 'BCAL_FCAL diphoton mass (cluster E > 500 MeV)', 'BCAL_FCAL diphoton mass (cluster E > 700 MeV)', 'BCAL_FCAL diphoton mass (cluster E > 900 MeV)']   
+  titles = ['BCAL_FCAL diphoton mass status', 'BCAL_FCAL diphoton mass [cluster E > 300 MeV]', 'BCAL_FCAL diphoton mass [cluster E > 500 MeV]', 'BCAL_FCAL diphoton mass [cluster E > 700 MeV]', 'BCAL_FCAL diphoton mass [cluster E > 900 MeV]']   
   values = [-1, None, None, None, None]
   png = ['bcal_fcal_inv_mass']
          

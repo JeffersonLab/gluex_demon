@@ -32,6 +32,7 @@ def declare_functions() :
 # TMultiGraphs are defined by giving the set of graph names the suffix _mmm_mg where mmm is the name of the multigraph
 # eg doca1_efficiency_mg and doca2_efficiency_mg would appear on the multigraph named efficiency_mg
 # doca1_efficiency_mg and doca1_efficiency_mg_err would appear as a TGraphErrors on the multigraph efficiency_mg
+# The MultiGtaph title is taken from the title of its first graph, up to the character [.
 #
 # This shows the minimum content required for a custom function:
 #
@@ -129,10 +130,12 @@ def example_multigraph(rootfile) :
 
     print('in function example_multigraph()')
                           
-    titles = ['Efficiency status', 'CDC hit efficiency at 0.04mm', 'Std dev 0.04mm', 'CDC hit efficiency at 5mm', 'Std dev 5mm', 'CDC hit efficiency at 6.4mm', 'Std dev 6.4mm']
+    titles = ['Efficiency status', 'CDC hit efficiency [0.04mm]', 'Std dev 0.04mm', 'CDC hit efficiency [5mm]', 'Std dev 5mm', 'CDC hit efficiency [6.4mm]', 'Std dev 6.4mm']
     names = ['eff_status', 'eff0_hitefficiency_mg', 'eff0_hitefficiency_mg_err', 'eff5_hitefficiency_mg', 'eff5_hitefficiency_mg_err', 'eff6_hitefficiency_mg', 'eff6_hitefficiency_mg_err']
     values = default_values(names)
     png = ['CDC_eff']    
+
+    # The multigraph created will have name 'hitefficiency' and title 'CDC hit efficiency'
 
     if not rootfile :  # called by init function
         return [names, titles, values, png]

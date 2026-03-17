@@ -294,8 +294,7 @@ async function getgraphnames() {
 		anchorname = thisgraph.substring(0,thisgraph.length-4);  // trim _all
 	    }
 	    
-            console.log(graph_collection[j]);
-	    console.log('first mg: '+first_mg ) ;
+	    //console.log('first mg: '+first_mg ) ;
 	    
 	    // The graphs are ordered Overall Status, Multigraphs, other graphs, graphs belonging to multigraphs
             if ((!mg_constituent_found) && ngraphs>3) {
@@ -358,12 +357,10 @@ async function getgraphnames() {
                 let thisdetector = det_list[i]; 
 
                 linkfile = document.URL.split("#")[0] + '&Detector=' + thisdetector;   // ignore #graphname
-//                divtext += '<span><a href=' + linkfile + '> ' + thisdetector + ' details </a>';
-//                divtext += '</span>';
                 divtext += '&nbsp;&nbsp;<a href=' + linkfile + '>Details</a>';
             }
-
-            divtext += '</div>';
+            divtext += '&nbsp;&nbsp;<span id="gdiv2_' + thisgraph + '" class="graph_info"></span></div>';
+//            divtext += '</div>';
 
         }          
 
@@ -554,39 +551,56 @@ function UserHandler(info,divname) {
 
     //console.log('click: divname: '+divname);
 
-    let mgname = divname.slice(6);   // start after gdiv2_   => name of graph or multigraph owning the minicanvas
-
     if (!info) {
         return true;
     }
 
     //console.log('click: info:');
     //console.log(info);
-    //console.log('click: mgname: ' + mgname);
-    
-    let run=info.obj.fX[info.bin];
+
     let gname=info.name;
-    let plotname = '';
-
-    if (gname != mgname) {
-	gname = gname + '_' + mgname;
-    }
-
-    //console.log('click: plot_collection[Detector]');
-    //console.log(plot_collection[Detector]);
-
     
-    if (plot_collection[Detector][gname]) {
-	    plotname = plot_collection[Detector][gname];
-	    //console.log('click: plotname: ' +plotname);
+    // cannot do anything for the overall status graph
+    if (gname == 'readiness') {
+	return true;
     }
 
+    let mgname = divname.slice(6);   // start after gdiv2_   => name of graph or multigraph owning the minicanvas
+    let thisdetector = Detector;
+    let run=info.obj.fX[info.bin];
+    let plotname = '';
+    
+    // if we are on the overview page, get the relevant detector name for the plot
+    if (Detector == '') {
+	thisdetector = mgname.replace("_status_all","");
+    }
+
+    // for multigraph parts, reconstruct the full graph name used to store the plot name
+    if ( mgname.endsWith("_status_all")) {
+   	gname = gname + '_status';
+    } else {	
+        if (gname != mgname) {
+   	    gname = gname + '_' + mgname;
+	}
+    }
+    
+    //console.log('click: gname:' +gname);
+    //console.log('click: plot_collection[Detector]');
+    //console.log(plot_collection[thisdetector]);
+    
+    if (plot_collection[thisdetector][gname]) {
+	    plotname = plot_collection[thisdetector][gname];
+	    console.log('click: plotname: ' +plotname);
+    } else {
+            console.log('click: plot_collection[thisdetector][gname] not found');
+    }
+    
     if (plotname) {
 
 	//        let divname = `gdiv2_${mgname}`;
 	let rcdburl = `https://halldweb.jlab.org/rcdb/runs/info/${run}`;
         let ploturl = `https://halldweb.jlab.org/work/halld2/data_monitoring/RunPeriod-2025-01/mon_ver16/Run${run}/${plotname}.png`;
-        let linktext = `<a href=${rcdburl}>RCDB (${run})</a>`;
+        let linktext = `<a href=${rcdburl}>RCDB</a>`;
         linktext += `&nbsp;&nbsp;<a href=${ploturl}>Monitoring histogram (${run})</a>`;
     
          // show info

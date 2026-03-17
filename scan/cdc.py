@@ -94,7 +94,7 @@ def occupancy(rootfile) :
 
 def efficiency(rootfile) :
 
-  titles = ['Efficiency status', 'CDC hit efficiency at 0.04mm', 'Hit efficiency at 0.04mm error', 'CDC hit efficiency at 5mm', 'Hit efficiency at 5mm error', 'CDC hit efficiency at 6.4mm', 'Hit efficiency at 6.4mm error']
+  titles = ['Efficiency status', 'CDC hit efficiency [0.04mm]', 'Hit efficiency at 0.04mm error', 'CDC hit efficiency [5mm]', 'Hit efficiency at 5mm error', 'CDC hit efficiency [6.4mm]', 'Hit efficiency at 6.4mm error']
   names = ['eff_status', 'eff0_hitefficiency_mg', 'eff0_hitefficiency_mg_err', 'eff5_hitefficiency_mg', 'eff5_hitefficiency_mg_err', 'eff6_hitefficiency_mg', 'eff6_hitefficiency_mg_err']
   values = default_values(names)
   png = ['CDC_eff']

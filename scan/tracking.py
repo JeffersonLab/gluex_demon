@@ -89,7 +89,7 @@ def ncandidates(rootfile) :
 def ntracks(rootfile) :
 
   names = ['ntracks_status','wire_ntracks_mg','time_ntracks_mg']  
-  titles = ['Number of tracks status','Mean number of wire-based tracks','Mean number of time-based tracks']
+  titles = ['Number of tracks status','Mean number of tracks [wire-based]','Mean number of tracks [time-based]']
   values = [-1, None, None]
   png = ['HistMacro_Tracking_p1']
   
@@ -138,7 +138,7 @@ def ntracks(rootfile) :
 def bcal_matchrate(rootfile) :
 
   names = ['bcal_status','all_bcal_mg','z_160_190cm_bcal_mg','bcal_matchpertrack_mg']  
-  titles = ['BCAL track match rate status','BCAL match rate','BCAL match rate (160 to 190cm)','BCAL match rate (160 to 190cm) / N time-based tracks'] # graph titles
+  titles = ['BCAL track match rate status','BCAL match rate','BCAL match rate [z 160 to 190cm]','Match rate per time-based track [BCAL, z 160 to 190cm]'] # graph titles
   values = [-1, None, None, None]
   png = ['HistMacro_Matching_BCAL']
   
@@ -214,7 +214,7 @@ def bcal_matchrate(rootfile) :
 def ecal_matchrate(rootfile) :
 
   names = ['ecal_match_status','all_ecal_mg','r20_40cm_1GeV_ecal_mg','ecal_matchpertrack_mg']
-  titles = ['ECAL track match rate status','ECAL match rate', 'ECAL match rate > 1 GeV (20-40cm)', 'ECAL match rate > 1 GeV (20-40cm) / N time-based tracks'] # graph titles] # graph titles
+  titles = ['ECAL track match rate status','ECAL match rate', 'ECAL match rate > 1 GeV (R 20-40cm)', 'Match rate per time-based track [ECAL > 1 GeV (20-40cm)]'] # graph titles] # graph titles
   values = [-1, None, None, None]
   png = ['HistMacro_Matching_ECAL']
   
@@ -379,7 +379,7 @@ def fcal_matchrate(rootfile) :
 def sc_matchrate(rootfile) :
 
   names = ['sc_match_status','sc_match', 'sc_matchpertrack_mg']
-  titles = ['SC track match rate status','SC match rate (z = 60 to 95cm)','SC match rate (z = 60 to 95cm) / N time-based tracks']
+  titles = ['SC track match rate status','SC match rate (z = 60 to 95cm)','Match rate per time-based track [SC, z = 60 to 95cm]']
   values = [-1, None, None]
   png = ['HistMacro_Matching_SC']
   
@@ -440,7 +440,7 @@ def sc_matchrate(rootfile) :
 def tof_matchrate(rootfile) :
 
   names = ['tof_match_status','4_6GeV_tof_mg','20_60cm_tof_mg','tof_matchpertrack_mg']  
-  titles = ['TOF track match rate status','TOF match rate (4 to 6GeV)','TOF match rate (20 to 60cm)', 'TOF match rate (20 to 60cm) / Mean time-based track count'] # graph titles
+  titles = ['TOF track match rate status','TOF match rate [4 to 6GeV]','TOF match rate [20 to 60cm]', 'Match rate per time-based track [TOF (20 to 60cm)'] # graph titles
   values = [-1, None, None, None]
   png = ['HistMacro_Matching_TOF']
 
