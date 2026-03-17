@@ -1,5 +1,5 @@
 from utils import get_histo     # demon's helper functions
-from ROOT import gROOT, TF1
+from ROOT import gROOT, TF1, TFile
 
 # Define the page name
 PAGENAME = 'Pi0'
@@ -7,6 +7,8 @@ PAGENAME = 'Pi0'
 # Provide the names of the custom functions in this module
 def declare_functions() : 
   list_of_functions = [bcal_inv_mass, bcal_fcal_inv_mass]
+  list_of_functions = [bcal_fcal_inv_mass]
+  
   return list_of_functions
 
 
@@ -99,7 +101,7 @@ def bcal_fcal_inv_mass(rootfile, llim=110, ulim=135) :
   h = get_histo(rootfile, dirname, histoname, min_counts)
 
   if h:
-    values[1] = bcal_fcal_fitmasshisto(h)
+    values[1] = bcal_fcal_fitmasshisto(h,300)
   else :
     values[1] = None
 
@@ -108,7 +110,7 @@ def bcal_fcal_inv_mass(rootfile, llim=110, ulim=135) :
   h = get_histo(rootfile, dirname, histoname, min_counts)
 
   if h:
-    values[2] = bcal_fcal_fitmasshisto(h)
+    values[2] = bcal_fcal_fitmasshisto(h,500)
   else :
     values[2] = None
 
@@ -117,7 +119,7 @@ def bcal_fcal_inv_mass(rootfile, llim=110, ulim=135) :
   h = get_histo(rootfile, dirname, histoname, min_counts)
 
   if h:
-    values[3] = bcal_fcal_fitmasshisto(h)
+    values[3] = bcal_fcal_fitmasshisto(h,700)
   else :
     values[3] = None
 
@@ -125,14 +127,12 @@ def bcal_fcal_inv_mass(rootfile, llim=110, ulim=135) :
   histoname = 'bcal_fcal_diphoton_mass_900'      # monitoring histogram to check
   h = get_histo(rootfile, dirname, histoname, min_counts)
 
-
-
   if h:
     #print('900 fit',fitmasshisto(h))
-    values[4] = bcal_fcal_fitmasshisto(h)
+    values[4] = bcal_fcal_fitmasshisto(h,900)
   else :
     values[4] = None
-    
+
 
   status=1
   for i in range(1,5) :
@@ -173,18 +173,36 @@ def fitmasshisto(h) :
   return mean
 
 
-def bcal_fcal_fitmasshisto(h) :
+def bcal_fcal_fitmasshisto(h,e) :
 
+  # cluster energy specific fit param initial values
+  if e == 300 :
+    x = 0
+  else :
+    x = 1
+
+  p0_scale = [0.5, 0.2]
+  p1 = [0.1, 0.135]
+  p2 = [0.009, 0.01]
+
+  p0_low_scale = [0.2, 0] 
+  
+  p1_low = [0.06, 0.02]
+  p1_high = [0.18, 0.3]
+
+  p2_low = [0.006, 0.001]
+  p2_high = [0.03, 0.05]
+            
   max = h.GetMaximum()
 
   fitfunc = TF1("fitfunc", "gaus(0)+pol3(3)", 0.04, 0.2)
-  fitfunc.SetParameters(0.2*max, 0.135, 0.01)
+  fitfunc.SetParameters(p0_scale[x]*max, p1[x], p2[x]) 
 
-  fitfunc.SetParLimits(0, 0, 2.1*max)
-  fitfunc.SetParLimits(1,0.02,0.3);
-  fitfunc.SetParLimits(2,0.001,0.05);
+  fitfunc.SetParLimits(0, p0_low_scale[x]*max, 2.1*max)
+  fitfunc.SetParLimits(1, p1_low[x], p1_high[x])
+  fitfunc.SetParLimits(2, p2_low[x], p2_high[x])  
 
-  fitresult = h.Fit(fitfunc,"RQS0");
+  fitresult = h.Fit(fitfunc,"RSQ0");
   
   if int(fitresult) == 0 :
     mean = 1000 * fitresult.Parameter(1)
@@ -194,3 +212,14 @@ def bcal_fcal_fitmasshisto(h) :
     mean = None
 
   return mean
+
+
+
+# code to test the module standalone
+#import os
+#from glob import glob
+#histofilelist = sorted(glob('hists/*.root'))
+#
+#for histofile in histofilelist:
+#  rootfile = TFile(histofile)
+#  bcal_fcal_inv_mass(rootfile)
