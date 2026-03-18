@@ -1,5 +1,5 @@
 from utils import get_histo, default_values     # demon's helper functions
-from ROOT import gROOT, TH1I, TF1,TMath
+from ROOT import gROOT, TH1I, TF1, TMath
 import math
 
 # Define the page name
@@ -7,7 +7,8 @@ PAGENAME = 'PhotonBeam'
 
 # Provide the names of the custom functions in this module
 def declare_functions() : 
-  list_of_functions = [rho_psigma_pse, trigger_asymmetry, rho_helicity_asymmetry]  
+  list_of_functions = [rho_psigma_pse, trigger_asymmetry, rho_helicity_asymmetry]
+  
   return list_of_functions
 
 
@@ -50,7 +51,6 @@ def rho_psigma_pse(rootfile) :
   if (not (hpsit and hps)) :
     return values
 
-
   amo = test_for_amo(hps)
 
   status = 1
@@ -82,9 +82,6 @@ def rho_psigma_pse(rootfile) :
     
     if values[1] == None :
       status = -1
-
-
-
 
   # --- p2pi hists psi histo ---
 
@@ -196,47 +193,55 @@ def find_edge(h):
   
   # rebin the histo to find out where the coherent edge is
   
-  rebinfactor = 5
+  rebinfactor = 4
   
   h2 = h.Clone("h2")
 
   h2.Rebin(rebinfactor)
 
+#  h2.Draw()
+ # input()
   h2maxbin = h2.GetMaximumBin()
 
   h2_edge_end = 0
   
   for i in range(h2maxbin, h2maxbin + int(3*15/float(rebinfactor))) :     # edge width usually about 15 bins before rebinning
     if h2.GetBinContent(i+1) > h2.GetBinContent(i) :
-      h2_edge_end = i-1
+      h2_edge_end = i
       break
 
   if h2_edge_end == 0 :
     return [None, None]
 
-
-  edge_width = rebinfactor * (h2_edge_end - h2maxbin)
-
-  edge_start = rebinfactor * h2maxbin
+  if h2_edge_end == h2maxbin:
+    h2_edge_end += 1
+  
+  edge_start = rebinfactor * (h2maxbin-1)
   edge_end = rebinfactor * h2_edge_end
 
+  edge_width = edge_end - edge_start
 
   # find the derivative of the original histo for the edge region, fit to find the max    
-  
+
   hdiff = TH1I('hdiff','hdiff',  edge_width, h.GetBinCenter(edge_start), h.GetBinCenter(edge_end))
 
   
   for i in range(1, edge_width) :
     hdiff.SetBinContent(i, h.GetBinContent(edge_start-1+i) - h.GetBinContent(edge_start+i))
 
-  fitstat = hdiff.Fit("gaus","WSQ0")
+  g = TF1('g','gaus',h.GetBinCenter(edge_start),h.GetBinCenter(edge_end))
 
-  # The histo is shifted down by 0.5 bins, it contains diff between previous bin and present bin
+  
+  g.SetParameter(2,h.GetBinWidth(edge_start))
+  fitstat = hdiff.Fit(g,"WSQ0")
 
   #hdiff.Draw()
   #input()
-                      
-  if int(fitstat) == 0:
+
+    
+  # The histo is shifted down by 0.5 bins, it contains diff between previous bin and present bin
+  
+  if fitstat.IsValid() :
     edge = 0.5*h.GetBinWidth(1) + fitstat.Parameter(1)
     edge_err = fitstat.GetErrors()[1]
 
@@ -360,3 +365,12 @@ def rho_helicity_asymmetry(rootfile) :
   return values       # return array of values, status first
 
 
+# code to test the module standalone
+import os
+from ROOT import TFile
+from glob import glob
+histofilelist = sorted(glob('hists/*.root'))
+#
+for histofile in histofilelist:
+  rootfile = TFile(histofile)
+  rho_psigma_pse(rootfile)

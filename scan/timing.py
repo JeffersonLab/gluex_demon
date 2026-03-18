@@ -7,6 +7,7 @@ PAGENAME = 'Timing'
 # Provide the names of the custom functions in this module
 def declare_functions() : 
   list_of_functions = [sc_rf_time, tof_rf_time, bcal_rf_time, ecal_rf_time, fcal_rf_time, cdc_rf_time, fdc_rf_time, ps_rf_time, tagh_rf_time, tagm_rf_time, fdc_tdc_diff, sc_rf_channels, tagh_rf_channels, tagm_rf_channels, sc_adctdc_channels, tof_adctdc_channels, tagh_adctdc_channels, tagm_adctdc_channels]
+
   return list_of_functions
 
 
@@ -979,12 +980,18 @@ def tagm_adctdc_channels(rootfile, diffmin=-0.1, diffmax=0.1) :
   high_limit = 0.3
 
   for mod in range(1,h.GetNbinsX()):
+    
     p = h.ProjectionY("p",mod,mod)  
     #p.Rebin(8)
-    if p.GetEntries() > min_counts:
+    
+    entries = p.GetEntries()
+    overflow = p.GetBinContent(1+p.GetNbinsX())    
+    
+    if (entries > min_counts) and (entries != overflow) :
 
       # find the bin with max content, histo looks like spike on flat bg
       tdiff = check_deltat(p, fitoptions, time_max, low_limit, high_limit)[1]
+      
       if tdiff is None:
       	continue
       if abs(tdiff) > abs(max_tdiff):
