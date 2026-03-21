@@ -1,4 +1,4 @@
-from utils import get_histo     # demon's helper functions
+from utils import get_histo, default_values     # demon's helper functions
 from ROOT import gROOT, TF1, TFile
 
 # Define the page name
@@ -7,7 +7,6 @@ PAGENAME = 'Pi0'
 # Provide the names of the custom functions in this module
 def declare_functions() : 
   list_of_functions = [bcal_inv_mass, bcal_fcal_inv_mass]
-  list_of_functions = [bcal_fcal_inv_mass]
   
   return list_of_functions
 
@@ -20,9 +19,9 @@ def declare_functions() :
 
 def bcal_inv_mass(rootfile, llim=130, ulim=140) :
 
-  names = ['bcal_2g_mass_status', '300_bcal_mg', '500_bcal_mg', '700_bcal_mg', '900_bcal_mg']
-  titles = ['BCAL diphoton mass status', 'BCAL diphoton mass [cluster E > 300 MeV]', 'BCAL diphoton mass [cluster E > 500 MeV]', 'BCAL diphoton mass [cluster E > 700 MeV]', 'BCAL diphoton mass [cluster E > 900 MeV]']   # Graph titles
-  values = [-1, None, None, None, None]
+  names = ['bcal_2g_mass_status', 'gg300_bcal_mg', 'gg300_bcalw_mg','gg500_bcal_mg', 'gg500_bcalw_mg','gg700_bcal_mg','gg700_bcawl_mg', 'gg900_bcal_mg','gg700_bcalw_mg',]
+  titles = ['BCAL diphoton mass status', 'BCAL diphoton mass [cluster E > 300 MeV]', 'BCAL diphoton width [cluster E > 300 MeV]', 'BCAL diphoton mass [cluster E > 500 MeV]', 'BCAL diphoton width [cluster E > 500 MeV]', 'BCAL diphoton mass [cluster E > 700 MeV]', 'BCAL diphoton width [cluster E > 700 MeV]', 'BCAL diphoton mass [cluster E > 900 MeV]',  'BCAL diphoton width [cluster E > 900 MeV]']   # Graph titles
+  values = default_values(names)
   png = ['bcal_inv_mass']
   
   if not rootfile :  # called by init function
@@ -36,44 +35,46 @@ def bcal_inv_mass(rootfile, llim=130, ulim=140) :
   h = get_histo(rootfile, dirname, histoname, min_counts)
 
   if h:
-    values[1] = fitmasshisto(h)
+    values[1],values[2] = fitmasshisto(h)
   else :
-    values[1] = None
+    values[1],values[2] = None
 
 
   histoname = 'bcal_diphoton_mass_500'      # monitoring histogram to check
   h = get_histo(rootfile, dirname, histoname, min_counts)
 
   if h:
-    values[2] = fitmasshisto(h)
+    values[3],values[4] = fitmasshisto(h)
   else :
-    values[2] = None
+    values[3],values[4] = None
 
     
   histoname = 'bcal_diphoton_mass_700'      # monitoring histogram to check
   h = get_histo(rootfile, dirname, histoname, min_counts)
 
   if h:
-    values[3] = fitmasshisto(h)
+    values[5],values[6] = fitmasshisto(h)
   else :
-    values[3] = None
+    values[5],values[6] = None
 
     
   histoname = 'bcal_diphoton_mass_900'      # monitoring histogram to check
   h = get_histo(rootfile, dirname, histoname, min_counts)
 
   if h:
-    values[4] = fitmasshisto(h)
+    values[7],values[8] = fitmasshisto(h)
   else :
-    values[4] = None
+    values[7],values[8] = None
     
 
   status=1
-  for i in range(1,5) :
+  for i in range(1,9) :
     if values[i] == None :
       status = -1
-      
-  for i in range(1,5) :
+
+
+  masses = [1,3,5]    
+  for i in masses :
     if values[i] != None :
       if values[i] < llim or values[i] > ulim :
         status = 0
@@ -86,9 +87,9 @@ def bcal_inv_mass(rootfile, llim=130, ulim=140) :
 
 def bcal_fcal_inv_mass(rootfile, llim=110, ulim=135) :
 
-  names = ['bcal_fcal_2g_mass_status', '300_bcalfcal_mg', '500_bcalfcal_mg', '700_bcalfcal_mg', '900_bcalfcal_mg']
-  titles = ['BCAL_FCAL diphoton mass status', 'BCAL_FCAL diphoton mass [cluster E > 300 MeV]', 'BCAL_FCAL diphoton mass [cluster E > 500 MeV]', 'BCAL_FCAL diphoton mass [cluster E > 700 MeV]', 'BCAL_FCAL diphoton mass [cluster E > 900 MeV]']   
-  values = [-1, None, None, None, None]
+  names = ['bcal_fcal_2g_mass_status', 'gg300_bcalfcal_mg', 'gg300_bcalfcalw_mg', 'gg500_bcalfcal_mg', 'gg500_bcalfcalw_mg', 'gg700_bcalfcal_mg', 'gg700_bcalfcalw_mg', 'gg900_bcalfcal_mg', 'gg900_bcalfcalw_mg']
+  titles = ['BCAL_FCAL diphoton mass status', 'BCAL_FCAL diphoton mass [cluster E > 300 MeV]', 'BCAL_FCAL diphoton width [cluster E > 300 MeV]', 'BCAL_FCAL diphoton mass [cluster E > 500 MeV]', 'BCAL_FCAL diphoton width [cluster E > 500 MeV]', 'BCAL_FCAL diphoton mass [cluster E > 700 MeV]', 'BCAL_FCAL diphoton width [cluster E > 700 MeV]', 'BCAL_FCAL diphoton mass [cluster E > 900 MeV]', 'BCAL_FCAL diphoton width [cluster E > 900 MeV]']   
+  values = default_values(names)
   png = ['bcal_fcal_inv_mass']
          
   if not rootfile :  # called by init function
@@ -101,27 +102,27 @@ def bcal_fcal_inv_mass(rootfile, llim=110, ulim=135) :
   h = get_histo(rootfile, dirname, histoname, min_counts)
 
   if h:
-    values[1] = bcal_fcal_fitmasshisto(h,300)
+    values[1],values[2] = bcal_fcal_fitmasshisto(h,300)
   else :
-    values[1] = None
+    values[1],values[2] = None
 
 
   histoname = 'bcal_fcal_diphoton_mass_500'      # monitoring histogram to check
   h = get_histo(rootfile, dirname, histoname, min_counts)
 
   if h:
-    values[2] = bcal_fcal_fitmasshisto(h,500)
+    values[3],values[4] = bcal_fcal_fitmasshisto(h,500)
   else :
-    values[2] = None
+    values[3],values[4] = None
 
     
   histoname = 'bcal_fcal_diphoton_mass_700'      # monitoring histogram to check
   h = get_histo(rootfile, dirname, histoname, min_counts)
 
   if h:
-    values[3] = bcal_fcal_fitmasshisto(h,700)
+    values[5],values[6] = bcal_fcal_fitmasshisto(h,700)
   else :
-    values[3] = None
+    values[5],values[6] = None
 
     
   histoname = 'bcal_fcal_diphoton_mass_900'      # monitoring histogram to check
@@ -129,17 +130,18 @@ def bcal_fcal_inv_mass(rootfile, llim=110, ulim=135) :
 
   if h:
     #print('900 fit',fitmasshisto(h))
-    values[4] = bcal_fcal_fitmasshisto(h,900)
+    values[7],values[8] = bcal_fcal_fitmasshisto(h,900)
   else :
-    values[4] = None
+    values[7],values[8] = None
 
 
   status=1
-  for i in range(1,5) :
+  for i in range(1,9) :
     if values[i] == None :
       status = -1
-      
-  for i in range(1,5) :
+
+  masses = [1,3,5]    
+  for i in masses :
     if values[i] != None :
       if values[i] < llim or values[i] > ulim :
         status = 0
@@ -165,12 +167,15 @@ def fitmasshisto(h) :
   
   if int(fitresult) == 0 :
     mean = 1000 * fitresult.Parameter(1)
+    width = 1000 * fitresult.Parameter(2)    
     mean = float('%.1f'%mean)    
-    
+    width = float('%.1f'%width)    
   else :
     mean = None
+    width = None
 
-  return mean
+  return [mean,width]
+
 
 
 def bcal_fcal_fitmasshisto(h,e) :
@@ -206,12 +211,14 @@ def bcal_fcal_fitmasshisto(h,e) :
   
   if int(fitresult) == 0 :
     mean = 1000 * fitresult.Parameter(1)
+    width = 1000 * fitresult.Parameter(2)    
     mean = float('%.1f'%mean)    
-    
+    width = float('%.1f'%width)    
   else :
     mean = None
+    width = None
 
-  return mean
+  return [mean,width]
 
 
 
