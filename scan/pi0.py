@@ -19,7 +19,7 @@ def declare_functions() :
 
 def bcal_inv_mass(rootfile, llim=130, ulim=140) :
 
-  names = ['bcal_2g_mass_status', 'gg300_bcal_mg', 'gg300_bcalw_mg','gg500_bcal_mg', 'gg500_bcalw_mg','gg700_bcal_mg','gg700_bcawl_mg', 'gg900_bcal_mg','gg700_bcalw_mg',]
+  names = ['bcal_2g_mass_status', 'gg300_bcal_mg', 'gg300_bcalw_mg','gg500_bcal_mg', 'gg500_bcalw_mg','gg700_bcal_mg','gg700_bcalw_mg', 'gg900_bcal_mg', 'gg900_bcalw_mg',]
   titles = ['BCAL diphoton mass status', 'BCAL diphoton mass [cluster E > 300 MeV]', 'BCAL diphoton width [cluster E > 300 MeV]', 'BCAL diphoton mass [cluster E > 500 MeV]', 'BCAL diphoton width [cluster E > 500 MeV]', 'BCAL diphoton mass [cluster E > 700 MeV]', 'BCAL diphoton width [cluster E > 700 MeV]', 'BCAL diphoton mass [cluster E > 900 MeV]',  'BCAL diphoton width [cluster E > 900 MeV]']   # Graph titles
   values = default_values(names)
   png = ['bcal_inv_mass']
