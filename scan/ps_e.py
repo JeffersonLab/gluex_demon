@@ -21,7 +21,8 @@ def ps_e(rootfile) :
   names = ['ps_e_status','ps_e_peak','ps_e_q1','ps_e_q2','ps_e_q3']   
   titles = ['PS pair E status','PS pair Epeak(GeV)','E quartile 1 (GeV)','E quartile 2 (GeV)','E quartile 3 (GeV)'] 
   values = default_values(names)
-
+  png = ['__PSPair_PSC_PS_PS_E','__PSPair_PSC_PS_PS_E','__PSPair_PSC_PS_PS_E','__PSPair_PSC_PS_PS_E']
+  
   if not rootfile :  # called by init function
     return [names, titles, values, png]
 

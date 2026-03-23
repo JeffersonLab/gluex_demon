@@ -268,8 +268,10 @@ def tof_1_dxpos(rootfile):
 
         if int(r) == 0:
           POSval = f1.GetParameter(1)
-          dPOSval = f1.GetParError(1)    
-  
+          dPOSval = f1.GetParError(1)
+          POSval = float('%.5f'%(POSval))
+          dPOSval = float('%.5f'%(dPOSval))
+            
     POS.append(POSval)
     dPOS.append(dPOSval)
 
@@ -278,8 +280,8 @@ def tof_1_dxpos(rootfile):
   values.append(status)
 
   for n in range(0,20):
-    values.append(float('%.5f'%(POS[n])))
-    values.append(float('%.5f'%(dPOS[n])))
+    values.append(POS[n])
+    values.append(dPOS[n])
     
   return values       # return array of values, status first
 
@@ -400,6 +402,8 @@ def tof_1_dypos(rootfile):
         if int(r) == 0:
           POSval = f1.GetParameter(1)
           dPOSval = f1.GetParError(1)    
+          POSval = float('%.5f'%(POSval))
+          dPOSval = float('%.5f'%(dPOSval))
 
     POS.append(POSval)
     dPOS.append(dPOSval)
@@ -407,9 +411,9 @@ def tof_1_dypos(rootfile):
   status = 1
   values = []
   values.append(status)
-
+  
   for n in range(0,20):
-    values.append(float('%.5f'%(POS[n])))
-    values.append(float('%.5f'%(dPOS[n])))
+    values.append(POS[n])
+    values.append(dPOS[n])
     
   return values       # return array of values, status first

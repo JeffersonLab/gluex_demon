@@ -37,7 +37,7 @@ def bcal_inv_mass(rootfile, llim=130, ulim=140) :
   if h:
     values[1],values[2] = fitmasshisto(h)
   else :
-    values[1],values[2] = None
+    values[1],values[2] = [None,None]
 
 
   histoname = 'bcal_diphoton_mass_500'      # monitoring histogram to check
@@ -46,7 +46,7 @@ def bcal_inv_mass(rootfile, llim=130, ulim=140) :
   if h:
     values[3],values[4] = fitmasshisto(h)
   else :
-    values[3],values[4] = None
+    values[3],values[4] = [None,None]
 
     
   histoname = 'bcal_diphoton_mass_700'      # monitoring histogram to check
@@ -55,7 +55,7 @@ def bcal_inv_mass(rootfile, llim=130, ulim=140) :
   if h:
     values[5],values[6] = fitmasshisto(h)
   else :
-    values[5],values[6] = None
+    values[5],values[6] = [None,None]
 
     
   histoname = 'bcal_diphoton_mass_900'      # monitoring histogram to check
@@ -64,7 +64,7 @@ def bcal_inv_mass(rootfile, llim=130, ulim=140) :
   if h:
     values[7],values[8] = fitmasshisto(h)
   else :
-    values[7],values[8] = None
+    values[7],values[8] = [None,None]
     
 
   status=1
@@ -104,7 +104,7 @@ def bcal_fcal_inv_mass(rootfile, llim=110, ulim=135) :
   if h:
     values[1],values[2] = bcal_fcal_fitmasshisto(h,300)
   else :
-    values[1],values[2] = None
+    values[1],values[2] = [None,None]
 
 
   histoname = 'bcal_fcal_diphoton_mass_500'      # monitoring histogram to check
@@ -113,7 +113,7 @@ def bcal_fcal_inv_mass(rootfile, llim=110, ulim=135) :
   if h:
     values[3],values[4] = bcal_fcal_fitmasshisto(h,500)
   else :
-    values[3],values[4] = None
+    values[3],values[4] = [None,None]
 
     
   histoname = 'bcal_fcal_diphoton_mass_700'      # monitoring histogram to check
@@ -122,7 +122,7 @@ def bcal_fcal_inv_mass(rootfile, llim=110, ulim=135) :
   if h:
     values[5],values[6] = bcal_fcal_fitmasshisto(h,700)
   else :
-    values[5],values[6] = None
+    values[5],values[6] = [None,None]
 
     
   histoname = 'bcal_fcal_diphoton_mass_900'      # monitoring histogram to check
@@ -132,7 +132,7 @@ def bcal_fcal_inv_mass(rootfile, llim=110, ulim=135) :
     #print('900 fit',fitmasshisto(h))
     values[7],values[8] = bcal_fcal_fitmasshisto(h,900)
   else :
-    values[7],values[8] = None
+    values[7],values[8] = [None,None]
 
 
   status=1

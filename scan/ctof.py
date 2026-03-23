@@ -102,8 +102,6 @@ def ctof_dt(rootfile) :
 
     tmean = p.GetMean()
 
-    print(tmean)
-
     myvals.append(float('%.1f'%(tmean)))
 
     if tmean < tmin  or tmean > tmax : 

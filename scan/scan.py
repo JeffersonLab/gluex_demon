@@ -97,12 +97,13 @@ nargs = len(sys.argv)
 if nargs<4 or nargs>7 or sys.argv[0] == "-h" or sys.argv[0] == "--h" or sys.argv[0] == "--help":
     exit("\nThis script scans GlueX/Hall D detector monitoring histograms to create graphs.\n\nUsage: python scan.py -r Year-Month -v VersionNumber [-s CheckStatus] [path_to_monitoring_histogram_directory]\n    eg python scan.py -r 2022-05 -v 06 -s 1\n\nThe histogram directory is optional if it is the usual one. \n\nCheckStatus values act as follows:\n  -1: check all runs\n   0: check only runs with RCDB status >0 (this is the default)\n   1: check only runs with RCDB status=1")
 
+# monitoring modules
 
-# detector monitoring modules
 import cdc 
 import cdc_cpp   
 import fdc
 import timing
+import timing2
 import sc
 import tof_1
 import fmwpc
@@ -115,13 +116,16 @@ import rho
 import omega
 import pi0
 import tracking
+import tracking2
+import tracking_cpp
 import triggers
 
-modules_cpp = [photons_cpp, ps_e, rf, timing, triggers, cdc_cpp, fdc, tof_1, fmwpc, ctof] # modules for CPP
-modules_def = [photons, rho, omega, pi0, rf, timing, tracking, triggers, cdc, fdc, sc, tof_1]
+modules_cpp = [photons_cpp, ps_e, pi0, rf, timing, tracking_cpp, triggers, cdc_cpp, fdc, tof_1, fmwpc, ctof] # modules for 2022-05
+modules_gx = [photons, rho, omega, pi0, rf, timing, tracking, triggers, cdc, fdc, sc, tof_1] # before ecal
+modules_gx2 = [photons, rho, omega, pi0, rf, timing2, tracking2, triggers, cdc, fdc, sc, tof_1]
 
 testing = 0  # stop after <runlimit> files, print diagnostics
-runlimit = 5 # process this number of runs if testing=1
+runlimit = 1 # process this number of runs if testing=1
 checkstatus = 0  # process runs with RCDB status>0.  if =1, only process status=1 runs, if -1, process all runs
 
 RunPeriod=""
@@ -161,7 +165,6 @@ checkstatus = int(checkstatus)
 
 if not os.path.isdir(histdir):
     exit('Cannot find ' + histdir + '\n  It might have been moved from /work/halld/data_monitoring to /cache/halld/offline_monitoring.')
-
     
 # Make list of filenames
 
@@ -171,8 +174,8 @@ histofilelist = sorted(glob('*.root'))
 os.chdir(cwd)
 
 if len(histofilelist) == 0:
-  exit("No monitoring files found")
-
+    exit("No monitoring files found")
+    
   
 # import ROOT now (after passing early checks), as the import is slow
 
@@ -188,12 +191,14 @@ run_module=[]
 if RunPeriod == '2022-05' :
     modules = modules_cpp
 else :
-    modules = modules_def
+    if int(RunPeriod[0:4]) < 2025 :     # before ECAL
+        modules = modules_gx
+    else :
+        modules = modules_gx2
 
 for x in modules:
     run_module.append(True)
-
-
+    
 # prepare output files
 
 tag = '_' + RunPeriod + '_ver' + VersionNumber
