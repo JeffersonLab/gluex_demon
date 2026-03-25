@@ -104,6 +104,7 @@ import cdc_cpp
 import fdc
 import timing
 import timing2
+import timing_cpp
 import sc
 import tof_1
 import fmwpc
@@ -115,16 +116,17 @@ import photons_cpp
 import rho
 import omega
 import pi0
+import pi0_cpp
 import tracking
 import tracking2
 import tracking_cpp
 import triggers
 
-modules_cpp = [photons_cpp, ps_e, pi0, rf, timing, tracking_cpp, triggers, cdc_cpp, fdc, tof_1, fmwpc, ctof] # modules for 2022-05
+modules_cpp = [photons_cpp, pi0_cpp, rf, timing_cpp, tracking_cpp, triggers, cdc_cpp, fdc, tof_1, fmwpc, ctof] # modules for 2022-05
 modules_gx = [photons, rho, omega, pi0, rf, timing, tracking, triggers, cdc, fdc, sc, tof_1] # before ecal
 modules_gx2 = [photons, rho, omega, pi0, rf, timing2, tracking2, triggers, cdc, fdc, sc, tof_1]
 
-testing = 0  # stop after <runlimit> files, print diagnostics
+testing = 0 # stop after <runlimit> files, print diagnostics
 runlimit = 1 # process this number of runs if testing=1
 checkstatus = 0  # process runs with RCDB status>0.  if =1, only process status=1 runs, if -1, process all runs
 

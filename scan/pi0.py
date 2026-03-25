@@ -73,7 +73,7 @@ def bcal_inv_mass(rootfile, llim=130, ulim=140) :
       status = -1
 
 
-  masses = [1,3,5]    
+  masses = [1,3,5,7]    
   for i in masses :
     if values[i] != None :
       if values[i] < llim or values[i] > ulim :
@@ -140,7 +140,7 @@ def bcal_fcal_inv_mass(rootfile, llim=110, ulim=135) :
     if values[i] == None :
       status = -1
 
-  masses = [1,3,5]    
+  masses = [1,3,5,7]    
   for i in masses :
     if values[i] != None :
       if values[i] < llim or values[i] > ulim :

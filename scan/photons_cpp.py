@@ -22,7 +22,7 @@ def rho_psigma_pse(rootfile) :
   titles = ['PS E and Rho P#Sigma status', 'Photon beam energy (diamond edge, amo peak) from PS pair E (GeV)', 'PS E err','Abs(P#Sigma) from #rho(770) production', 'Abs(P#Sigma)_err', 'P#Sigma (135)', 'P#Sigma(135)err', 'P#Sigma (45)', 'P#Sigma(45)err','#phi_{0} diamond', '#phi_{0} diamond err', '#phi_{0} amo', '#phi_{0} amo err' ]   # Graph titles
   values = [-1, None, None, None, None, None, None, None, None, None, None, None, None]
   values = default_values(names)
-  png = ['HistMacro_p2pi','__PSPair_PSC_PS_PS_E','__PSPair_PSC_PS_PS_E','HistMacro_p2pi','HistMacro_p2pi','HistMacro_p2pi','HistMacro_p2pi','HistMacro_p2pi','HistMacro_p2pi','HistMacro_p2pi','HistMacro_p2pi','HistMacro_p2pi','HistMacro_p2pi']
+  png = ['__PSPair_PSC_PS_PS_E','__PSPair_PSC_PS_PS_E','__PSPair_PSC_PS_PS_E','HistMacro_p2pi','HistMacro_p2pi','HistMacro_p2pi','HistMacro_p2pi','HistMacro_p2pi','HistMacro_p2pi','HistMacro_p2pi','HistMacro_p2pi','HistMacro_p2pi','HistMacro_p2pi']
  
   if not rootfile :  # called by init function
     return [names, titles, values, png]
