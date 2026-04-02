@@ -102,7 +102,7 @@ def bcal_fcal_fitmasshisto(h,e) :
   fitfunc = TF1("fitfunc", "gaus(0)+pol3(3)", 0.04, 0.2)
   fitfunc.SetParameters(p0_scale[x]*max, p1[x], p2[x]) 
 
-  fitfunc.SetParLimits(0, p0_low_scale[x]*max, 2.1*max)
+  fitfunc.SetParLimits(0, p0_low_scale[x]*max, 1.1*max)
   fitfunc.SetParLimits(1, p1_low[x], p1_high[x])
   fitfunc.SetParLimits(2, p2_low[x], p2_high[x])  
 
