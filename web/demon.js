@@ -243,7 +243,7 @@ async function getgraphnames() {
     
     if (Detector != "") {  // detector page
 //        let year_month = `${RunPeriod}.substring(10,17)`;
-        let page_csv_filename = `./${RunPeriod}/${Version}/monitoring_page_${Detector}_${year_month}_ver${Version}.csv`;
+        let page_csv_filename = `./${RunPeriod}/${Version}/monitoring_data_${Detector}_${year_month}_ver${Version}.csv`;
 	const file_exists = await fetchfiledata(page_csv_filename,true);
         let csv_link = '';
 	if (file_exists) {
@@ -556,7 +556,7 @@ function UserHandler(info,divname) {
     }
 
     //console.log('click: info:');
-    //console.log(info);
+    console.log(info);
 
     let gname=info.name;
     
@@ -567,7 +567,7 @@ function UserHandler(info,divname) {
 
     let mgname = divname.slice(6);   // start after gdiv2_   => name of graph or multigraph owning the minicanvas
     let thisdetector = Detector;
-    let run=info.obj.fX[info.bin];
+    let run=Math.trunc(info.obj.fX[info.bin]);  // fX contains floats
     let plotname = '';
     
     // if we are on the overview page, get the relevant detector name for the plot
@@ -599,8 +599,13 @@ function UserHandler(info,divname) {
 
 	//        let divname = `gdiv2_${mgname}`;
 	let rcdburl = `https://halldweb.jlab.org/rcdb/runs/info/${run}`;
-        let ploturl = `https://halldweb.jlab.org/work/halld2/data_monitoring/RunPeriod-2025-01/mon_ver16/Run${run}/${plotname}.png`;
-        let linktext = `<a href=${rcdburl}>RCDB</a>`;
+        let ploturl = `https://halldweb.jlab.org/work/halld2/data_monitoring/${RunPeriod}/mon_ver${Version}/Run${run}/${plotname}.png`;
+        if (Version[0] == "R") {
+	    let rest = Version[4];
+	    ploturl = `https://halldweb.jlab.org/work/halld2/data_monitoring/${RunPeriod}/recon_ver0${rest}/Run${run}/${plotname}.png`;
+	}
+
+        let linktext = `<a href=${rcdburl}><img src="rcdb.png" alt="RCDB" height="16" width="16"/></a>`;
         linktext += `&nbsp;&nbsp;<a href=${ploturl}>Monitoring histogram (${run})</a>`;
     
          // show info
