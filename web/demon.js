@@ -694,7 +694,11 @@ select_det.addEventListener('change',function() {
   const ver = select_ver.value;
   const det = select_det.value;
 
-  let new_url = document.URL.split("?")[0] + `?RunPeriod=${RP}&Version=${ver}`;
+  // trim local bookmark #graphname
+    
+  let new_url = document.URL.split("#")[0];
+  new_url = new_url.split("?")[0] + `?RunPeriod=${RP}&Version=${ver}`;
+
   if ( det != "" ) {
     new_url = new_url + `&Detector=${det}`;
   }
@@ -711,8 +715,11 @@ console.log('reload');
     const RP = select_rp.value;
     const ver = select_ver.value;
     const det = '';
+    
+    let new_url = document.URL.split("#")[0];
+    new_url = new_url.split("?")[0] + `?RunPeriod=${RP}&Version=${ver}`;
 
-    let new_url = document.URL.split("?")[0] + `?RunPeriod=${RP}&Version=${ver}`;
+    //let new_url = document.URL.split("?")[0] + `?RunPeriod=${RP}&Version=${ver}`;
 
     console.log(new_url);
     window.location.assign(new_url);
@@ -742,7 +749,10 @@ document.addEventListener('click', (event) => {
 	        thisdet = `&Detector=${det}`;
 	    }
 
-            let this_url = document.URL.split("?")[0] + `?RunPeriod=${RP}&Version=${ver}${thisdet}#${clicked_graph}`;
+	    let new_url = document.URL.split("#")[0];
+	    new_url = new_url.split("?")[0] + `?RunPeriod=${RP}&Version=${ver}`;
+	      
+            //let this_url = document.URL.split("?")[0] + `?RunPeriod=${RP}&Version=${ver}${thisdet}#${clicked_graph}`;
 
             console.log(clicked_graph);
             console.log(this_url);
