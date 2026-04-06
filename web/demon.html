@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="canonical" href="https://getbootstrap.com/docs/5.3/examples/sidebars/">
-
+    <link rel="icon" type="image/x-icon" href="favicon.ico">  
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://code.jquery.com/ui/1.13.1/jquery-ui.min.js"
         integrity="sha256-eTyxS0rkjpLEo16uXTS0uVCS4815lc40K2iVpWDvdSY=" crossorigin="anonymous"></script>
@@ -19,28 +19,33 @@
         body {margin:1em 5em 1em 5em;}  
         #links span {margin-right: 0.5em;}
         #selectors,#titles {margin-top: 1em; margin-bottom: 1em;}
-        #problems {margin-top: 0em; margin-bottom: 0em; font-size:1.5em; color:red;}
+        #problems {margin-top: 0em; margin-bottom: 0em; font-size:1.5em; color:#ff3131;}
         #titles2 {margin-top: 1em; margin-bottom: 2em;}
         #links_graphs_this_page {margin-bottom: 4em;}
-        #under-dev {margin-top:10px;}
-        #under-dev hr {border: 2px solid #505050;}
-        .red {color:red;}
+        #top {margin-top:10px;}
+        #top hr {border: 2px solid #505050;}
+        .red {color:#ff3131;}
         .graphpanel {width:1200px; height:420px; margin-top: 50px;}
         .statusgraphpanel {width:1200px; height:250px; margin-top: 50px;}
         .graph_info {width:1200px; height:50px; margin-top: 10px;}	
 	.graphmissing {font-size:80%; font-style:italic;}
         .graph_top {margin-top:2.5em;}
-        .graph_names {font-size:80%; font-style:italic; color: darkslategray;}
+        .graph_names {font-size:80%; font-style:italic; color: darkslategray; height:30px; padding-left:4px;}
 	.before_mg_constituents {margin-top: 30px; height:10px; width:1200px; background-color:#eff3f8;}
 	#links_graphs_this_page ul {list-style-type: none; }
 	#links_graphs_this_page li {display: inline; padding-right: 1em;}
+	button.graph_url {width:25px; cursor:pointer; padding:0;}
+        button.graph_url img {height: 10px; width: 22px;}
+	button.graph_url:hover img {height:14px; width:24px;}
+	button.graph_url {background-color:transparent; border:none;}
+
     </style>
 </head>
 
 
 <body>
 
-        <div id="under-dev" class="red">GlueX Demon is under development! &nbsp; <span style="font-size:1em;"> Contact Naomi Jarvis (njarvis) with any questions.<span>
+        <div id="top" class="red"><img src="demon.png" alt="demon" width="32px" height="32px" style="margin: 0 5px 10px 0">GlueX Demon is watching Hall D monitoring data. Contact Naomi Jarvis (njarvis) with any questions.
         </div>
         <div id="links">
             <span id="github"><a href="https://github.com/JeffersonLab/gluex_demon">Github repo</a></span>

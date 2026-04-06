@@ -309,8 +309,14 @@ async function getgraphnames() {
 	    divtext += `<div id="${anchorname}" class="graph_top"></div>`;
             divtext += '<div id="gdiv_' + thisgraph + '" ' + style + '>';
             divtext += '</div>';
+	    
+            //divtext += `<div class="graph_names"><a title="Copy the url for this plot" class="graph_url" href="#${anchorname}" id="link#${anchorname}"><img src="link.png" alt=${anchorname}></a>&nbsp;&nbsp;<a href="#top">Top of page</a>`;
 
-            divtext += `<div class="graph_names"><a href="#${anchorname}">${anchorname}</a>&nbsp;&nbsp;<a href="#selectors">Top of page</a>`;
+            divtext += `<div class="graph_names">`;
+	    divtext += `<button title="Copy the url for this plot" class="graph_url" id="btn_${anchorname}"><img src="link.png" alt="Copy url"></button>`;
+	    divtext += `&nbsp;&nbsp;<a href="#top">Top of page</a>`;
+
+	    
             divtext += '&nbsp;&nbsp;<span id="gdiv2_' + thisgraph + '" class="graph_info"></span></div>';
 
             listoflinks += `<li><a href = "#${anchorname}">${anchorname}</a></li> `;
@@ -347,9 +353,12 @@ async function getgraphnames() {
             divtext += `<div id="${anchorname}" class="graph_top"></div>`;
 
             divtext += `<div id=gdiv_${thisgraph} ${styletext}></div>`;  // the graph gets inserted inside this later
-
-            divtext += `<div class="graph_names"><a href="#${anchorname}">${anchorname}</a>&nbsp;&nbsp;<a href="#selectors">Top of page</a>`; //</div>`;
-
+            divtext += `<div class="graph_names">`;
+	    divtext += `<button title="Copy the url for this plot" class="graph_url" id="btn_${anchorname}"><img src="link.png" alt="Copy url"></button>`;
+	    divtext += `&nbsp;&nbsp;<a href="#top">Top of page</a>`;
+	    
+            //divtext += `<div class="graph_names"><a title="Copy the url for this plot" class="graph_url" href="#${anchorname}" id="link#${anchorname}"><img src="link.png" alt=${anchorname}></a>&nbsp;&nbsp;<a href="#top">Top of page</a>`;
+	    
             listoflinks += `&nbsp;&nbsp;<a href = "#${anchorname}">${anchorname}</a> `;
 
             if (i>0) { // no detector link for overall readiness
@@ -711,4 +720,55 @@ console.log('reload');
 });
 
 
+document.addEventListener('click', (event) => {
+  // Use .closest() to find the target element or its parent with a specific selector
+  const btn = event.target.closest('div.graph_names button.graph_url');
 
+  if (btn) {
+      console.log('Button clicked:', btn.id);
+
+      if (btn.id) {
+          let clicked_graph = btn.id.split("btn_")[1]
+
+	  if (clicked_graph) {
+	  
+            const RP = select_rp.value;
+            const ver = select_ver.value;
+            const det = select_det.value;
+
+	  
+  	    let thisdet = "";
+	    if (det) {
+	        thisdet = `&Detector=${det}`;
+	    }
+
+            let this_url = document.URL.split("?")[0] + `?RunPeriod=${RP}&Version=${ver}${thisdet}#${clicked_graph}`;
+
+            console.log(clicked_graph);
+            console.log(this_url);
+
+            const tempInput = document.createElement('textarea');
+            tempInput.value = this_url;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            tempInput.setSelectionRange(0, 99999);
+
+            try {
+     	      document.execCommand('copy');
+//    	      alert('URL copied to clipboard!');
+            } catch (err) {
+    	      alert('Could not copy URL, sorry.');
+            }
+
+            document.body.removeChild(tempInput);
+	  }
+      }
+
+      
+
+  }
+}, {passive: true} );
+
+//function copyURLtoClipboard() {
+//            window.clipboardData.setData("Text",location.href);
+//            }
