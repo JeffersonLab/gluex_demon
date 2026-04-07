@@ -276,8 +276,7 @@ async function getgraphnames() {
 
             let thisgraph =  graph_collection[j][i];
             let rootgraph =  gdir + '/' + thisgraph;
-            let style = styletext
-
+            let style = styletext;
 	    
             // only show composite status_all graphs, hide the other status graphs
             if (thisgraph.endsWith('status')) continue; 
@@ -292,6 +291,7 @@ async function getgraphnames() {
 	    let anchorname = thisgraph;
 	    if (thisgraph.endsWith("_status_all")) {
 		anchorname = thisgraph.substring(0,thisgraph.length-4);  // trim _all
+		style = styletext2;
 	    }
 	    
 	    //console.log('first mg: '+first_mg ) ;
@@ -346,13 +346,16 @@ async function getgraphnames() {
             graphs_this_page.push(rootgraph);  // copy graph name into array for this page
 
 	    let anchorname = thisgraph;
+            let style = styletext;
+	    
 	    if (thisgraph.endsWith("_status_all")) {
 		anchorname = thisgraph.substring(0,thisgraph.length-11);
+		style = styletext2;
 	    }
 	    
             divtext += `<div id="${anchorname}" class="graph_top"></div>`;
 
-            divtext += `<div id=gdiv_${thisgraph} ${styletext}></div>`;  // the graph gets inserted inside this later
+            divtext += `<div id=gdiv_${thisgraph} ${style}></div>`;  // the graph gets inserted inside this later
             divtext += `<div class="graph_names">`;
 	    divtext += `<button title="Copy the url for this plot" class="graph_url" id="btn_${anchorname}"><img src="link.png" alt="Copy url"></button>`;
 	    divtext += `&nbsp;&nbsp;<a href="#top">Top of page</a>`;
@@ -482,9 +485,11 @@ async function drawGraphs() {
 	    Object.assign(obj[i], {fMarkerSize: 0.5, fMarkerStyle: 8, fMarkerColor: 890, fEditable: 0});
 	    
             if (gname.includes('status')) {
-                obj[i].fMinimum = -1.5;
-                obj[i].fMaximum = 1.5;
-		// obj[i].fYaxis.fNdivisions = 1;  // gives an error
+                obj[i].fHistogram.fMinimum = -1.5;
+                obj[i].fHistogram.fMaximum = 1.5;
+		obj[i].fHistogram.fYaxis.fNdivisions = 103;
+		obj[i].fHistogram.fXaxis.fLabelSize = 0.047;
+		obj[i].fHistogram.fYaxis.fLabelSize = 0.047;
             }
 
             let drawlegend = false;
