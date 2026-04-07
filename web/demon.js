@@ -754,11 +754,9 @@ document.addEventListener('click', (event) => {
 	        thisdet = `&Detector=${det}`;
 	    }
 
-	    let new_url = document.URL.split("#")[0];
-	    new_url = new_url.split("?")[0] + `?RunPeriod=${RP}&Version=${ver}`;
+	    let this_url = document.URL.split("#")[0];
+            this_url = this_url.split("?")[0] + `?RunPeriod=${RP}&Version=${ver}${thisdet}#${clicked_graph}`;
 	      
-            //let this_url = document.URL.split("?")[0] + `?RunPeriod=${RP}&Version=${ver}${thisdet}#${clicked_graph}`;
-
             console.log(clicked_graph);
             console.log(this_url);
 
