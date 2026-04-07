@@ -484,11 +484,7 @@ async function drawGraphs() {
             if (gname.includes('status')) {
                 obj[i].fMinimum = -1.5;
                 obj[i].fMaximum = 1.5;
-                obj[i].fHistogram.fMinimum = -1.5;
-                obj[i].fHistogram.fMaximum = 1.5;
-		obj[i].fHistogram.fYaxis.fNdivisions = 103;
-		obj[i].fHistogram.fXaxis.fLabelSize = 0.047;
-		obj[i].fHistogram.fYaxis.fLabelSize = 0.047;
+		// obj[i].fYaxis.fNdivisions = 1;  // gives an error
             }
 
             let drawlegend = false;
