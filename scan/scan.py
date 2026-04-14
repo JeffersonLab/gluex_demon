@@ -121,10 +121,11 @@ import tracking
 import tracking2
 import tracking_cpp
 import triggers
+import evio
 
 modules_cpp = [photons_cpp, pi0_cpp, rf, timing_cpp, tracking_cpp, triggers, cdc_cpp, fdc, tof_1, fmwpc, ctof] # modules for 2022-05
 modules_gx = [photons, rho, omega, pi0, rf, timing, tracking, triggers, cdc, fdc, sc, tof_1] # before ecal
-modules_gx2 = [photons, rho, omega, pi0, rf, timing2, tracking2, triggers, cdc, fdc, sc, tof_1]
+modules_gx2 = [photons, rho, omega, pi0, rf, timing2, tracking2, triggers, cdc, fdc, sc, tof_1, evio]
 
 testing = 0 # stop after <runlimit> files, print diagnostics
 runlimit = 1 # process this number of runs if testing=1
