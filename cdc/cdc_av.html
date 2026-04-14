@@ -51,14 +51,20 @@
 
 
     <p style="font-size:100%;">
-      To show a different root file, change the filename in the url, eg <a href="https://halldweb.jlab.org/gluex_demon/cdc/cdc.html?file=/work/halld/data_monitoring/RunPeriod-2025-01/mon_ver01/rootfiles/hd_root_131405.root">https://halldweb.jlab.org/gluex_demon/cdc/cdc.html?file=/work/halld/data_monitoring/RunPeriod-2025-01/mon_ver01/rootfiles/hd_root_131405.root</a>.
-If the plot is not drawn (it can take as much as a minute), check that the file exists. </p>
-    <p>You will need an on-site connection to access any files on the work disk.  To use the page from off-site, ask Naomi to copy the root file from mon_ver01 into the web directory and omit the path from the url, eg <a href="https://halldweb.jlab.org/gluex_demon/cdc/cdc.html?file=hd_root_131194.root">https://halldweb.jlab.org/gluex_demon/cdc/cdc.html?file=hd_root_131194.root</a></p>
-    <p>To show the channels with 0 counts in magenta instead of black, add "&pink=1" to the end of the url.</p>
-    <p>To show the occupancy relative to the mean occupancy for the ring, use cdc_av.html instead of cdc.html, eg 
-<a href="https://halldweb.jlab.org/gluex_demon/cdc/cdc_av.html?file=hd_root_131194.root">https://halldweb.jlab.org/gluex_demon/cdc/cdc_av.html?file=hd_root_131194.root</a></p>
 
-<p>This shows the CDC occupancy viewed from the ELECTRONICS end, looking downstream.  The regular monitoring plots are viewed as if looking upstream. Move the mouse over the plot to see channel information.</p> <p>&nbsp;</p>
+      This page shows the occupancy of each straw relative to the mean occupancy for the ring.  For the conventional occupancy view, use cdc.html instead of cdc_av.html, eg 
+<a href="https://halldweb.jlab.org/gluex_demon/cdc/cdc.html?file=hd_root_131194.root">https://halldweb.jlab.org/gluex_demon/cdc/cdc.html?file=hd_root_131194.root</a></p>
+
+<p>
+      To show a different root file, change the filename in the url, eg <a href="https://halldweb.jlab.org/gluex_demon/cdc/cdc_av.html?file=/work/halld/data_monitoring/RunPeriod-2025-01/mon_ver01/rootfiles/hd_root_131405.root">https://halldweb.jlab.org/gluex_demon/cdc/cdc_av.html?file=/work/halld/data_monitoring/RunPeriod-2025-01/mon_ver01/rootfiles/hd_root_131405.root</a>.
+</p>
+
+
+    <p>You will need an on-site connection to access any files on the work disk.  To use the page from off-site, ask Naomi to copy the root file from mon_ver01 into the web directory and omit the path from the url, eg <a href="https://halldweb.jlab.org/gluex_demon/cdc/cdc_av.html?file=hd_root_131194.root">https://halldweb.jlab.org/gluex_demon/cdc/cdc_av.html?file=hd_root_131405.root</a></p>
+
+<p>If the plot is not drawn (it can take as much as a minute), check that the file exists. </p>
+    
+<p>This shows the CDC relative occupancy viewed from the ELECTRONICS end, looking downstream.  The regular monitoring plots are viewed as if looking upstream. Move the mouse over the plot to see channel information.</p> <p>&nbsp;</p>
 	  
         </div>
 
@@ -101,7 +107,7 @@ The plot should go here. It could take up to a minute to load.  If it's not draw
 
 
 
-    <script src="cdc.js" type="module"></script>
+    <script src="cdc_av.js" type="module"></script>
 
 </body>
 

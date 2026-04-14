@@ -170,7 +170,8 @@ async function drawHisto() {
 	
 	await draw('plot',ax,'NOSTAT');
 
-        const counts = []
+        const counts = [];
+	const norm = [];  // percent diff from mean for the ring
         const r = [];
 	const phi = [];
 
@@ -185,52 +186,53 @@ async function drawHisto() {
 	    const histoname = "/CDC/rings_occupancy/cdc_occ_ring[" + ring + "]";
 
             const h = await file.readObject(histoname);
+	    const hnorm = await renorm_histo(h);
+
 	    
 	    for (let straw = 1; straw <= h.fXaxis.fNbins; straw++ ) {
 		const n = h.getBinContent(straw,1);
-
+		const nn = hnorm[straw-1];
+		
 		counts.push(n);
-		if (n>maxcounts) maxcounts = n;
+		if (nn>maxcounts) maxcounts = nn;
 
-		strawnum++;		
+		norm.push(nn);
+		
+		strawnum++;
+		if (ring==1) console.log(n,nn);
+
 		description.push('Ring '+ring+' Straw '+straw + ' N ' + strawnum );
 	    }
-
+	    
         }
 
 
 	//const colours = [19, 859, 862, 869, 434, 839,  815, 397, 800, 91,  90 ];  //orig set using root's default palette
 	
-	const mypalette = getColorPalette(57,0);   //array of 255 kBird
+	const mypalette = getColorPalette(104,0);   //array of 255 kBird
 	adoptRootColors(mypalette.palette);   // replace the first 255 root colours with mypalette array, starting with rgb (52,44, 138)
-	adoptRootColors(['white', 'rgb(0,0,0)']);   // put almost black at the front; keep white as index 0 because root uses it for pad b/g
+//	adoptRootColors(['white', 'rgb(0,0,0)']);   // put almost black at the front; keep white as index 0 because root uses it for pad b/g
 
-	if (draw_pink) adoptRootColors(['white', 'magenta']);   // show 0-count straws in magenta instead of black
+//	if (draw_pink) adoptRootColors(['white', 'magenta']);   // show 0-count straws in magenta instead of black
 
         //console.log(mypalette);
-	
-        const colours = [1 ];  // almost black for 0 counts
 
-	const skip = 20; // skip the darkest blue colours, to make black stand out more 
-	
-	const n=254-skip;  // number of colours (254 is the max for the palette), first 2 were replaced
+	const contours = [-1, -0.45,-0.35, -0.25, -0.15, -0.05, 0.05,0.15, 0.25, 0.35, 0.45, 1000];
 
-	for (let i=2; i<n ; i++) {
-	    colours.push(skip+i);   // store new array index for palette     
-	    //colours.push(Math.floor(i*255/n));    // reinstate this if n < 255
+	const nbands = contours.length - 1;
+
+//	console.log('nbands',nbands);
+	
+        const colours = [];  // almost black for 0 counts
+
+	const skip = 0; // skip the darkest blue colours, to make black stand out more 
+	
+	for (let i=0; i<nbands ; i ++) {
+//	    colours.push(i);   // store new array index for palette     
+	    colours.push(Math.floor(i*255/nbands));    // reinstate this if n < 255
 	}
 
-	
-	const nbands = colours.length - 1;
-
-	const cont = Math.ceil(maxcounts/(nbands));
-	
-	const contours = [0,  1];    // first colour band is for 0 counts (almost black)
-	
-	for (let i=0; i<nbands; i++) {    // highest one needs to stop above max counts
-	    contours.push(contours[i+1] + cont);
-	}
-
+				
 	const graphs=[];
 	const info=[];
 	
@@ -247,7 +249,7 @@ async function drawHisto() {
 	    
   	    for (let i=0; i<3522; i++) {
 
-	        if (counts[i] >= contours[c] && counts[i] < contours[c+1]) {
+	        if (norm[i] >= contours[c] && norm[i] < contours[c+1]) {
 		    
 		    x1.push(radius[i]*Math.cos(theta[i]));
 		    y1.push(radius[i]*Math.sin(theta[i]));
@@ -256,6 +258,10 @@ async function drawHisto() {
 
 		    let text  = counts[i] + ' counts';
 		    if (counts[i] == 1) text = counts[i] + ' count'; 
+
+		    //		    text = text + ' wrt to ring-mean ' + Number.parseFloat(norm[i]).toFixed(1);
+
+		    text = text + ' ' + Math.trunc( 100+100*norm[i] ) + '% of ring-mean';
 		    tt1.push(text);
 		    
 		    tt2.push(xinfo[i]);
@@ -357,6 +363,30 @@ async function fetchfiledata(filename) {
 
 
 
+async function renorm_histo(h) {
 
+    const nbins = h.fXaxis.fNbins;
+    
+    const newcounts = [];
 
+    let total = 0;
+    for (let straw = 1; straw <= h.fXaxis.fNbins; straw++ ) {
+	total = total + h.getBinContent(straw,1);
+    }
 
+    const mean = total/nbins;
+    
+    for (let straw = 1; straw <= h.fXaxis.fNbins; straw++ ) {
+	const n = h.getBinContent(straw,1);
+
+	const newcontent = (n - mean)/mean;
+
+	const newcontent_percent = 100*newcontent;
+
+	newcounts.push(newcontent);
+//	h.setBinContent(straw,1,newcontent_percent);
+    }
+
+    return newcounts;
+
+}
