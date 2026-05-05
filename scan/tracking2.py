@@ -161,6 +161,7 @@ def bcal_matchrate(rootfile) :
 
   status1 = 0
   status2 = 0
+  match_rate = 0
   
   if h1 and h2 :
     hits = h1.GetEntries()
@@ -200,7 +201,8 @@ def bcal_matchrate(rootfile) :
 
   status3 = 0
   ratio = 0
-  if ntbt > 0:
+
+  if ntbt > 0 and match_rate > 0 :
     ratio = match_rate/ntbt
     values[3] = float('%.4f'%(ratio))
     status3 = 1
@@ -235,6 +237,7 @@ def ecal_matchrate(rootfile) :
   h2 = get_histo(rootfile, dirname, histoname, min_counts)
 
   status1 = 0
+  match_rate = 0
   
   if h1 and h2 :
     hits = h1.GetEntries()
@@ -258,6 +261,7 @@ def ecal_matchrate(rootfile) :
   h2 = get_histo(rootfile, dirname, histoname, min_counts)
 
   status2 = 0
+  match_rate = 0
   
   if h1 and h2 :
     bin1 = h1.GetXaxis().FindBin(20)
@@ -282,7 +286,7 @@ def ecal_matchrate(rootfile) :
 
   status3 = 0
   ratio = 0
-  if ntbt > 0:
+  if ntbt > 0 and match_rate > 0 :
     ratio = match_rate/ntbt
     values[3] = float('%.4f'%(ratio))
     status3 = 1
@@ -341,6 +345,7 @@ def fcal_matchrate(rootfile) :
   h2 = get_histo(rootfile, dirname, histoname, min_counts)
 
   status2 = 0
+  match_rate = 0
   
   if h1 and h2 :
     bin1 = h1.GetXaxis().FindBin(45)
@@ -365,7 +370,7 @@ def fcal_matchrate(rootfile) :
 
   status3 = 0
   ratio = 0
-  if ntbt > 0:
+  if ntbt > 0 and match_rate > 0 :
     ratio = match_rate/ntbt
     values[3] = float('%.4f'%(ratio))
     status3 = 1
@@ -399,7 +404,8 @@ def sc_matchrate(rootfile) :
   h2 = get_histo(rootfile, dirname, histoname, min_counts)
 
   status1 = 0
-  
+  match_rate = 0
+    
   if h1 and h2 :
     bin1 = h1.GetXaxis().FindBin(60)
     bin2 = h1.GetXaxis().FindBin(95)
@@ -426,7 +432,7 @@ def sc_matchrate(rootfile) :
 
   status2 = 0
   ratio = 0
-  if ntbt > 0:
+  if ntbt > 0 and match_rate > 0 :
     ratio = match_rate/ntbt
     values[2] = float('%.4f'%(ratio))
     status2 = 1
@@ -461,6 +467,7 @@ def tof_matchrate(rootfile) :
   h2 = get_histo(rootfile, dirname, histoname, min_counts)
 
   status1 = 0
+  match_rate = 0
   
   if h1 and h2 :
     bin1 = h1.GetXaxis().FindBin(4.0)
@@ -488,6 +495,7 @@ def tof_matchrate(rootfile) :
   h2 = get_histo(rootfile, dirname, histoname, min_counts)
 
   status2 = 0
+  match_rate = 0
   
   if h1 and h2 :
     bin1 = h1.GetXaxis().FindBin(20)
@@ -513,7 +521,7 @@ def tof_matchrate(rootfile) :
 
   status3 = 0
   ratio = 0
-  if ntbt > 0:
+  if ntbt > 0 and match_rate > 0 :
     ratio = match_rate/ntbt
     values[3] = float('%.4f'%(ratio))
     status3 = 1
