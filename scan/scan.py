@@ -370,7 +370,11 @@ for filename in histofilelist:
         elif checkstatus == 1 :
             condition = db.get_condition(run, "status")
             if condition.value != 1:
-                skiprun = 1 
+                skiprun = 1
+
+        elif RunPeriod == "2025-03" :
+            if run < 140300 :
+                skiprun = 1
 
                 
         if skiprun:
