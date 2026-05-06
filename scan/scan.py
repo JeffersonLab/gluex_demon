@@ -372,9 +372,8 @@ for filename in histofilelist:
             if condition.value != 1:
                 skiprun = 1
 
-        elif RunPeriod == "2025-03" :
-            if run < 140300 :
-                skiprun = 1
+        if RunPeriod == "2026-03" and run < 140300 :
+            skiprun = 1
 
                 
         if skiprun:
