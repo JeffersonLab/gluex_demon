@@ -113,6 +113,7 @@ import rf
 import ps_e
 import photons
 import photons_cpp
+import photons26
 import rho
 import omega
 import pi0
@@ -121,14 +122,18 @@ import tracking
 import tracking2
 import tracking_cpp
 import triggers
+import triggers26
 import evio
+
 
 modules_cpp = [photons_cpp, pi0_cpp, rf, timing_cpp, tracking_cpp, triggers, cdc_cpp, fdc, tof_1, fmwpc, ctof] # modules for 2022-05
 modules_gx = [photons, rho, omega, pi0, rf, timing, tracking, triggers, cdc, fdc, sc, tof_1] # before ecal
 modules_gx2 = [photons, rho, omega, pi0, rf, timing2, tracking2, triggers, cdc, fdc, sc, tof_1, evio]
+modules_gx26 = [photons26, omega, pi0, rf, timing2, tracking2, triggers26, cdc, fdc, sc, tof_1, evio]
+
 
 testing = 0 # stop after <runlimit> files, print diagnostics
-runlimit = 1 # process this number of runs if testing=1
+runlimit = 2 # process this number of runs if testing=1
 checkstatus = 0  # process runs with RCDB status>0.  if =1, only process status=1 runs, if -1, process all runs
 
 RunPeriod=""
@@ -163,7 +168,8 @@ if testing:
     print('Looking for monitoring histograms inside directory',histdir)
 
 checkstatus = int(checkstatus)
-    
+
+
 # Make sure the monitoring histogram directory exists
 
 if not os.path.isdir(histdir):
@@ -194,14 +200,22 @@ run_module=[]
 if RunPeriod == '2022-05' :
     modules = modules_cpp
 else :
-    if int(RunPeriod[0:4]) < 2025 :     # before ECAL
+    year = int(RunPeriod[0:4])
+    
+    if year < 2025 :     # before ECAL
         modules = modules_gx
-    else :
+        
+    elif year == 2025 :  # GlueX-II detector config
         modules = modules_gx2
+    else :
+        modules = modules_gx26   #Sasha changed the trigger bits
+
+
 
 for x in modules:
     run_module.append(True)
-    
+
+
 # prepare output files
 
 tag = '_' + RunPeriod + '_ver' + VersionNumber
@@ -372,7 +386,7 @@ for filename in histofilelist:
             continue
             
         if testing : 
-            print('\nRun %i - processing %s\n' % (run,filename))
+            print('\nRun %i - processing %s --------------------------------\n' % (run,filename))
 
         thisrun_values = [run]   # collect all the returned values
         thisrun_status = []      # collect the returned status values, use them later to create a combined status
