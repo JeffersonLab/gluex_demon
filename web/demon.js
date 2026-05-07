@@ -367,8 +367,8 @@ async function getgraphnames() {
             if (i>0) { // no detector link for overall readiness
 
                 let thisdetector = det_list[i]; 
+                linkfile = document.URL.split("?")[0] + `?RunPeriod=${RunPeriod}&Version=${Version}&Detector=${thisdetector}`;   // ignore #graphname
 
-                linkfile = document.URL.split("#")[0] + '&Detector=' + thisdetector;   // ignore #graphname
                 divtext += '&nbsp;&nbsp;<a href=' + linkfile + '>Details</a>';
             }
             divtext += '&nbsp;&nbsp;<span id="gdiv2_' + thisgraph + '" class="graph_info"></span></div>';

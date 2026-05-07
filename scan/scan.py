@@ -170,6 +170,7 @@ if testing:
 checkstatus = int(checkstatus)
 
 
+
 # Make sure the monitoring histogram directory exists
 
 if not os.path.isdir(histdir):
@@ -352,6 +353,7 @@ for filename in histofilelist:
     
         skiprun = 0
 
+        
         if checkstatus == 2025 :
             if run < 131593 :
                 skiprun = 1
@@ -372,10 +374,10 @@ for filename in histofilelist:
             if condition.value != 1:
                 skiprun = 1
 
-        if RunPeriod == "2026-03" and run < 140300 :
+        if RunPeriod == "2026-03" and run < 140302 :
             skiprun = 1
 
-                
+        
         if skiprun:
             continue
     
