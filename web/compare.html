@@ -7,7 +7,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="canonical" href="https://getbootstrap.com/docs/5.3/examples/sidebars/">
     <link rel="icon" type="image/x-icon" href="favicon.ico">  
-
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://code.jquery.com/ui/1.13.1/jquery-ui.min.js"
         integrity="sha256-eTyxS0rkjpLEo16uXTS0uVCS4815lc40K2iVpWDvdSY=" crossorigin="anonymous"></script>
@@ -18,7 +17,7 @@
     <script src="https://root.cern/js/latest/scripts/JSRoot.core.min.js"></script>
     <style>
         body {margin:1em 5em 1em 5em;}  
-
+        h1 {font-size: 150%;}
         #selectors {margin-top: 1em; margin-bottom: 1em;}
         #titles {}
         #titles2 {margin-top: 1em; margin-bottom: 2em;}
@@ -36,7 +35,11 @@
 
 <body>
 
-        <div id="under-dev" class="red"><a href="https://halldweb.jlab.org/gluex_demon/demon.html">GlueX Demon</a> is under development! &nbsp; <span style="font-size:1em;"> Contact Naomi Jarvis (njarvis) with any questions.<span>
+	<div id="top" class="red"><img src="demon.png" alt="demon" width="32px" height="32px" style="margin: 0 5px 10px 0">GlueX Demon is watch
+	  ing Hall D monitoring data. Contact Naomi Jarvis (njarvis) with any questions.
+	</div>
+	<div>
+	  The purpose of this page is to compare different versions of the same graph. It cannot compare MultiGraphs.
         </div>
         <div id="links">
             <span id="github"><a href="https://github.com/JeffersonLab/gluex_demon">Github repo</a></span>
@@ -50,28 +53,28 @@
             </select>
             <select name="select_ver" id="select_ver">
             </select>
+            <select name="select_ver2" id="select_ver2">
+            </select>
             <button type="button" id="reload" style="display:none">Go</button>&nbsp;&nbsp;
+            <select name="select_gr" id="select_gr">
+            </select>
             <hr/>
         </div>
 
         <div id="problems" class="red">
         </div>
 
-        <div id="titles"><h1><span id="RunPeriod"></span>&nbsp;&nbsp;<span id="Version"></span></h1>
+        <div id="titles"><h1><span id="RunPeriod"></span>&nbsp;&nbsp;<span id="Version1"></span>&nbsp;&nbsp;<span id="Version2"></span>&nbsp;&nbsp;<span id="Graph"></span></h1>
         </div>
 
-        <div id="titles2">
-            <div id="list_graphs">
-                <span id="sel_gr_text"></span><select name="select_gr" id="select_gr" size="5" multiple></select> 
-            </div>
-        </div>
 
+	
         <div id="graphs" class="graphpanel">
             <!--h1 id="loading" style="margin-left:10em;"></h1-->
         </div>
+
         <div id="legend" class="legendpanel">
         </div>
-
 
 
     <script src="compare.js" type="module"></script>

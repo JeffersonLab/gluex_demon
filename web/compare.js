@@ -4,14 +4,18 @@ const RP_file = './runperiods.txt';
 
 var RP_list = [];  // list of available run periods  in runperiods.txt
 var ver_list = []; // list of available versions     in versions.txt inside RP's subdir
+var ver2_list = []; // list of available versions     in versions.txt inside RP's subdir
 var graph_list = [];  // list of graphs in the root file             in pagenames
 
 var graphs = [];   // list of graphs to compare
 
 var RunPeriod = "";
 var Version = "";
+var Version2 = "";
+var Graph = "";
 
 var graphs_filename = "";  // root file
+var graphs_filename2 = "";  // root file
 var csv_filename = "";
 var pagenames = "";  // file containing lists of graphs
 
@@ -30,7 +34,8 @@ $(document).ready(async function () {
 
         RunPeriod = RP_list[0];
         Version = "";
-        graphs=[];
+        Version2 = "";		
+        graph_list=[];
       
     } else if (! RP_list.includes(RunPeriod) ) {
 
@@ -38,55 +43,68 @@ $(document).ready(async function () {
 
         RunPeriod = RP_list[0];
         Version = "";
-        graphs=[];
+        Version2 = "";	
+        graph_list=[];
     } 
     
     await fillmenu("select_rp",RP_list,[RunPeriod]);
 
     ver_list = [];
-
     ver_list = await readlist(`${RunPeriod}/versions.txt`);
+
+    ver2_list = [];
+    ver2_list = await readlist(`${RunPeriod}/versions.txt`);
 
     if (Version === "") { 
 
         Version = ver_list[0];                
-        graphs=[];
+        graph_list=[];
 
     } else if (! ver_list.includes(Version) ) {
 
         show_problem(`${RunPeriod} version ${Version} is not known!`);
         Version = ver_list[0];                
-        graphs=[];
+        graph_list=[];
     }
 
+    if (Version2 === "") { 
+
+        Version2 = ver2_list[0];                
+
+    } else if (! ver2_list.includes(Version) ) {
+
+        show_problem(`${RunPeriod} version ${Version} is not known!`);
+        Version2 = ver_list2[0];                
+
+    }
+    
     await fillmenu("select_ver",ver_list,[Version]);
+    await fillmenu("select_ver2",ver2_list,[Version2]);    
 
 
     document.getElementById("RunPeriod").innerHTML = RunPeriod;
-    document.getElementById("Version").innerHTML = 'Version ' + Version;
+    document.getElementById("Version1").innerHTML = 'Version ' + Version;
+    document.getElementById("Version2").innerHTML = 'Version ' + Version2;    
+    document.getElementById("Graph").innerHTML = Graph;
+    
 
 
+
+    
     let year_month = RunPeriod.substring(10,17);
 
     graphs_filename = `./${RunPeriod}/${Version}/monitoring_graphs_${year_month}_ver${Version}.root`;
+    graphs_filename2 = `./${RunPeriod}/${Version2}/monitoring_graphs_${year_month}_ver${Version2}.root`;    
     csv_filename = `./${RunPeriod}/${Version}/monitoring_data_${year_month}_ver${Version}.csv`;
     pagenames = `./${RunPeriod}/${Version}/monitoring_pagenames_${year_month}_ver${Version}.txt`;
 
-
+    console.log('awaiting get list of graphs');
     await getlistofgraphs();	// this fills det_list and graph_collection
 
+    await fillmenu("select_gr",graph_list,Graph);
+
+    
     //remove graphs from url if not in the list
-
-    var temp = [];
-    for (const x of graphs) {
-        if (graph_list.includes(x)) temp.push(x);
-    }
-
-    graphs = temp; // keep first 4
-
-
-    show_graph_menu();
-    await fillmenu("select_gr",graph_list,graphs);
 
 
 
@@ -101,7 +119,7 @@ $(document).ready(async function () {
 //    document.getElementById("loading").innerHTML = "Loading...";
 
 
-    if (graphs.length > 0) await drawGraphs();
+    if (Graph != "") await drawGraphs();
 
 
 });
@@ -111,7 +129,7 @@ function get_url_args() {
 
     /* read in the url, split it into arguments */
 
-    let par_from_url = { RunPeriod: "", Version: "", Compare: ""};
+    let par_from_url = { RunPeriod: "", Version: "", Version2:"", Graph: ""};
     let currentURL_split = "";
 
     currentURL_split = document.URL.split("?");
@@ -128,10 +146,10 @@ function get_url_args() {
 
     RunPeriod = par_from_url['RunPeriod'];
     Version = par_from_url['Version'];
+    Version2 = par_from_url['Version2'];
+    Graph = par_from_url['Graph'];    
 
-    graphs = [];
 
-    graphs = par_from_url['Compare'].split("+"); 
     
 }
 
@@ -165,21 +183,26 @@ async function getlistofgraphs() {
 
     let text = await fetchfiledata(pagenames);
 
+    console.log(pagenames);
+    
     let lineArr = text.split('\r\n'); 
              // eg CDC - CPP,4,cdc_status,cdc_occ,cdc_missing,cdc_eff
 
-    let npages = lineArr.length - 1;  // ignore the empty last line
+    let npages = lineArr.length-1;  // do not ignore the empty last line
 
     for (let i=0; i<npages; i++) {
 
         let thisline = lineArr[i].split(',');
         let dir = thisline[0];
-        
-        for (let j = 2; j< thisline[1]; j++) {   
+	let lastitem = Number(thisline[1]) + 1;
+	console.log("lastitem:",lastitem);
+        for (let j = 2; j<=lastitem; j++) {
+	    console.log(thisline[j]);
             if (!thisline[j].endsWith("composite")) graph_list.push(dir.concat("/",thisline[j]));  // exclude the multigraphs
         }
     }
 
+    console.log(graph_list);
 }
 
 
@@ -246,87 +269,92 @@ function show_problem(message) {
 async function drawGraphs() {
 
     let file = await openFile(graphs_filename);//'./RunPeriod-2023-01/v6/monitoring_graphs.root');
+    let file2 = await openFile(graphs_filename2);//'./RunPeriod-2023-01/v6/monitoring_graphs.root');    
 
     if (file) {
-        console.log('file opened');
+	console.log('file opened');
+    }
 
-        const obj = [];
+    if (file2) {
+	console.log('file 2 opened');
+    }
 
-        var mg_colours = [887, 907, 801, 63];
-        var mg_symbols = [8, 22, 29, 33, 23];
+    if (!file || !file2) {
+	console.log('file missing');
+	return;
+    }
+	
+        
 
-        let divname = 'graphs';
+    var mg_colours = [887, 907, 801, 63];
+    var mg_symbols = [8, 22, 29, 33, 23];
 
-        let leg = create('TLegend');
+    let divname = 'graphs';
+    let leg = create('TLegend');
+    leg.fColumnSeparation = 0;
+    leg.fMargin = 0.05; 
 
+/////        for (let i = 0; i < graphs.length; i++) {
 
-        for (let i = 0; i < graphs.length; i++) {
-
-            let gname = graphs[i];  //graphnames[i]
-          
-            let mkr = mg_symbols[i];
+    let gname = Graph; //graphs[i];  //graphnames[i]
+    let mkr = mg_symbols[0];
             
             console.log('looking for graph called ',gname);
-            obj[i] = await file.readObject(gname);
-            obj[i].fMarkerSize = 0.6;
-            obj[i].fMarkerColor = mg_colours[i];
-            obj[i].fMarkerStyle = mkr; //mg_symbols[(i/5) % 4];
-            obj[i].fLineColor = mg_colours[i];
-            obj[i].fLineStyle = 3;
+    let g1 = await file.readObject(gname);
 
-            let legendtxt = gname.concat(' ',obj[i].fTitle);
-            let temp = CreateLegendEntry(obj[i], legendtxt, mkr);
+    console.log(g1);    
+    
+            g1.fMarkerSize = 0.6;
+            g1.fMarkerColor = mg_colours[0];
+            g1.fMarkerStyle = mkr; //mg_symbols[(i/5) % 4];
+            g1.fLineColor = mg_colours[0];
+            g1.fLineStyle = 3;
+
+//            let legendtxt = gname.concat(' ',obj[i].fTitle);
+            let temp = CreateLegendEntry(g1, Version, mkr);
+
+    
+	
+            leg.fPrimitives.Add(temp);          
+            mkr = mg_symbols[0];
+            
+            console.log('looking for graph in next file');
+            let g2 = await file2.readObject(gname);
+            g2.fMarkerSize = 0.6;
+            g2.fMarkerColor = mg_colours[1];
+            g2.fMarkerStyle = mkr; //mg_symbols[(i/5) % 4];
+            g2.fLineColor = mg_colours[1];
+            g2.fLineStyle = 3;
+
+//            let legendtxt = gname.concat(' ',obj[i].fTitle);
+            temp = CreateLegendEntry(g2, Version2, mkr);
             leg.fPrimitives.Add(temp);          
 
-       }
+
+	
+/////       }
 
         // allow 0.1 per line until reaching 1
-
-        let y1 = 1.0 - 0.05*graphs.length;
+        let n = graphs.length;
+	
+        let y1 = 1.0 - 0.05*2;
         if (y1 < 0) y1 = 0;
 
-        Object.assign(leg, { fX1NDC: 0.3, fY1NDC: y1, fX2NDC: 0.7, fY2NDC: 1.0 });
+//        Object.assign(leg, { fX1NDC: 0.3, fY1NDC: y1, fX2NDC: 0.7, fY2NDC: 1.0 });
         Object.assign(leg, { fTextFont:43, fTextSize:13, fTextAlign:12 });
-
-
-        let n = graphs.length;
-
-        let mg = obj[0];
+        Object.assign(leg, { fX1NDC: 0.91, fY1NDC: 0.7, fX2NDC: 1.0, fY2NDC: 0.9, fColumnSeparation:0, fMargin:0.15 });
     
-        if (n==1) {
-          mg = createTMultiGraph(obj[0]);
+        let mg = createTMultiGraph(g1, g2);
 
-        } else if (n==2) {
+    console.log('c');
+    console.log(divname);
+    console.log(mg);
+        await draw(divname,mg,'ap:gridx:gridy');
+       await draw(divname,leg);
 
-          mg = createTMultiGraph(obj[0],obj[1]);
-
-        } else if (n==3) {
-
-          mg = createTMultiGraph(obj[0],obj[1],obj[2]);
-
-        } else if (n==4) {
-
-          mg = createTMultiGraph(obj[0],obj[1],obj[2],obj[3]);
-        
-        } else if (n==5) {
-
-           mg = createTMultiGraph(obj[0],obj[1],obj[2],obj[3],obj[4]);
-
-        } else {
-
-           mg = createTMultiGraph(obj[0],obj[1],obj[2],obj[3],obj[4],obj[5]);
-        }
-
-
-        await draw(divname,mg,'apl:gridx:gridy');
-
-        await draw('legend',leg);
       
         console.log('drawing completed');
 
-    } else {
-        console.log('cannot find file :-( ');  // I dont think this works
-    }
 
 }
 
@@ -340,24 +368,6 @@ function CreateLegendEntry(obj, lbl, mkr) {
 }
 
 
-function show_graph_menu() {
-    document.getElementById("sel_gr_text").innerHTML = 'Select up to 4 graphs to compare (click and ctrl-click or cmd-click)<br/>';
-
-    const sel = document.getElementById("select_gr");
-    sel.style.display = "inline";
-}
-
-function hide_graph_menu() {
-    document.getElementById("sel_gr_text").innerHTML = '';
-
-    const sel = document.getElementById("select_gr");
-    sel.style.display = "none";
-
-    document.getElementById("graphs").innerHTML = '';
-    document.getElementById("legend").innerHTML = '';
-    document.getElementById("RunPeriod").innerHTML = '';
-    document.getElementById("Version").innerHTML = '';
-}
 
 
 
@@ -366,8 +376,8 @@ select_rp.addEventListener('change', async function () {
     let listfile = `${selectedRP}/versions.txt`;
 
     Version = '';
+    Version2 = "";
     graphs = [];
-    hide_graph_menu();
 
     let ver_list = await readlist(listfile);
     let most_recent = ver_list[ver_list.length-1];  // suggest as default
@@ -375,6 +385,7 @@ select_rp.addEventListener('change', async function () {
     Version = most_recent;
 
     await fillmenu("select_ver",ver_list,most_recent);
+    await fillmenu("select_ver2",ver_list,most_recent);    
 
 });
 
@@ -391,7 +402,7 @@ select_rp.addEventListener('change', async function () {
 //      reload the page
 //
 
-
+/*
 
 select_rp.addEventListener('change',function() {
 
@@ -420,6 +431,7 @@ select_ver.addEventListener('change',function() {
 
 });
 
+*/
 
 select_gr.addEventListener('change',function() {
 
@@ -430,25 +442,14 @@ select_gr.addEventListener('change',function() {
 
   const RP = select_rp.value;
   const ver = select_ver.value;
+  const ver2 = select_ver2.value;
+  const Graph = select_gr.value;
+        
 
-  var options = document.getElementById('select_gr').selectedOptions;
-  graphs = Array.from(options).map(({ value }) => value);
-
-  while (graphs.length > 4) {
-      graphs.pop();
-  }
-    
-
-  console.log(graphs);
+  console.log(Graph);
 
 
-  let new_url = document.URL.split("?")[0] + `?RunPeriod=${RP}&Version=${ver}`;
-  if ( graphs.length > 0 ) {
-    new_url = new_url + `&Compare=${graphs[0]}`;
-  }
-  for (let i=1; i< graphs.length; i++) {
-    new_url = new_url + `+${graphs[i]}`;
-  }
+  let new_url = document.URL.split("?")[0] + `?RunPeriod=${RP}&Version=${ver}&Version2=${ver2}&Graph=${Graph}`;
 
   console.log(new_url);
   window.location.assign(new_url);
@@ -461,8 +462,9 @@ reload.addEventListener('click', function () {
 console.log('reload');
     const RP = select_rp.value;
     const ver = select_ver.value;
+    const ver2 = select_ver2.value;    
 
-    let new_url = document.URL.split("?")[0] + `?RunPeriod=${RP}&Version=${ver}`;
+    let new_url = document.URL.split("?")[0] + `?RunPeriod=${RP}&Version=${ver}&Version2=${ver2}`;
 
     console.log(new_url);
     window.location.assign(new_url);
