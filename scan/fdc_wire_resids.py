@@ -22,7 +22,7 @@ def resids(rootfile) :
   names = ['t0_status']  
   titles = ['FDC t0']
   values = [-1]
-  png = ['FDC_resi.png']
+  png = ['FDC_resi']
 
   for x in range (1,25) :
     names.append('L_plane_' + str(x) + '_mg')
@@ -57,14 +57,14 @@ def resids(rootfile) :
     h = get_histo(rootfile, dirname, histoname, min_counts)
 
     if (h) :
-      values[ix+1] = float('%.3f'%(h.GetRMS()))
+      values[ix+1] = float('%.4f'%(h.GetRMS()))
       
       max = h.GetBinCenter(h.GetMaximumBin())
       fitresult = h.Fit("gaus","SQ0","",max-0.01,max+0.01)
 
       if int(fitresult) == 0 :
         mean = fitresult.Parameter(1)
-        values[ix] = float('%.3f'%(mean))
+        values[ix] = float('%.4f'%(mean))
       else :
         status = -1
         
@@ -78,14 +78,14 @@ def resids(rootfile) :
     h = get_histo(rootfile, dirname, histoname, min_counts)
     
     if (h) :
-      values[ix+3] = float('%.3f'%(h.GetRMS()))      
+      values[ix+3] = float('%.4f'%(h.GetRMS()))      
 
       max = h.GetBinCenter(h.GetMaximumBin())
       fitresult = h.Fit("gaus","SQ0","",max-0.01,max+0.01)
 
       if int(fitresult) == 0 :
         mean = fitresult.Parameter(1)
-        values[ix+2] = float('%.3f'%(mean))
+        values[ix+2] = float('%.4f'%(mean))
       else :
         status = -1
         
