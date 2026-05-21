@@ -371,7 +371,7 @@ def rho_helicity_asymmetry(rootfile) :
 def accidentals(rootfile) :
 
     titles = ['Accidentals status', 'Accidental scaling factor [Random]', 'Scale error [Random]', 'Accidental scaling factor [TAGM]', 'Scale error [TAGM]', 'Accidental scaling factor [TAGH]', 'Scale error [TAGH]']
-    names = ['acc_status', 'random_accidentalsf_mg', 'random_accidentalsf_mg_err', 'tagm_accidentalsf_mg', 'tagm_accidentalsf_mg_err', 'tagh_accidentalsf_mg', 'tagh_accidentalsf_mg_err']
+    names = ['acc_status', 'random_accidentals_mg', 'random_accidentals_mg_err', 'tagm_accidentals_mg', 'tagm_accidentals_mg_err', 'tagh_accidentals_mg', 'tagh_accidentals_mg_err']
     values = default_values(names)
     png = ['BEAM_overview']    
 
