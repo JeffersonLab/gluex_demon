@@ -161,6 +161,7 @@ def bcal_matchrate(rootfile) :
 
   status1 = 0
   status2 = 0
+  status3 = 0
   match_rate = 0
   
   if h1 and h2 :
@@ -193,19 +194,19 @@ def bcal_matchrate(rootfile) :
 
       if match_rate >= llim2 :
         status2 = 1
-         
+
   # match rate / N TBT
   tbt = ntracks(rootfile)
 
   ntbt = tbt[2]
 
-  status3 = 0
-  ratio = 0
+  if ntbt:
+      status3 = 0
 
-  if ntbt > 0 and match_rate > 0 :
-    ratio = match_rate/ntbt
-    values[3] = float('%.4f'%(ratio))
-    status3 = 1
+      if ntbt > 0 and match_rate > 0 :
+          ratio = match_rate/ntbt
+          values[3] = float('%.4f'%(ratio))
+          status3 = 1
         
   values[0] = status1 and status2 and status3
    
@@ -280,16 +281,19 @@ def ecal_matchrate(rootfile) :
         status2 = 1
 
   # match rate / N TBT
+
+  status3 = 0
   tbt = ntracks(rootfile)
 
   ntbt = tbt[2]
 
-  status3 = 0
-  ratio = 0
-  if ntbt > 0 and match_rate > 0 :
-    ratio = match_rate/ntbt
-    values[3] = float('%.4f'%(ratio))
-    status3 = 1
+  if ntbt:
+      status3 = 0
+
+      if ntbt > 0 and match_rate > 0 :
+          ratio = match_rate/ntbt
+          values[3] = float('%.4f'%(ratio))
+          status3 = 1
         
   values[0] = status1 and status2 and status3
   
@@ -364,16 +368,18 @@ def fcal_matchrate(rootfile) :
         status2 = 1
 
   # match rate / N TBT
+  status3 = 0
   tbt = ntracks(rootfile)
 
   ntbt = tbt[2]
 
-  status3 = 0
-  ratio = 0
-  if ntbt > 0 and match_rate > 0 :
-    ratio = match_rate/ntbt
-    values[3] = float('%.4f'%(ratio))
-    status3 = 1
+  if ntbt:
+      status3 = 0
+
+      if ntbt > 0 and match_rate > 0 :
+          ratio = match_rate/ntbt
+          values[3] = float('%.4f'%(ratio))
+          status3 = 1
         
   values[0] = status1 and status2 and status3
 
@@ -426,16 +432,17 @@ def sc_matchrate(rootfile) :
         status1 = 1
 
   # match rate / N TBT
+  status2 = 0
   tbt = ntracks(rootfile)
 
   ntbt = tbt[2]
 
-  status2 = 0
-  ratio = 0
-  if ntbt > 0 and match_rate > 0 :
-    ratio = match_rate/ntbt
-    values[2] = float('%.4f'%(ratio))
-    status2 = 1
+  if ntbt :
+      status2 = 0
+      if ntbt > 0 and match_rate > 0 :
+          ratio = match_rate/ntbt
+          values[2] = float('%.4f'%(ratio))
+          status2 = 1
         
   values[0] = status1 and status2
         
@@ -515,16 +522,16 @@ def tof_matchrate(rootfile) :
 
 
   # match rate / N TBT
+  status3 = 0
   tbt = ntracks(rootfile)
 
   ntbt = tbt[2]
 
-  status3 = 0
-  ratio = 0
-  if ntbt > 0 and match_rate > 0 :
-    ratio = match_rate/ntbt
-    values[3] = float('%.4f'%(ratio))
-    status3 = 1
+  if ntbt :
+      if ntbt > 0 and match_rate > 0 :
+          ratio = match_rate/ntbt
+          values[3] = float('%.4f'%(ratio))
+          status3 = 1
         
   values[0] = status1 and status2 and status3
 
