@@ -20,10 +20,11 @@ def triggers26(rootfile) :
 
   names = ['trig_status','GTP_trigger_count','bcal_GTPtriggers_mg','bcalfcal_GTPtriggers_mg','ps_GTPtriggers_mg','random_trigger_count',
            'bcal_Hadronic_mg','bcalfcal_Hadronic_mg','ps_Hadronic_mg',
-           'bcal_CP_mg','bcalfcal_CP_mg','ps_CP_mg']
+           'bcal_CP_mg','bcalfcal_CP_mg','ps_CP_mg','L1livetime','L1livetime_std']
   titles = ['trig_status','All GTP triggers','GTP triggers (%) [BCAL]','GTP triggers (%) [BCAL+FCAL]','GTP triggers (%) [PS]','Random triggers',
             'Hadronic triggers (%) [BCAL]', 'Hadronic triggers (%) [BCAL+FCAL]', 'Hadronic triggers (%) [PS]',
-            'Hadronic triggers, coherent peak (%) [BCAL]', 'Hadronic triggers, coherent peak (%) [BCAL+FCAL]', 'Hadronic triggers, coherent peak (%) [PS]']
+            'Hadronic triggers, coherent peak (%) [BCAL]', 'Hadronic triggers, coherent peak (%) [BCAL+FCAL]', 'Hadronic triggers, coherent peak (%) [PS]',
+            'L1 livetime (%)','L1 livetime std. dev. (%)']
             
   values = default_values(names)
   png = ['HistMacro_Trigger']
@@ -111,6 +112,22 @@ def triggers26(rootfile) :
     values[8] =  float('%.1f'%(ps_hadronic))
     values[11] =  float('%.1f'%(ps_cp))    
 
+
+  dirname1 = '/occupancy'
+  histoname4 = 'L1livetime'
+  
+  h4 = get_histo(rootfile, dirname1, histoname4, min_counts)
+  if (not h4) :
+    values[12] = 0
+    values[13] = 0
+    status = 0
+  else :
+    h4mean = h4.GetMean()
+    h4sig = h4.GetRMS()
+    values[12] = float('%.1f'%(h4mean))
+    values[13] = float('%.2f'%(h4sig)) 
+
+  
   # trigger status  
   if nbcal == 0 or nbcalfcal == 0 or nps == 0 or nrandom == 0:
     status = 0
