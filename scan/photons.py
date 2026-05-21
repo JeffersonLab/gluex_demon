@@ -7,8 +7,7 @@ PAGENAME = 'PhotonBeam'
 
 # Provide the names of the custom functions in this module
 def declare_functions() : 
-  list_of_functions = [rho_psigma_pse, trigger_asymmetry, rho_helicity_asymmetry]
-  
+  list_of_functions = [rho_psigma_pse, trigger_asymmetry, rho_helicity_asymmetry, accidentals]
   return list_of_functions
 
 
@@ -365,6 +364,130 @@ def rho_helicity_asymmetry(rootfile) :
   return values       # return array of values, status first
 
 
+def accidentals(rootfile) :
+
+    titles = ['Accidentals status', 'Accidental scaling factor [Random]', 'Scale error [Random]', 'Accidental scaling factor [TAGM]', 'Scale error [TAGM]', 'Accidental scaling factor [TAGH]', 'Scale error [TAGH]']
+    names = ['acc_status', 'random_accidentals_mg', 'random_accidentals_mg_err', 'tagm_accidentals_mg', 'tagm_accidentals_mg_err', 'tagh_accidentals_mg', 'tagh_accidentals_mg_err']
+    values = default_values(names)
+    png = ['BEAM_overview']    
+
+
+    if not rootfile :  # called by init function
+        return [names, titles, values, png]
+
+    dirname = '/BEAM'
+
+    min_counts = 1000 # minimum counts required, default 100    
+
+    emin_L = 700      # integration window for the low energy run
+    emax_L = 750
+    
+    emin_R = 1180
+    emax_R = 1400
+
+    histoname = 'PStagmEnergyInTime'
+    PStagmEnergyInTime = get_histo(rootfile, dirname, histoname, min_counts)
+    
+    histoname = 'PStagmEnergyOutOfTime'
+    PStagmEnergyOutOfTime = get_histo(rootfile, dirname, histoname, min_counts)
+
+    if PStagmEnergyInTime and PStagmEnergyOutOfTime :
+    
+        PStagmEnergyOutOfTime.Scale(1.0 / 20.0)
+
+        ISignalL = PStagmEnergyInTime.Integral(emin_L, emax_L)   # 700 - 750 for high energy runs
+        IBackgrL = PStagmEnergyOutOfTime.Integral(emin_L, emax_L)
+
+        ISignalR = PStagmEnergyInTime.Integral(emin_R, emax_R)
+        IBackgrR = PStagmEnergyOutOfTime.Integral(emin_R, emax_R)
+
+        if IBackgrL > 0 and IBackgrR > 0 :
+        
+            ScaleL = ISignalL / IBackgrL
+            ScaleLErr = math.sqrt(ISignalL / IBackgrL / IBackgrL * (1. + ScaleL)) 
+
+            ScaleR = ISignalR / IBackgrR
+            ScaleRErr = math.sqrt(ISignalR / IBackgrR / IBackgrR * (1. + ScaleR)) 
+
+            ScaleErr = (1.0 / ScaleLErr**2 + 1.0 / ScaleRErr**2)
+            ScaleTAGM = (ScaleL / ScaleLErr**2 + ScaleR / ScaleRErr**2) / ScaleErr
+            ScaleErrTAGM = (1.0 / ScaleErr)**0.5
+
+            values[3] = float('%.3f'%(ScaleTAGM))
+            values[4] = float('%.3f'%(ScaleErrTAGM))
+
+
+            
+    histoname = 'PStaghEnergyInTime'
+    PStaghEnergyInTime = get_histo(rootfile, dirname, histoname, min_counts)
+
+    histoname = 'PStaghEnergyOutOfTime'
+    PStaghEnergyOutOfTime = get_histo(rootfile, dirname, histoname, min_counts)
+
+    emin_L = 700
+    emax_L = 750
+    
+    emin_R = 1180
+    emax_R = 1400
+
+    
+    if PStaghEnergyInTime and PStaghEnergyOutOfTime :
+      
+        PStaghEnergyOutOfTime.Scale(1./20.)
+
+        ISignalL = PStaghEnergyInTime.Integral(emin_L, emax_L)
+        IBackgrL = PStaghEnergyOutOfTime.Integral(emin_L, emax_L)
+
+        ISignalR = PStaghEnergyInTime.Integral(emin_R, emax_R)
+        IBackgrR = PStaghEnergyOutOfTime.Integral(emin_R, emax_R)
+
+        if IBackgrL > 0 and IBackgrR > 0 :
+        
+            ScaleL = ISignalL / IBackgrL
+            ScaleLErr = math.sqrt(ISignalL / IBackgrL / IBackgrL * (1. + ScaleL))
+
+            ScaleR = ISignalR / IBackgrR
+            ScaleRErr = math.sqrt(ISignalR / IBackgrR / IBackgrR * (1. + ScaleR))
+
+            ScaleErr = 1.0 / ScaleLErr**2 + 1.0 / ScaleRErr**2
+            ScaleTAGH = (ScaleL / ScaleLErr**2 + ScaleR / ScaleRErr**2) / ScaleErr
+            ScaleErrTAGH = math.sqrt(1.0 / ScaleErr)
+
+            values[5] = float('%.3f'%(ScaleTAGH))
+            values[6] = float('%.3f'%(ScaleErrTAGH))
+
+
+    histoname = 'deltaTall'
+    deltaTall = get_histo(rootfile, dirname, histoname, min_counts)
+
+    if deltaTall:
+        dtp = deltaTall.ProjectionX("dtp", 1, 10)
+
+        binl = dtp.FindBin(0.0 - 2.004)
+        binh = dtp.FindBin(0.0 + 2.004)
+        Ic = dtp.Integral(binl, binh)
+
+        binll = dtp.FindBin(0.0 - 2.004 - 10. * 4.008)
+        binhh = dtp.FindBin(0.0 + 2.004 + 10. * 4.008)
+        Il = dtp.Integral(binll, binl - 1)
+        Ih = dtp.Integral(binh + 1, binhh)
+
+        BG = (Il + Ih) / 2.0 / 10.0
+
+        if BG > 0 :
+            Rrand = Ic / BG
+            values[1] = float('%.3f'%(Rrand))
+            values[2] = float('%.3f'%(0.0))
+
+
+    status = 1
+    
+    values[0] = status
+
+    return values
+
+
+  
 # code to test the module standalone
 import os
 from ROOT import TFile
