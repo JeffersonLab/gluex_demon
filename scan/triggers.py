@@ -18,12 +18,14 @@ def declare_functions() :
 
 def triggers(rootfile) : 
 
-  names = ['trig_status','GTP_trigger_count','main_GTPtriggers_mg','bcal_GTPtriggers_mg','ps_GTPtriggers_mg','random_trigger_count',
-           'main_Hadronic_mg','bcal_Hadronic_mg','ps_Hadronic_mg',
-           'main_CP_mg','bcal_CP_mg','ps_CP_mg']
-  titles = ['trig_status','All GTP triggers','GTP triggers (%) [main]','GTP triggers (%) [BCAL]','GTP triggers (%) [PS]','Random triggers',
-            'Hadronic triggers (%) [main]', 'Hadronic triggers (%) [BCAL]', 'Hadronic triggers (%) [PS]',
-            'Hadronic triggers, coherent peak (%) [main]', 'Hadronic triggers, coherent peak (%) [BCAL]', 'Hadronic triggers, coherent peak (%) [PS]']
+  names = ['trig_status','GTP_trigger_count','bcal_GTPtriggers_mg','bcalfcal_GTPtriggers_mg','ps_GTPtriggers_mg','random_trigger_count',
+           'bcal_Hadronic_mg','bcalfcal_Hadronic_mg','ps_Hadronic_mg',
+           'bcal_CP_mg','bcalfcal_CP_mg','ps_CP_mg',
+           'L1livetime','L1livetime_err','bcal_rate_mg','bcalfcal_rate_mg','ps_rate_mg']
+  titles = ['trig_status','All GTP triggers','GTP triggers (%) [BCAL]','GTP triggers (%) [BCAL+FCAL]','GTP triggers (%) [PS]','Random triggers',
+            'Hadronic triggers (%) [BCAL]', 'Hadronic triggers (%) [BCAL+FCAL]', 'Hadronic triggers (%) [PS]',
+            'Hadronic triggers, coherent peak (%) [BCAL]', 'Hadronic triggers, coherent peak (%) [BCAL+FCAL]', 'Hadronic triggers, coherent peak (%) [PS]',
+            'L1 livetime (%)','L1 livetime std. dev. (%)','Trigger rate (kHz) [BCAL]','Trigger rate (kHz) [BCAL+FCAL]','Trigger rate (kHz) [PS]']
             
   values = default_values(names)
   png = ['HistMacro_Trigger']
@@ -31,8 +33,8 @@ def triggers(rootfile) :
   if not rootfile :  # called by init function
     return [names, titles, values, png]
 
-  # Main Trigger BCAL+FCAL: GTP Bit 1
-  # BCAL Trigger: GTP Bit 3            
+  # Main Trigger BCAL+FCAL: GTP Bit 1 
+  # BCAL Trigger: GTP Bit 3           
   # PS Trigger: GTP Bit 4
   # Random Trigger: FP Bit 12		
   
@@ -49,24 +51,24 @@ def triggers(rootfile) :
   histoname = 'L1bits_gtp'
   histoname2 = 'L1bits_fp'
   histoname3 = 'NumTriggers'
-  
-  min_counts = 100
-  h = get_histo(rootfile, dirname, histoname, min_counts)
-
-  if (not h) :
-    return values
-
-  nmain = h.GetBinContent(1)
-  nbcal = h.GetBinContent(3)
-  nps = h.GetBinContent(4)
-  
   min_counts = 0
+  
+  nbcal = 0
+  nbcalfcal = 0
+  nps = 0
+  nrandom = 0
+
+  h = get_histo(rootfile, dirname, histoname, min_counts)
+  
+  if h :
+    nbcal = h.GetBinContent(3)
+    nbcalfcal = h.GetBinContent(1)
+    nps = h.GetBinContent(4)
+
   h = get_histo(rootfile, dirname, histoname2, min_counts)
 
-  if (h) :
+  if h :
     nrandom = h.GetBinContent(12)
-  else :
-    nrandom = 0
 
     
   h = get_histo(rootfile, dirname, histoname3, min_counts)
@@ -81,28 +83,28 @@ def triggers(rootfile) :
   values[5] = int(nrandom)
   
   if ntot > 0 :
-    mainpercent = 100*nmain/ntot
-    values[2] = float('%.1f'%(mainpercent))
-
     bcalpercent = 100*nbcal/ntot
-    values[3] = float('%.1f'%(bcalpercent))
+    values[2] = float('%.1f'%(bcalpercent))
+
+    bcalfcalpercent = 100*nbcalfcal/ntot
+    values[3] = float('%.1f'%(bcalfcalpercent))
 
     pspercent = 100*nps/ntot
     values[4] = float('%.1f'%(pspercent))    
 
-  if nmain>0 :
-    main_hadronic = 100*h.GetBinContent(1,3)/nmain
-    main_cp = 100*h.GetBinContent(1,4)/nmain
-
-    values[6] = float('%.1f'%(main_hadronic))
-    values[9] = float('%.1f'%(main_cp))
-    
-  if nbcal>0:
+  if nbcal>0 :
     bcal_hadronic = 100*h.GetBinContent(3,3)/nbcal
     bcal_cp = 100*h.GetBinContent(3,4)/nbcal
 
-    values[7] =  float('%.1f'%(bcal_hadronic))
-    values[10] =  float('%.1f'%(bcal_cp))    
+    values[6] = float('%.1f'%(bcal_hadronic))
+    values[9] = float('%.1f'%(bcal_cp))
+    
+  if nbcalfcal>0:
+    bcalfcal_hadronic = 100*h.GetBinContent(1,3)/nbcalfcal
+    bcalfcal_cp = 100*h.GetBinContent(1,4)/nbcalfcal
+
+    values[7] =  float('%.1f'%(bcalfcal_hadronic))
+    values[10] =  float('%.1f'%(bcalfcal_cp))    
 
   if nps >0:
     ps_hadronic = 100*h.GetBinContent(4,3)/nps
@@ -111,8 +113,36 @@ def triggers(rootfile) :
     values[8] =  float('%.1f'%(ps_hadronic))
     values[11] =  float('%.1f'%(ps_cp))    
 
+
+  dirname1 = '/occupancy'
+  histoname4 = 'L1livetime'
+  histoname5 = 'L1GTPRate'
+  
+  h4 = get_histo(rootfile, dirname1, histoname4, min_counts)
+
+  if h4 :
+    h4mean = h4.GetMean()
+    h4sig = h4.GetRMS()
+    values[12] = float('%.1f'%(h4mean))
+    values[13] = float('%.2f'%(h4sig)) 
+
+  h5 = get_histo(rootfile, dirname1, histoname5, min_counts)
+
+  if h5 :
+    h5xbin1 = h5.ProjectionY("h5xbin1",1,1)
+    h5xbin1mean = h5xbin1.GetMean()
+    h5xbin3 = h5.ProjectionY("h5xbin3",3,3)
+    h5xbin3mean = h5xbin3.GetMean()
+    h5xbin4 = h5.ProjectionY("h5xbin4",4,4)
+    h5xbin4mean = h5xbin4.GetMean()
+    #title = h5.GetTitle()
+    #print(title)
+    values[14] = float('%.1f'%(h5xbin3mean))
+    values[15] = float('%.1f'%(h5xbin1mean))
+    values[16] = float('%.1f'%(h5xbin4mean))
+  
   # trigger status  
-  if nmain == 0 or nbcal == 0 or nps == 0 or nrandom == 0:
+  if nbcal == 0 or nbcalfcal == 0 or nps == 0 or nrandom == 0:
     status = 0
     
   values[0] = status

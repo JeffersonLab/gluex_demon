@@ -20,11 +20,12 @@ def triggers26(rootfile) :
 
   names = ['trig_status','GTP_trigger_count','bcal_GTPtriggers_mg','bcalfcal_GTPtriggers_mg','ps_GTPtriggers_mg','random_trigger_count',
            'bcal_Hadronic_mg','bcalfcal_Hadronic_mg','ps_Hadronic_mg',
-           'bcal_CP_mg','bcalfcal_CP_mg','ps_CP_mg','L1livetime','L1livetime_std']
+           'bcal_CP_mg','bcalfcal_CP_mg','ps_CP_mg',
+           'L1livetime','L1livetime_err','bcal_rate_mg','bcalfcal_rate_mg','ps_rate_mg']
   titles = ['trig_status','All GTP triggers','GTP triggers (%) [BCAL]','GTP triggers (%) [BCAL+FCAL]','GTP triggers (%) [PS]','Random triggers',
             'Hadronic triggers (%) [BCAL]', 'Hadronic triggers (%) [BCAL+FCAL]', 'Hadronic triggers (%) [PS]',
             'Hadronic triggers, coherent peak (%) [BCAL]', 'Hadronic triggers, coherent peak (%) [BCAL+FCAL]', 'Hadronic triggers, coherent peak (%) [PS]',
-            'L1 livetime (%)','L1 livetime std. dev. (%)']
+            'L1 livetime (%)','L1 livetime std. dev. (%)','Trigger rate (kHz) [BCAL]','Trigger rate (kHz) [BCAL+FCAL]','Trigger rate (kHz) [PS]']
             
   values = default_values(names)
   png = ['HistMacro_Trigger']
@@ -50,24 +51,24 @@ def triggers26(rootfile) :
   histoname = 'L1bits_gtp'
   histoname2 = 'L1bits_fp'
   histoname3 = 'NumTriggers'
-  
-  min_counts = 100
-  h = get_histo(rootfile, dirname, histoname, min_counts)
-
-  if (not h) :
-    return values
-
-  nbcal = h.GetBinContent(1)
-  nbcalfcal = h.GetBinContent(3)
-  nps = h.GetBinContent(4)
-  
   min_counts = 0
+  
+  nbcal = 0
+  nbcalfcal = 0
+  nps = 0
+  nrandom = 0
+
+  h = get_histo(rootfile, dirname, histoname, min_counts)
+  
+  if h :
+    nbcal = h.GetBinContent(1)
+    nbcalfcal = h.GetBinContent(3)
+    nps = h.GetBinContent(4)
+
   h = get_histo(rootfile, dirname, histoname2, min_counts)
 
-  if (h) :
+  if h :
     nrandom = h.GetBinContent(12)
-  else :
-    nrandom = 0
 
     
   h = get_histo(rootfile, dirname, histoname3, min_counts)
@@ -115,18 +116,30 @@ def triggers26(rootfile) :
 
   dirname1 = '/occupancy'
   histoname4 = 'L1livetime'
+  histoname5 = 'L1GTPRate'
   
   h4 = get_histo(rootfile, dirname1, histoname4, min_counts)
-  if (not h4) :
-    values[12] = 0
-    values[13] = 0
-    status = 0
-  else :
+
+  if h4 :
     h4mean = h4.GetMean()
     h4sig = h4.GetRMS()
     values[12] = float('%.1f'%(h4mean))
     values[13] = float('%.2f'%(h4sig)) 
 
+  h5 = get_histo(rootfile, dirname1, histoname5, min_counts)
+
+  if h5 :
+    h5xbin1 = h5.ProjectionY("h5xbin1",1,1)
+    h5xbin1mean = h5xbin1.GetMean()
+    h5xbin3 = h5.ProjectionY("h5xbin3",3,3)
+    h5xbin3mean = h5xbin3.GetMean()
+    h5xbin4 = h5.ProjectionY("h5xbin4",4,4)
+    h5xbin4mean = h5xbin4.GetMean()
+    #title = h5.GetTitle()
+    #print(title)
+    values[14] = float('%.1f'%(h5xbin1mean))
+    values[15] = float('%.1f'%(h5xbin3mean))
+    values[16] = float('%.1f'%(h5xbin4mean))
   
   # trigger status  
   if nbcal == 0 or nbcalfcal == 0 or nps == 0 or nrandom == 0:

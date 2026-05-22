@@ -478,11 +478,9 @@ def accidentals(rootfile) :
             Rrand = Ic / BG
             values[1] = float('%.3f'%(Rrand))
             values[2] = float('%.3f'%(0.0))
-
-
-    status = 1
-    
-    values[0] = status
+        
+    if values[1] != None and values[3] != None and values[5] != None :    
+        values[0] = 1
 
     return values
 
