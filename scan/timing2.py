@@ -953,7 +953,7 @@ def check_badchannels(h, fitoptions, time_max, low_limit, high_limit, min_counts
     p = h.ProjectionY("p",mod,mod)
 
     entries = p.GetEntries()
-    overflow = p.GetBinContent(p.GetNbinsX()+2)
+    overflow = p.GetBinContent(p.GetNbinsX()+1)
 
     if (entries > min_counts) and (not reject_overflow or entries != overflow):
 
