@@ -660,32 +660,16 @@ def sc_rf_channels(rootfile, diffmin=-0.2, diffmax=0.2) :
   if (not h) :
     return values
 
-  n = h.GetEntries()
-  bad_channels = 0
-  max_tdiff = 0.  
-  fitoptions = "0SQ"
-  time_max = 10.
-  low_limit = -0.3
-  high_limit = 0.3
-
-  for mod in range(1,h.GetNbinsX()):
-    p = h.ProjectionY("p",mod,mod)  
-    #p.Rebin(8)
-    if p.GetEntries() > min_counts:
-
-      # find the bin with max content, histo looks like spike on flat bg
-      tdiff = check_deltat(p, fitoptions, time_max, low_limit, high_limit)[1]
-      if tdiff is None:
-      	continue
-      if abs(tdiff) > abs(max_tdiff):
-        max_tdiff = tdiff 
-        bad_channels = bad_channels + 1
-
-  status = 1
-  if max_tdiff < diffmin or max_tdiff > diffmax:
-    status=0
-
-  values = [status, bad_channels, float('%.1f'%(max_tdiff)) ]
+  values = check_badchannels(
+    h=h,
+    fitoptions = "0SQ",
+    time_max = 10.,
+    low_limit = -0.3,
+    high_limit = 0.3,
+    min_counts=min_counts,
+    diffmin=diffmin,
+    diffmax=diffmax,
+  )
   
   return values
 
@@ -712,32 +696,16 @@ def tagh_rf_channels(rootfile, diffmin=-0.1, diffmax=0.1) :
   if (not h) :
     return values
 
-  n = h.GetEntries()
-  bad_channels = 0
-  max_tdiff = 0.
-  fitoptions = "0SQ"
-  time_max = 10.
-  low_limit = -0.15
-  high_limit = 0.15
-
-  for mod in range(1,h.GetNbinsX()):
-    p = h.ProjectionY("p",mod,mod)  
-    #p.Rebin(8)
-    if p.GetEntries() > min_counts:
-
-      # find the bin with max content, histo looks like spike on flat bg
-      tdiff = check_deltat(p, fitoptions, time_max, low_limit, high_limit)[1]
-      if tdiff is None:
-      	continue
-      if abs(tdiff) > abs(max_tdiff):
-        max_tdiff = tdiff 
-        bad_channels = bad_channels + 1
-
-  status = 1
-  if max_tdiff < diffmin or max_tdiff > diffmax:
-    status=0
-
-  values = [status, bad_channels, float('%.1f'%(max_tdiff)) ]
+  values = check_badchannels(
+    h=h,
+    fitoptions = "0SQ",
+    time_max = 10.,
+    low_limit = -0.15,
+    high_limit = 0.15,
+    min_counts=min_counts,
+    diffmin=diffmin,
+    diffmax=diffmax,
+  )
   
   return values
 
@@ -764,32 +732,16 @@ def tagm_rf_channels(rootfile, diffmin=-0.1, diffmax=0.1) :
   if (not h) :
     return values
 
-  n = h.GetEntries()
-  bad_channels = 0
-  max_tdiff = 0.
-  fitoptions = "0SQ"
-  time_max = 10.
-  low_limit = -0.3
-  high_limit = 0.3
-
-  for mod in range(1,h.GetNbinsX()):
-    p = h.ProjectionY("p",mod,mod)  
-    #p.Rebin(8)
-    if p.GetEntries() > min_counts:
-
-      # find the bin with max content, histo looks like spike on flat bg
-      tdiff = check_deltat(p, fitoptions, time_max, low_limit, high_limit)[1]
-      if tdiff is None:
-      	continue
-      if abs(tdiff) > abs(max_tdiff):
-        max_tdiff = tdiff 
-        bad_channels = bad_channels + 1
-
-  status = 1
-  if max_tdiff < diffmin or max_tdiff > diffmax:
-    status=0
-
-  values = [status, bad_channels, float('%.1f'%(max_tdiff)) ]
+  values = check_badchannels(
+    h=h,
+    fitoptions = "0SQ",
+    time_max = 10.,
+    low_limit = -0.3,
+    high_limit = 0.3,
+    min_counts=min_counts,
+    diffmin=diffmin,
+    diffmax=diffmax,
+  )
   
   return values
 
@@ -815,32 +767,16 @@ def sc_adctdc_channels(rootfile, diffmin=-0.1, diffmax=0.1) :
   if (not h) :
     return values
 
-  n = h.GetEntries()
-  bad_channels = 0
-  max_tdiff = 0.
-  fitoptions = "0SQ"
-  time_max = 10.
-  low_limit = -0.3
-  high_limit = 0.3
-
-  for mod in range(1,h.GetNbinsX()):
-    p = h.ProjectionY("p",mod,mod)  
-    #p.Rebin(8)
-    if p.GetEntries() > min_counts:
-
-      # find the bin with max content, histo looks like spike on flat bg
-      tdiff = check_deltat(p, fitoptions, time_max, low_limit, high_limit)[1]
-      if tdiff is None:
-      	continue
-      if abs(tdiff) > abs(max_tdiff):
-        max_tdiff = tdiff 
-        bad_channels = bad_channels + 1
-
-  status = 1
-  if max_tdiff < diffmin or max_tdiff > diffmax:
-    status=0
-
-  values = [status, bad_channels, float('%.1f'%(max_tdiff)) ]
+  values = check_badchannels(
+    h=h,
+    fitoptions = "0SQ",
+    time_max = 10.,
+    low_limit = -0.3,
+    high_limit = 0.3,
+    min_counts=min_counts,
+    diffmin=diffmin,
+    diffmax=diffmax,
+  )
   
   return values
 
@@ -867,32 +803,16 @@ def tof_adctdc_channels(rootfile, diffmin=-0.5, diffmax=0.5) :
   if (not h) :
     return values
 
-  n = h.GetEntries()
-  bad_channels = 0
-  max_tdiff = 0.
-  fitoptions = "0SQ"
-  time_max = 10.
-  low_limit = -0.15
-  high_limit = 0.15
-
-  for mod in range(1,h.GetNbinsX()):
-    p = h.ProjectionY("p",mod,mod)  
-    #p.Rebin(8)
-    if p.GetEntries() > min_counts:
-
-      # find the bin with max content, histo looks like spike on flat bg
-      tdiff = check_deltat(p, fitoptions, time_max, low_limit, high_limit)[1]
-      if tdiff is None:
-      	continue
-      if abs(tdiff) > abs(max_tdiff):
-        max_tdiff = tdiff 
-        bad_channels = bad_channels + 1
-
-  status = 1
-  if max_tdiff < diffmin or max_tdiff > diffmax:
-    status=0
-
-  values = [status, bad_channels, float('%.1f'%(max_tdiff)) ]
+  values = check_badchannels(
+    h=h,
+    fitoptions = "0SQ",
+    time_max = 10.,
+    low_limit = -0.15,
+    high_limit = 0.15,
+    min_counts=min_counts,
+    diffmin=diffmin,
+    diffmax=diffmax,
+  )
   
   return values
 
@@ -919,32 +839,16 @@ def tagh_adctdc_channels(rootfile, diffmin=-0.1, diffmax=0.1) :
   if (not h) :
     return values
 
-  n = h.GetEntries()
-  bad_channels = 0
-  max_tdiff = 0.
-  fitoptions = "0SQ"
-  time_max = 10.
-  low_limit = -0.15
-  high_limit = 0.15
-
-  for mod in range(1,h.GetNbinsX()):
-    p = h.ProjectionY("p",mod,mod)  
-    #p.Rebin(8)
-    if p.GetEntries() > min_counts:
-
-      # find the bin with max content, histo looks like spike on flat bg
-      tdiff = check_deltat(p, fitoptions, time_max, low_limit, high_limit)[1]
-      if tdiff is None:
-      	continue
-      if abs(tdiff) > abs(max_tdiff):
-        max_tdiff = tdiff 
-        bad_channels = bad_channels + 1
-
-  status = 1
-  if max_tdiff < diffmin or max_tdiff > diffmax:
-    status=0
-
-  values = [status, bad_channels, float('%.1f'%(max_tdiff)) ]
+  values = check_badchannels(
+    h=h,
+    fitoptions = "0SQ",
+    time_max = 10.,
+    low_limit = -0.15,
+    high_limit = 0.15,
+    min_counts=min_counts,
+    diffmin=diffmin,
+    diffmax=diffmax,
+  )
   
   return values
 
@@ -971,38 +875,17 @@ def tagm_adctdc_channels(rootfile, diffmin=-0.1, diffmax=0.1) :
   if (not h) :
     return values
 
-  n = h.GetEntries()
-  bad_channels = 0
-  max_tdiff = 0.
-  fitoptions = "0SQ"
-  time_max = 10.
-  low_limit = -0.3
-  high_limit = 0.3
-
-  for mod in range(1,h.GetNbinsX()):
-    
-    p = h.ProjectionY("p",mod,mod)  
-    #p.Rebin(8)
-    
-    entries = p.GetEntries()
-    overflow = p.GetBinContent(1+p.GetNbinsX())    
-    
-    if (entries > min_counts) and (entries != overflow) :
-
-      # find the bin with max content, histo looks like spike on flat bg
-      tdiff = check_deltat(p, fitoptions, time_max, low_limit, high_limit)[1]
-      
-      if tdiff is None:
-      	continue
-      if abs(tdiff) > abs(max_tdiff):
-        max_tdiff = tdiff 
-        bad_channels = bad_channels + 1
-
-  status = 1
-  if max_tdiff < diffmin or max_tdiff > diffmax:
-    status=0
-
-  values = [status, bad_channels, float('%.1f'%(max_tdiff)) ]
+  values = check_badchannels(
+    h=h,
+    fitoptions = "0SQ",
+    time_max = 10.,
+    low_limit = -0.3,
+    high_limit = 0.3,
+    min_counts=min_counts,
+    diffmin=diffmin,
+    diffmax=diffmax,
+    reject_overflow=True,
+  )
   
   return values
 
@@ -1059,3 +942,34 @@ def check_deltat(h, fitoptions, tmax, low_limit, high_limit) :
     values = [ status, float('%.5f'%(mean)), float('%.5f'%(sigma)) ]
     
   return values
+
+
+def check_badchannels(h, fitoptions, time_max, low_limit, high_limit, min_counts, diffmin, diffmax, reject_overflow=False, num_decimals=3):
+
+  bad_channels = 0
+  max_tdiff = 0.
+
+  for mod in range(1,h.GetNbinsX()+1):
+    p = h.ProjectionY("p",mod,mod)
+
+    entries = p.GetEntries()
+    overflow = p.GetBinContent(p.GetNbinsX()+2)
+
+    if (entries > min_counts) and (not reject_overflow or entries != overflow):
+
+      # find the bin with max content, histo looks like spike on flat bg
+      tdiff = check_deltat(p, fitoptions, time_max, low_limit, high_limit)[1]
+      if tdiff is None:
+        continue
+      if abs(tdiff) > abs(max_tdiff):
+        max_tdiff = tdiff 
+      if tdiff < diffmin or tdiff > diffmax:
+        bad_channels += 1
+
+  status = 1
+  if bad_channels:
+    status=0
+
+  # "Round" technically rounds the underlying binary representation but
+  # I think this is reasonable with the precision we expect to have here.
+  return [status, bad_channels, round(max_tdiff, num_decimals) ]
