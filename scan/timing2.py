@@ -638,7 +638,7 @@ def fdc_tdc_diff(rootfile) :
   return values
 
 
-def sc_rf_channels(rootfile, diffmin=-0.2, diffmax=0.2) :
+def sc_rf_channels(rootfile, diffmin=-0.07, diffmax=0.07) :
 
   #print("in sc_rf_channels() ...")
 
@@ -674,7 +674,7 @@ def sc_rf_channels(rootfile, diffmin=-0.2, diffmax=0.2) :
   return values
 
 
-def tagh_rf_channels(rootfile, diffmin=-0.1, diffmax=0.1) :
+def tagh_rf_channels(rootfile, diffmin=-0.5, diffmax=0.5) :
 
   #print("in tagh_rf_channels() ...")
 
@@ -710,7 +710,7 @@ def tagh_rf_channels(rootfile, diffmin=-0.1, diffmax=0.1) :
   return values
 
 
-def tagm_rf_channels(rootfile, diffmin=-0.1, diffmax=0.1) :
+def tagm_rf_channels(rootfile, diffmin=-0.5, diffmax=0.5) :
 
   #print("in sc_rf_channels() ...")
 
@@ -781,7 +781,7 @@ def sc_adctdc_channels(rootfile, diffmin=-0.1, diffmax=0.1) :
   return values
 
 
-def tof_adctdc_channels(rootfile, diffmin=-0.5, diffmax=0.5) :
+def tof_adctdc_channels(rootfile, diffmin=-1.5, diffmax=1.5) :
 
   #print("in sc_rf_channels() ...")
 
@@ -817,7 +817,7 @@ def tof_adctdc_channels(rootfile, diffmin=-0.5, diffmax=0.5) :
   return values
 
 
-def tagh_adctdc_channels(rootfile, diffmin=-0.1, diffmax=0.1) :
+def tagh_adctdc_channels(rootfile, diffmin=-1.0, diffmax=1.0) :
 
   #print("in sc_rf_channels() ...")
 
@@ -853,7 +853,7 @@ def tagh_adctdc_channels(rootfile, diffmin=-0.1, diffmax=0.1) :
   return values
 
 
-def tagm_adctdc_channels(rootfile, diffmin=-0.1, diffmax=0.1) :
+def tagm_adctdc_channels(rootfile, diffmin=-1.0, diffmax=1.0) :
 
   #print("in sc_rf_channels() ...")
 
