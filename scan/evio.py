@@ -12,10 +12,10 @@ def declare_functions() :
 def badhits(rootfile) :
 
 
-    titles = ['EVIO status', 'Source of errors (0:swap, 1:TSscaler, 2:f250 scaler, 3:EPICS, 4:BOR, 5:Trigger, 10+:ROCid)','#2','#3', '#4']
-    names = ['badhits_status', '1_roc_mg', '2_roc_mg', '3_roc_mg', '4_roc_mg']
+    titles = ['EVIO status', 'Source of errors (0:swap, 1:TSscaler, 2:f250 scaler, 3:EPICS, 4:BOR, 5:Trigger, 10+:ROCid)','#2','#3', '#4', "Max error rate (%)"]
+    names = ['badhits_status', '1_roc_mg', '2_roc_mg', '3_roc_mg', '4_roc_mg', 'max_rate']
     values = default_values(names)
-    png = ['HistMacro_bad_hits']    
+    png = ['HistMacro_bad_hits']
 
 
     if not rootfile :  # called by init function
@@ -23,8 +23,8 @@ def badhits(rootfile) :
 
     dirname = '/bad_hits'
     histoname = 'roc'
-    
-    min_counts = 0 # minimum counts required, default 100    
+
+    min_counts = 0 # minimum counts required, default 100
     h = get_histo(rootfile, dirname, histoname, min_counts)
 
     if (not h) :
@@ -32,16 +32,16 @@ def badhits(rootfile) :
 
     if h.GetEntries() == 0 :    # good - no errors
       values[0] = 1
+      values[5] = 0
       return values
 
 
-    
     counts = {}
 
     for i in range(1, 1+ h.GetNbinsX()) :
       n = int(h.GetBinContent(i))
       if n>0 :
-         counts.update( { n : i})
+         counts.update( { n : i-1 })
 
     values = [0]
 
@@ -50,6 +50,15 @@ def badhits(rootfile) :
 
     for i in range(len(counts)+1,5) :
       values.append(None)
+
+    histoname = 'num_events'
+    h = get_histo(rootfile, dirname, histoname, min_counts)
+
+    nentries = h.GetEntries()
+    max_errs = max(counts, key = counts.get)
+    rate = 100*max_errs/float(nentries)
+
+    values.append(float('%.4f'%(rate)))
 
     return values
 
