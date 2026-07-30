@@ -266,6 +266,7 @@ async function getgraphnames() {
             let thisgraph =  graph_collection[j][i];
             if (thisgraph.endsWith("_status_all")) continue; 	    
             if (thisgraph.endsWith("_status")) continue;
+            if (!(thisgraph.endsWith("_mg"))) continue;
 	    first_mg = thisgraph;
 	    break;
 	}
