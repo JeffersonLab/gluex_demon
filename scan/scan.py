@@ -129,8 +129,9 @@ import fdc_wire_resids
 
 modules_cpp = [photons_cpp, pi0_cpp, rf, timing_cpp, tracking_cpp, triggers, cdc_cpp, fdc, fdc_wire_resids, tof_1, fmwpc, ctof, evio] # modules for 2022-05
 modules_gx = [photons, rho, omega, pi0, rf, timing, tracking, triggers, cdc, fdc, fdc_wire_resids, sc, tof_1, evio] # before ecal
-modules_gx2 = [photons, rho, omega, pi0, rf, timing2, tracking2, triggers, cdc, fdc, fdc_wire_resids, sc, tof_1, evio]
-modules_gx26 = [photons26, omega, pi02, rf, timing2, tracking2, triggers26, cdc, fdc, fdc_wire_resids, sc, tof_1, evio]
+modules_gx2 = [photons, rho, omega, pi02, rf, timing2, tracking2, triggers, cdc, fdc, fdc_wire_resids, sc, tof_1, evio]
+modules_gx26_3 = [photons26, omega, pi02, rf, timing2, tracking2, triggers26, cdc, fdc, fdc_wire_resids, sc, tof_1, evio]  # low energy, no rho
+modules_gx26 = [photons26, rho, omega, pi02, rf, timing2, tracking2, triggers26, cdc, fdc, fdc_wire_resids, sc, tof_1, evio]  # with ecal
 
 
 testing = 0 # stop after <runlimit> files, print diagnostics
@@ -201,6 +202,10 @@ run_module=[]
 
 if RunPeriod == '2022-05' :
     modules = modules_cpp
+
+elif RunPeriod == '2026-03' :
+    modules = modules_gx26_3     # low energy run
+        
 else :
     year = int(RunPeriod[0:4])
     
@@ -209,6 +214,7 @@ else :
         
     elif year == 2025 :  # GlueX-II detector config
         modules = modules_gx2
+
     else :
         modules = modules_gx26   #Sasha changed the trigger bits
 

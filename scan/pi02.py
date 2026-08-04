@@ -19,20 +19,20 @@ def declare_functions() :
 
 def pi0_mass(rootfile, llim=130, ulim=140) :
 
-  names = ['pi0_status', 'ecal', 'ecal_err']
-  names.extend(['fcal', 'fcal_err'])
-  names.extend(['bcal', 'bcal_err'])
-  names.extend(['bcal_ecal', 'bcal_ecal_err'])
-  names.extend(['bcal_fcal', 'bcal_fcal_err'])  
+  names = ['pi0_status', 'ECAL', 'ECAL_err', 'ECAL_sigmaoverM']
+  names.extend(['FCAL', 'FCAL_err', 'FCAL_sigmaoverM'])
+  names.extend(['BCAL', 'BCAL_err', 'BCAL_sigmaoverM'])
+
   
-  titles = ['diphoton mass status', 'ECAL diphoton mass (MeV)', 'ECAL diphoton width']
-  titles.extend(['FCAL diphoton mass (MeV)', 'FCAL diphoton width'])
-  titles.extend(['BCAL diphoton mass (MeV)', 'BCAL diphoton width'])
-  titles.extend(['BCAL+ECAL diphoton mass (MeV)', 'BCAL+ECAL diphoton width'])
-  titles.extend(['BCAL+FCAL diphoton mass (MeV)', 'BCAL+FCAL diphoton width'])      
+  titles = ['diphoton mass status', 'ECAL diphoton mass (MeV)', 'ECAL diphoton width', 'ECAL diphoton #sigma/M (%)']
+  titles.extend(['FCAL diphoton mass (MeV)', 'FCAL diphoton width', 'FCAL diphoton #sigma/M (%)'])
+  titles.extend(['BCAL diphoton mass (MeV)', 'BCAL diphoton width', 'BCAL diphoton #sigma/M (%)'])
 
   values = default_values(names)
-  png = ['fit_pi0', 'fit_pi0', 'fit_pi0', 'fit_pi0', 'fit_pi0', 'fit_pi0', '', '', '', '', '', '']
+  png = []
+  for i in range(0,len(names)) :
+    png.append('fit_pi0')
+
   
   if not rootfile :  # called by init function
     return [names, titles, values, png]
@@ -41,7 +41,8 @@ def pi0_mass(rootfile, llim=130, ulim=140) :
 
   min_counts = 1000
 
-  histonames = ['h_2gamma_ECAL_ECAL', 'h_2gamma_FCAL_FCAL', 'h_2gamma_BCAL_BCAL', 'h_2gamma_BCAL_ECAL', 'h_2gamma_ECAL_FCAL']
+  histonames = ['h_2gamma_ECAL_ECAL', 'h_2gamma_FCAL_FCAL', 'h_2gamma_BCAL_BCAL']
+
 
   status=1
   
@@ -49,10 +50,11 @@ def pi0_mass(rootfile, llim=130, ulim=140) :
     
     histoname = histonames[i]
     h = get_histo(rootfile, dirname, histoname, min_counts)
-    j = 2*i  + 1
+    j = 3*i  + 1
     
     if h:
-      values[j],values[j+1] = fitmasshisto(h)
+      values[j],values[j+1],values[j+2] = fitmasshisto(h)
+
       if values[j] == None:
         if status == 1:
           status = -1
@@ -60,7 +62,8 @@ def pi0_mass(rootfile, llim=130, ulim=140) :
         status = 0
       
     else :
-      values[j],values[j+1] = [None,None]
+      values[j],values[j+1],values[j+2] = [None, None, None]
+
       if status == 1:
         status = -1
 
@@ -84,9 +87,6 @@ def fitmasshisto(h) :
     
   elif "FCAL_FCAL" in histoname:
     fitfunc.SetParameters(max, 0.135, 0.008, 2, -10, 0)
-
-  elif "ECAL_FCAL" in histoname:
-    fitfunc.SetParameters(max, 0.135, 0.008, 2, -10, 0)
     
   else: #BCAL combos
     fitfunc.SetParameters(max, 0.135, 0.01, 2, -10, 0)
@@ -96,15 +96,19 @@ def fitmasshisto(h) :
   
   if int(fitresult) == 0 :
     mean = 1000 * fitresult.Parameter(1)
-    width = 1000 * fitresult.Parameter(2)    
+    width = 1000 * fitresult.Parameter(2)
+    widthovermean = 100 * width/mean
+
     mean = float('%.1f'%mean)    
     width = float('%.1f'%width)
-#    widthovermean = float('%.1f'%100*width/mean)
+    widthovermean = float('%.2f'%widthovermean)
+    
   else :
     mean = None
     width = None
+    widthovermean = None
+  return [mean,width, widthovermean]
 
-  return [mean,width]
 
 
 
