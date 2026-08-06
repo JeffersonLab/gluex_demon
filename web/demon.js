@@ -5,9 +5,10 @@ const RP_file = './runperiods.txt';
 var RP_list = [];  // list of available run periods  in runperiods.txt
 var ver_list = []; // list of available versions     in versions.txt inside RP's subdir
 var det_list = []; // list of available detectors/modules   in pagenames 
+var gr_list = [];
 
 var graph_collection = [];  // vast 2D list of graphs             in pagenames
-var graphs_this_page = [];   // list of graphs on the current page
+var graphs_this_page = [];   // list of graphs on the current page loaded from the file (may include nonexistent graphs)
 
 var plot_collection = '';
 
@@ -23,108 +24,126 @@ var plotnames = "";  // file containing lists of plots
 
 var year_month = "";
 
+
 //import { openFile, draw, create, settings } from 'https://jsroot.gsi.de/dev/modules/main.mjs';
 import { openFile, draw, create, settings } from 'https://root.cern/js/latest/modules/main.mjs';
 
 
-$(document).ready(async function () {
+//$(document).ready(async function () {
 
-    await get_url_args();
+await get_url_args();
 
-    RP_list = await readlist(RP_file, true);
+RP_list = await readlist(RP_file, true);
 
-    if ( RunPeriod === "" ) {
+if ( RunPeriod === "" ) {
 
-        RunPeriod = RP_list[0];
-        Version = "";
-        Detector = "";
-      
-    } else if (! RP_list.includes(RunPeriod) ) {
-
-        show_problem(`${RunPeriod} is not known!`);
-
-        RunPeriod = RP_list[0];
-        Version = "";
-        Detector = "";
-    } 
+    RunPeriod = RP_list[0];
+    Version = "";
+    Detector = "";
+    Graph = "";
     
-    await fillmenu("select_rp",RP_list,RunPeriod);
+} else if (! RP_list.includes(RunPeriod) ) {
 
-    ver_list = [];
+    show_problem(`${RunPeriod} is not known!`);
 
-    ver_list = await readlist(`${RunPeriod}/versions.txt`, true);
+    RunPeriod = RP_list[0];
+    Version = "";
+    Detector = "";
+    Graph = "";
+    
+} 
+    
+await fillmenu("select_rp",RP_list,RunPeriod);
 
-    if (Version === "") { 
+ver_list = [];
+gr_list = [];
 
-        Version = ver_list[0];                
-        Detector = "";
+ver_list = await readlist(`${RunPeriod}/versions.txt`, true);
 
-    } else if (! ver_list.includes(Version) ) {
+if (Version === "") { 
 
-        show_problem(`${RunPeriod} version ${Version} is not known!`);
-        Version = ver_list[0];                
-        Detector = "";
-    }
+    Version = ver_list[0];                
+    Detector = "";
 
-    await fillmenu("select_ver",ver_list,Version);
+} else if (! ver_list.includes(Version) ) {
 
+    show_problem(`${RunPeriod} version ${Version} is not known!`);
+    Version = ver_list[0];                
+    Detector = "";
+}
 
-    document.getElementById("RunPeriod").innerHTML = RunPeriod;
-    document.getElementById("Version").innerHTML = 'Version ' + Version;
-
-
-    year_month = RunPeriod.substring(10,17);
-
-    graphs_filename = `./${RunPeriod}/${Version}/monitoring_graphs_${year_month}_ver${Version}.root`;
-    csv_filename = `./${RunPeriod}/${Version}/monitoring_data_${year_month}_ver${Version}.csv`;
-    pagenames = `./${RunPeriod}/${Version}/monitoring_pagenames_${year_month}_ver${Version}.txt`;
-    plotnames = `./${RunPeriod}/${Version}/monitoring_plotnames_${year_month}_ver${Version}.txt`;
-
-    let compare_link = `https://halldweb.jlab.org/gluex_demon/compare.html?RunPeriod=${RunPeriod}&Version=${Version}`;
-
-    await getdetectornames();	// this fills det_list and graph_collection
+await fillmenu("select_ver",ver_list,Version);
 
 
-    if (! det_list.includes(Detector) ) {   //det_list[0] is ""
-        show_problem(`${RunPeriod} version ${Version} does not include ${Detector}!`);
-        Detector = "";
-    }
-
-    await fillmenu("select_det",det_list,Detector);
+document.getElementById("RunPeriod").innerHTML = RunPeriod;
+document.getElementById("Version").innerHTML = 'Version ' + Version;
 
 
-    console.log('filled detector menu');
+year_month = RunPeriod.substring(10,17);
 
-    let subtitle = "Overview";
-    let link_1 = `<a href="${graphs_filename}">ROOT file</a>`;
-    let link_2 = `<a href="${csv_filename}">CSV file</a>`;
-    let link_3 = `<a href="${compare_link}">Compare graphs</a>`;    
+graphs_filename = `./${RunPeriod}/${Version}/monitoring_graphs_${year_month}_ver${Version}.root`;
+csv_filename = `./${RunPeriod}/${Version}/monitoring_data_${year_month}_ver${Version}.csv`;
+pagenames = `./${RunPeriod}/${Version}/monitoring_pagenames_${year_month}_ver${Version}.txt`;
+plotnames = `./${RunPeriod}/${Version}/monitoring_plotnames_${year_month}_ver${Version}.txt`;
 
-    if (Detector !== "") {
-        subtitle = Detector;
-        document.getElementById("return").innerHTML = `<a href="${document.URL.split("&Detector")[0]}">Return to overview page</a>`;
-    }
+let compare_link = `https://halldweb.jlab.org/gluex_demon/compare.html?RunPeriod=${RunPeriod}&Version=${Version}`;
 
-    document.getElementById("Detector").innerHTML = subtitle;
-
-    document.getElementById("rootfile").innerHTML = link_1;
-    document.getElementById("csv").innerHTML = link_2;
-    document.getElementById("compare").innerHTML = link_3;
-
-    document.getElementById("loading").innerHTML = "Loading...";
-
-    await getgraphnames();   // reads graph names from pagenames file
-
-    drawGraphs().then(
-       function(text) { 
-           //console.log(Graph);
-           if (Graph != "") {
-                document.getElementById(Graph).scrollIntoView();
-           }
-    });
+console.log("started");
 
 
-});
+    
+await getdetectornames();	// this fills det_list and graph_collection
+console.log("collected detector names and graphs");
+
+if (Detector != "" && ! det_list.includes(Detector) ) {   //det_list[0] is "Overview"
+    show_problem(`${RunPeriod} version ${Version} does not include ${Detector}!`);
+    Detector = "";
+}
+
+await fillmenu("select_det",det_list,Detector);
+
+
+console.log('filled detector menu');
+
+let subtitle = "Overview";
+let link_1 = `<a href="${graphs_filename}">ROOT file</a>`;
+let link_2 = `<a href="${csv_filename}">CSV file</a>`;
+let link_3 = `<a href="${compare_link}">Compare graphs</a>`;    
+
+if (Detector !== "") {
+    subtitle = Detector;
+//    document.getElementById("return").innerHTML = `<a href="${document.URL.split("&Detector")[0]}">Return to overview page</a>`;
+}
+
+document.getElementById("Detector").innerHTML = subtitle;
+
+document.getElementById("rootfile").innerHTML = link_1;
+document.getElementById("csv").innerHTML = link_2;
+document.getElementById("compare").innerHTML = link_3;
+
+document.getElementById("loading").innerHTML = "Loading...";
+
+console.log("before getting the list");
+
+//  await make_csv_link();
+    
+await get_list_of_graphs();
+
+console.log('awaiting build_page');
+await build_page();
+
+let selected = Graph;
+if (selected == "") selected = "Overview";
+
+await fillmenu("select_graph",gr_list,Graph);
+//console.log('?');
+
+if (Graph != "") {
+    document.getElementById(Graph).scrollIntoView();
+}
+
+console.log('page ready');
+//});
 
 
 function get_url_args() {
@@ -209,7 +228,7 @@ async function getdetectornames() {
 
     let npages = lineArr.length - 1;  // ignore the empty last line
 
-    det_list = [""];
+    det_list = ["Overview"];
 
     for (let i=0; i<npages; i++) {
         graph_collection.push(lineArr[i].split(','));
@@ -225,29 +244,12 @@ async function getdetectornames() {
 }
 
 
-async function getgraphnames() {
 
-    // uses global graph_collection
-    // fills global graphs_this_page
-
-    let statusgraphs = ['readiness'];
-    let styletext = ' class="graphpanel"';
-    let styletext2 = ' class="statusgraphpanel"';
-    let divtext = '<div class="user_tooltip"></div>';
-    let linkfile = '';
-    let listoflinks = '<ul>';
+async function get_list_of_graphs() {
 
     graphs_this_page = [];  // tells jsROOT which graphs to show
     
     if (Detector != "") {  // detector page
-        let page_csv_filename = `./${RunPeriod}/${Version}/monitoring_data_${Detector}_${year_month}_ver${Version}.csv`;
-	const file_exists = await fetchfiledata(page_csv_filename,true);
-        let csv_link = '';
-	if (file_exists) {
-	    csv_link = `<a href="${page_csv_filename}">CSV file for this page</a>`;
-        }
-	//let csv_link = `<a href="${page_csv_filename}">CSV file for this page</a>`;
-        document.getElementById("csv").innerHTML = csv_link;
 	
         let j = det_list.indexOf(Detector) - 1;   // because det_list starts w overview
 
@@ -256,84 +258,25 @@ async function getgraphnames() {
         const ngraphs = Number(graphs[1]); 
         const status_composite = graphs[2];
 	
-	// use array in_mg to mark graphs used in multigraphs
-	let in_mg = [];
-	for (let i=0; i< ngraphs; i++) in_mg.push(0);
-	
-	let show_first = [];
-	let show_last = [];
-
-	show_first.push(status_composite);
+	graphs_this_page.push(gdir + '/' + status_composite);
 
 	// mg names appear before constituents
 	for (let i=1; i < ngraphs ; i++) {
 
 	    let thisgraph = graphs[i+2];
-
-	    if (thisgraph.endsWith("_status")) continue;
-	    if (in_mg[i]) continue;
-
-	    show_first.push(thisgraph);
 	    
-	    for (let k = i + 1 ; k < ngraphs ; k++) {
-		if (in_mg[k]) continue;
-		let testgraph = graphs[k+2];
+	    if (thisgraph.endsWith("_status")) continue;
 
-		if (testgraph.endsWith("_"+thisgraph)) {
-		    in_mg[k] = 1;
-		    show_last.push(testgraph);
-		}
-	    }
+	    graphs_this_page.push(gdir + '/' + thisgraph);	    
 	}
 
-	const num_first = show_first.length;
-        const num_last = show_last.length;
 	
-	const ordered_graphs = show_first.concat(show_last);
-
-	let first_mg = -1;
-	if (num_last > 0) first_mg = num_first;  // draw line before mg constituents are drawn
-	
-        for (let i = 0; i < ordered_graphs.length ; i++) {
-
-            let thisgraph =  ordered_graphs[i];
-            let rootgraph =  gdir + '/' + thisgraph;
-            let style = styletext;
-	    
-            graphs_this_page.push(rootgraph);  // copy graph name into array for this page
-
-	    if (i == first_mg) {
-		listoflinks += '</ul>Graphs included in MultiGraphs:<ul>';
-		divtext += '<div class="before_mg_constituents"></div>';		
-            }
-	    
-	    let anchorname = thisgraph;
-	    if (thisgraph.endsWith("_status_all")) {
-		anchorname = thisgraph.substring(0,thisgraph.length-4);  // trim _all
-		style = styletext2;
-	    }
-	    
-	    //console.log('first mg: '+first_mg ) ;
-	    
-	    // The graphs are ordered Overall Status, Multigraphs, other graphs, graphs belonging to multigraphs
-
-	    let addtext = make_graph_div_html(thisgraph, anchorname, style); 
-	    divtext += addtext;
-
-            listoflinks += `<li><a href = "#${anchorname}">${anchorname}</a></li> `;
-
-        } 
-
     } else  {    // overview page
 
-        let csv_link = `<a href="${csv_filename}">CSV file</a>`;
-        document.getElementById("csv").innerHTML = csv_link;    
-
 	let npages = det_list.length;  // NB it starts with "" for overview
-
-        // start at -1 for readiness
+        
         for (let i = 0; i < npages; i++) {
-
+    
             let thisgraph = 'readiness';
             let gdir = '';
 
@@ -342,72 +285,233 @@ async function getgraphnames() {
                 thisgraph = graph_collection[i-1][2];
             }
 
-            let rootgraph =  gdir + '/' + thisgraph;
+            graphs_this_page.push(gdir + '/' + thisgraph);  // copy graph name into array for this page
 
-            graphs_this_page.push(rootgraph);  // copy graph name into array for this page
+	}	
+    }
+}
 
-	    let anchorname = thisgraph;
-            let style = styletext;
+async function make_csv_link()  {
+
+    let page_csv_filename = csv_filename; //global, link for big csv file from overview page
+    let link_text = 'CSV file';
+
+    if (Detector != "") {  // detector page
+        page_csv_filename = `./${RunPeriod}/${Version}/monitoring_data_${Detector}_${year_month}_ver${Version}.csv`;
+        link_text = 'CSV file for this page';
+    }
+    
+    const file_exists = await fetchfiledata(page_csv_filename,true);
+    let csv_link = '';
+    
+    if (file_exists) {
+	csv_link = `<a href="${page_csv_filename}">${link_text}</a>`;
+    } else {
+	csv_link = `CSV file not found: ${page_csv_filename}`;
+    }
+
+    document.getElementById("csv").innerHTML = csv_link;
+	
+}    
+
+
+async function build_page() {
+
+    // graphs_this_page and gr_list are global
+
+    let file = await openFile(graphs_filename);//'./RunPeriod-2023-01/v6/monitoring_graphs.root');
+
+    if (!file) console.log("file not found",graphs_filename);
+    if (!file) return;
+
+    console.log("opened root file");
+
+    let styletext = ' class="graphpanel"';
+    let styletext2 = ' class="statusgraphpanel"';
+
+    const rootgraphs = [];
+    const legends = [];
+    const gnames_present = [];
+
+    const mg_components = [];
+
+    // eliminate any missing graphs from the list
+    
+    for (const fullgname of graphs_this_page) {
+	
+	//console.log('looking for',fullgname);
+
+	let rootgraph = null;  
+	rootgraph = await file.readObject(fullgname).catch((err) => {
+	    console.log(`Graph ${fullgname} not found in root file`);
+	    console.error(err);
+	});
+
+	if (rootgraph == null) continue;
+
+	let gname = fullgname.split('/')[1];		
+
+	rootgraphs.push(rootgraph);
+	gnames_present.push(gname);
+
+	if (gname.endsWith('status_all')) continue;   // this is a MG but its parts are not included
 	    
-	    if (thisgraph.endsWith("_status_all")) {
-		anchorname = thisgraph.substring(0,thisgraph.length-11);
-		style = styletext2;
+	if (rootgraph._typename == 'TMultiGraph') {
+	    for (const x of rootgraph.fGraphs.arr) {
+		mg_components.push(x.fName + '_' + gname);
+	    }	    
+	}	
+    }
+
+    // show the MG components after the other graphs
+    const gnames1 = [];
+    const gnames2 = [];
+    
+    for (const gname of gnames_present) {
+	if (mg_components.includes(gname)) {
+	    gnames2.push(gname);
+	} else {
+	    gnames1.push(gname);
+	}
+    }
+
+    const gnames = gnames1.concat(gnames2);
+
+    gr_list = [];    
+    for (const gname of gnames) {
+	let itemname = gname.replace("_status_all","");
+	gr_list.push(itemname);
+    }
+    const first_mg = gnames2[0]
+    
+    // make complete html page before filling the divs with graphs
+
+    let divtext = '';
+//    let listoflinks = '';
+
+    for (const gname of gnames) {
+
+	const clickelement = 'click_info_' + gname;
+	let anchorname = gname;
+        let style = styletext;
+	let details = '';
+
+	if (gname.endsWith("_status_all")) {
+	    anchorname = gname.substring(0,gname.length-11);
+	    style = styletext2;
+	}
+
+	if (Detector != '' && gname == first_mg) {
+	    //listoflinks += '</ul><br/><br/>Graphs included in MultiGraphs:<ul>';
+	    divtext += '<div class="before_mg_constituents"></div>';		
+        }
+
+	if (Detector == '' && gname != 'readiness') {
+
+            let thisdetector = gname.replace('_status_all',''); 
+	    let linkfile = document.URL.split("?")[0] + `?RunPeriod=${RunPeriod}&Version=${Version}&Detector=${thisdetector}`;   // ignore #graphname
+            details = '    &nbsp;&nbsp;<a href=' + linkfile + '>Details</a>';
+
+	}
+	
+	const new_html = make_graph_div_html(gname, anchorname, clickelement, style, details);
+
+	divtext = divtext + new_html;
+
+        //listoflinks += `<li><a href = "#${anchorname}">${anchorname}</a></li> `;	
+
+    }
+
+    
+    document.getElementById("graphs").innerHTML = divtext;
+    //document.getElementById("links_graphs_this_page").innerHTML = 'Graphs on this page: ' + listoflinks;    
+
+    console.log('drawing graphs');
+    
+    for (const rootgraph of rootgraphs) {
+
+	Object.assign(rootgraph, {fMarkerSize: 0.5, fMarkerStyle: 8, fMarkerColor: 890, fEditable: 0});
+
+	const gname = rootgraph.fName;
+
+	// set range of status graphs uniformly
+        if (gname.includes('status')) {
+            rootgraph.fHistogram.fMinimum = -1.5;
+            rootgraph.fHistogram.fMaximum = 1.5;
+	    rootgraph.fHistogram.fYaxis.fNdivisions = 103;
+	    rootgraph.fHistogram.fXaxis.fLabelSize = 0.047;
+	    rootgraph.fHistogram.fYaxis.fLabelSize = 0.047;
+        }
+    
+        let drawlegend = false;	
+	let legend = null;
+
+	// don't draw legend on the status composite multigraph made in JS bc it kills the graph	
+	if (rootgraph._typename == 'TMultiGraph') { // && !gname.includes('composite')) {
+	    if (rootgraph.fGraphs) {
+		if (rootgraph.fGraphs.arr) {
+		    if (rootgraph.fGraphs.arr.length>1 ) drawlegend = true;
+		}
 	    }
+	}
+	
+	if (drawlegend) {
+   	    legend = await create('TLegend');    		
 
+	    const garr = rootgraph.fGraphs.arr;
+	    let y1 = 0.9 - 0.1*garr.length;
+	    if (y1<0.18) y1=0.18;
+		
+            Object.assign(legend, { fX1NDC: 0.91, fY1NDC: y1, fX2NDC: 1.0, fY2NDC: 0.9, fColumnSeparation:0, fMargin:0.15 });
 
-	    let details = '';
+	    for (const g of garr) {
 
-            if (i>0) { // no detector link for overall readiness
+		let entry = await create('TLegendEntry');
+    		Object.assign(entry, {fObject: g, fLabel: g.fName, fOption: 'p'});			
+   		await legend.fPrimitives.Add(entry);
 
-                let thisdetector = det_list[i]; 
-                linkfile = document.URL.split("?")[0] + `?RunPeriod=${RunPeriod}&Version=${Version}&Detector=${thisdetector}`;   // ignore #graphname
-                details= '&nbsp;&nbsp;<a href=' + linkfile + '>Details</a>';
-            }
+	    }
+        }
+	
+        const divname = 'gdiv_' + gname;      
+	//console.log('drawing into',divname);
+
+        let painter = await draw(divname, rootgraph, 'ap;gridx;gridy;').then(painter => {     // draw the graph first, otherwise xmin gets reset to 0  !
+	    const clickelement = 'click_info_' + gname;
+	    painter.configureUserClickHandler(info => UserHandler(info, divname, clickelement));
+	});
 	    
-	    let addtext = make_graph_div_html(thisgraph, anchorname, style, details); 
-	    divtext += addtext;
+	if (drawlegend) await draw(divname,legend);
 
-            listoflinks += `&nbsp;&nbsp;<a href = "#${anchorname}">${anchorname}</a> `;
-
-        }          
-
-    } 
-
-    listoflinks += '</ul>';
-    document.getElementById("graphs").innerHTML = divtext;    
-    document.getElementById("links_graphs_this_page").innerHTML = 'Graphs on this page: ' + listoflinks;    
-
+	//console.log('drawing graph finished');
+    }	
 }
 
 
-
-function make_graph_div_html(thisgraph, anchorname, style, details='') {
+function make_graph_div_html(graphname, anchorname, clickelement, style, details='') {
+    
     let divtext = '';
+
     divtext += `<div id="${anchorname}_wrapper" class="graph_wrapper">` + "\n";
     
     divtext += `  <div id="${anchorname}" class="graph_top"></div>` + "\n";
-    divtext += '  <div id="gdiv_' + thisgraph + '" ' + style + '></div>' + "\n";
-	    
-    //divtext += `<div class="graph_names"><a title="Copy the url for this plot" class="graph_url" href="#${anchorname}" id="link#${anchorname}"><img src="link.png" alt=${anchorname}></a>&nbsp;&nbsp;<a href="#top">Top of page</a>`;
+    divtext += '  <div id="gdiv_' + graphname + '" ' + style + '></div>' + "\n";
 
-    divtext += `  <div class="graph_names">` + "\n";
-    divtext += `    <button title="Copy the url for this plot" class="graph_url" id="btn_${anchorname}"><img src="link.png" alt="Copy url"></button>`;
-    divtext += `&nbsp;&nbsp;<a href="#${anchorname}">${anchorname}</a>`;
-    divtext += '&nbsp;&nbsp;<a href="#top">Top of page</a>';
+    divtext += `  <div class="graph_bottom">` + "\n";
+    divtext += `    <button title="Copy the url for this plot" class="graph_url" id="btn_${anchorname}"><img src="link.png" alt="Copy url"></button>` + '\n';
+    divtext += `    &nbsp;&nbsp;<a href="#${anchorname}">${anchorname}</a>`;
+    divtext += '    &nbsp;&nbsp;<a href="#top">Top of page</a>';
 
     divtext += details;
 	    
-    divtext += '&nbsp;&nbsp;<span id="gdiv2_' + thisgraph + '" class="graph_info"></span></div>\n';
+    divtext += '    &nbsp;&nbsp;<span id="' + clickelement + '" class="click_info"></span>\n';
     divtext += '  </div>';
-    divtext += '</div>';
+    divtext += '</div>\n\n';
     
     return divtext;
 	    
 }
 
-
-
-    
 
 async function readlist(listfile, reverse=false) {
 
@@ -435,12 +539,11 @@ async function readlist(listfile, reverse=false) {
 }
 
 
-
-
 async function fillmenu(select_id,list,preselect) {
 
     let x = document.getElementById(select_id);
 
+    
     // remove existing list
     for (let i = x.options.length-1 ; i>=0; i-- ) {           
         x.options.remove(i);
@@ -461,9 +564,6 @@ async function fillmenu(select_id,list,preselect) {
 
 
 function show_problem(message) {
-    //    document.getElementById("RunPeriod").innerHTML = "";
-    //  document.getElementById("Version").innerHTML = "";
-    //document.getElementById("titles2").innerHTML = "";
     document.getElementById("problems").innerHTML = message;
 }
 
@@ -471,181 +571,80 @@ function show_problem(message) {
 
 
 
-async function drawGraphs() {
+function UserHandler(info, divname, clickelement) {
 
-    let file = await openFile(graphs_filename);//'./RunPeriod-2023-01/v6/monitoring_graphs.root');
-
-    if (file) {
-        console.log('root file opened');
-        //console.log('graphs to draw: ' + graphs_this_page.length);
-        const obj = [];
-        const leg = [];
-	
-        // this makes an object named after the graph, which populates the div with the same name
-
-        for (let i = 0; i < graphs_this_page.length; i++) {
-
-            const fullgname = graphs_this_page[i];  //graphnames[i]
-	    const gname = fullgname.split('/')[1];
-            const divname = 'gdiv_' + gname;      // the divname doesnt include the directory
-	    const divname2 = 'gdiv2_' + gname;      // the divname doesnt include the directory
-	    const wrapper_divname = gname + '_wrapper';
-	    
-	    console.log(gname);
-
-            obj[i] = await file.readObject(fullgname).catch((err) => {       
-                console.error(err);
-
-                const thisdiv = document.getElementById(wrapper_divname);
-	        thisdiv.innerHTML = ''; 
-		thisdiv.classList.add("graphmissing");
-
-		const linkdiv = document.getElementById("links_graphs_this_page");
-		const links = document.querySelectorAll('div#links_graphs_this_page a');
-		links.forEach(link => {
-		    if (link.innerText == gname) link.remove();
-		});
-	//	continue;  
-	    });
-
-
-	    if (obj[i] == null) continue;
-	    
-	    Object.assign(obj[i], {fMarkerSize: 0.5, fMarkerStyle: 8, fMarkerColor: 890, fEditable: 0});
-	    
-            if (gname.includes('status')) {
-                obj[i].fHistogram.fMinimum = -1.5;
-                obj[i].fHistogram.fMaximum = 1.5;
-		obj[i].fHistogram.fYaxis.fNdivisions = 103;
-		obj[i].fHistogram.fXaxis.fLabelSize = 0.047;
-		obj[i].fHistogram.fYaxis.fLabelSize = 0.047;
-            }
-
-            let drawlegend = false;
-   	    leg[i] = await create('TLegend');    
-	    
-	    if (obj[i]._typename == 'TMultiGraph') { // && !gname.includes('composite')) {                 
-
-		if (obj[i].fGraphs) {
-		    if (obj[i].fGraphs.arr) {
-			if (obj[i].fGraphs.arr.length>1 ) drawlegend = true;      // don't draw legend on the status composite multigraph made in JS bc it kills the graph
-		    }
-		}
-	    }
-		    
-	    if (drawlegend) {
-		
-		const garr = obj[i].fGraphs.arr;
-		let y1 = 0.9 - 0.1*garr.length;
-		if (y1<0.18) y1=0.18;
-		
-                Object.assign(leg[i], { fX1NDC: 0.91, fY1NDC: y1, fX2NDC: 1.0, fY2NDC: 0.9, fColumnSeparation:0, fMargin:0.15 });
-
-	        const entry = []
-
-		for (let j=0; j < garr.length; j++) {
-		
-		    entry[j] = await create('TLegendEntry');
-		    //		    Object.assign(entry[j], {fObject: garr[j], fLabel: garr[j].fName+"_"+obj[i].fName, fOption: 'p'});
-    		    Object.assign(entry[j], {fObject: garr[j], fLabel: garr[j].fName, fOption: 'p'});
-			
-   		    await leg[i].fPrimitives.Add(entry[j]);
-
-		}
-            }
-
-            let painter = await draw(divname, obj[i], 'ap;gridx;gridy;').then(painter => {     // draw the graph first, otherwise xmin gets reset to 0  !
-		painter.configureUserClickHandler(info => UserHandler(info,divname2));
-	    });
-
-	    //console.log(gname);
-	    
-
-	    if (drawlegend) await draw(divname,leg[i]);	    
-
-           // TMultiGraphPainter has array of Painters with xmin and xmax set to range   autorange set to true
-	    // data are in arrays fX  fY
-	    
-        }
-
-        console.log('drawing completed');
-
-    } else {
-        console.log('cannot find file :-( ');  // I dont think this works
-    }
-
-}
-
-function UserHandler(info,divname) {
-
-    //console.log('click: divname: '+divname);
+    console.log('click: divname: '+divname);
 
     if (!info) {
         return true;
     }
 
-    //console.log('click: info:');
-    console.log(info);
+    console.log('click: info:', info);
 
-    let gname=info.name;
+    // for overall status, show rcdb link only
+
+    let run = Math.trunc(info.obj.fX[info.bin]);  // fX contains floats
+    let rcdburl = `https://halldweb.jlab.org/rcdb/runs/info/${run}`;    
+    let linktext = `<a href=${rcdburl}><img src="rcdb.png" alt="RCDB" height="16" width="16"/></a>`;
+
+    let ploturl = '';
+    let showplot = true;
     
-    // cannot do anything for the overall status graph
-    if (gname == 'readiness') {
-	return true;
-    }
-
-    let mgname = divname.slice(6);   // start after gdiv2_   => name of graph or multigraph owning the minicanvas
-    let thisdetector = Detector;
-    let run=Math.trunc(info.obj.fX[info.bin]);  // fX contains floats
-    let plotname = '';
-
-    let run_6digits = `${run}`.padStart(6,"0");   // add leading 0 for early run numbers
+    if (info.name == 'readiness') showplot = false;
     
-    // if we are on the overview page, get the relevant detector name for the plot
-    if (Detector == '') {
-	thisdetector = mgname.replace("_status_all","");
-    }
+    if (showplot) {
 
-    // for multigraph parts, reconstruct the full graph name used to store the plot name
-    if ( mgname.endsWith("_status_all")) {
-   	gname = gname + '_status';
-    } else {	
-        if (gname != mgname) {
-   	    gname = gname + '_' + mgname;
+	// single graphs:       divname gdiv_n_missing,          info.name n_missing  => graph n_missing
+	// single mg component: divname gdiv_eff0_hitefficiency, info.name eff0_hitefficiency => eff0_hitefficiency
+	
+	// mg :                 divname gdiv_hitefficiency,      info.name eff0 -> eff0_hitefficiency
+	// status mg :          divname gdiv_CDC_status_all,     info.name occ -> occ_status
+	
+	let gname = divname.slice(5); // remove gdiv_ from the front
+
+	if (gname != info.name) { // mg
+	    if (divname.endsWith('status_all')) {
+		gname = info.name + '_status';
+	    } else {
+		gname = info.name + '_' + gname;
+	    }
 	}
-    }
+	
+	console.log('graph name:',gname);
     
-    //console.log('click: gname:' +gname);
-    //console.log('click: plot_collection[Detector]');
-    //console.log(plot_collection[thisdetector]);
-    
-    if (plot_collection[thisdetector][gname]) {
+	let thisdetector = Detector;
+
+	if (Detector == '') {
+	    thisdetector = divname.slice(5).replace('_status_all','');
+	}
+
+	let run_6digits = `${run}`.padStart(6,"0");   // add leading 0 for early run numbers
+	let plotname = '';
+	
+	if (plot_collection[thisdetector][gname]) {
 	    plotname = plot_collection[thisdetector][gname];
 	    console.log('click: plotname: ' +plotname);
-    } else {
-            console.log('click: plot_collection[thisdetector][gname] not found');
-    }
-    
-    if (plotname) {
-
-	//        let divname = `gdiv2_${mgname}`;
-	let rcdburl = `https://halldweb.jlab.org/rcdb/runs/info/${run}`;
-        let ploturl = `https://halldweb.jlab.org/work/halld2/data_monitoring/${RunPeriod}/mon_ver${Version}/Run${run_6digits}/${plotname}.png`;
-        if (Version[0] == "R") {
-	    let rest = Version[4];
-	    ploturl = `https://halldweb.jlab.org/work/halld2/data_monitoring/${RunPeriod}/recon_ver0${rest}/Run${run_6digits}/${plotname}.png`;
+	} else {
+            console.log(`click: plot_collection[${thisdetector}][${gname}] not found`);
 	}
 
-        let linktext = `<a href=${rcdburl}><img src="rcdb.png" alt="RCDB" height="16" width="16"/></a>`;
-        linktext += `&nbsp;&nbsp;<a href=${ploturl}>Monitoring histogram (${run})</a>`;
+	if (plotname) {
+
+            let ploturl = `https://halldweb.jlab.org/work/halld2/data_monitoring/${RunPeriod}/mon_ver${Version}/Run${run_6digits}/${plotname}.png`;
+            if (Version[0] == "R") {
+		let rest = Version[4];
+		ploturl = `https://halldweb.jlab.org/work/halld2/data_monitoring/${RunPeriod}/recon_ver0${rest}/Run${run_6digits}/${plotname}.png`;
+	    }
+
+            linktext += `&nbsp;&nbsp;<a href=${ploturl}>Monitoring histogram (${run})</a>`;
+	}    
+    }
     
-         // show info
-        document.getElementById(divname).innerHTML = linktext;
-	//`Name: ${info.name} Bin: ${info.bin}`;
-     }
+
+    document.getElementById(clickelement).innerHTML = linktext;
     
-     return true; // means event is handled and can be ignored
- }
+    return true; // means event is handled and can be ignored
+}
 
 
 select_rp.addEventListener('change', async function () {
@@ -721,12 +720,25 @@ select_det.addEventListener('change',function() {
   let new_url = document.URL.split("#")[0];
   new_url = new_url.split("?")[0] + `?RunPeriod=${RP}&Version=${ver}`;
 
-  if ( det != "" ) {
+  if ( det != "" && det != "Overview" ) {
     new_url = new_url + `&Detector=${det}`;
   }
 
   console.log(new_url);
   window.location.assign(new_url);
+
+});
+
+
+select_graph.addEventListener('change',function() {
+
+    Graph = select_graph.value;
+    
+    console.log('graph menu changed');
+
+    if (Graph != "") {
+	document.getElementById(Graph).scrollIntoView();
+    }
 
 });
 
@@ -749,6 +761,8 @@ console.log('reload');
 });
 
 
+// copy-graph-url-to-clipboard code
+
 document.addEventListener('click', (event) => {
   // Use .closest() to find the target element or its parent with a specific selector
   const btn = event.target.closest('div.graph_names button.graph_url');
@@ -765,9 +779,10 @@ document.addEventListener('click', (event) => {
             const ver = select_ver.value;
             const det = select_det.value;
 
+	    
 	  
   	    let thisdet = "";
-	    if (det) {
+	    if (det != "" && det != "Overview") {
 	        thisdet = `&Detector=${det}`;
 	    }
 
@@ -798,6 +813,10 @@ document.addEventListener('click', (event) => {
 
   }
 }, {passive: true} );
+
+
+
+
 
 //function copyURLtoClipboard() {
 //            window.clipboardData.setData("Text",location.href);

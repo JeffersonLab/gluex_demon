@@ -30,8 +30,8 @@
         .graph_info {width:1200px; height:50px; margin-top: 10px;}	
 	.graphmissing {font-size:80%; font-style:italic;}
         .graph_top {margin-top:2.5em;}
-        .graph_names {font-size:80%; font-style:italic; color: darkslategray; height:30px; padding-left:4px;}
-	.before_mg_constituents {margin-top: 30px; height:10px; width:1200px; background-color:#eff3f8;}
+        .graph_bottom {font-size:80%; font-style:italic; color: darkslategray; height:30px; padding-left:4px;}
+	.before_mg_constituents {margin-top: 30px; height:30px; width:1200px; background-color:#eff3f8;}
 	#links_graphs_this_page ul {list-style-type: none; }
 	#links_graphs_this_page li {display: inline; padding-right: 1em;}
 	button.graph_url {width:25px; cursor:pointer; padding:0;}
@@ -58,8 +58,7 @@
         <div id ="selectors">
             <hr/>
             <select name="select_rp" id="select_rp">
-            <!--option value="RunPeriod-2022-05">RunPeriod-2022-05</option>
-            <option value="RunPeriod-2023-01">RunPeriod-2023-01</option-->
+	          <option value="Loading">Loading data</option>
             </select>
 
             <select name="select_ver" id="select_ver">
@@ -67,6 +66,10 @@
             <button type="button" id="reload" style="display:none">Go</button>
             <select name="select_det" id="select_det">
             </select>
+
+            <select name="select_graph" id="select_graph">
+            </select>
+
             <hr/>
         </div>
 
@@ -83,9 +86,6 @@
             <br/>
             </div>
             <span id="return"></span><br/>
-        </div>
-
-        <div id="links_graphs_this_page">
         </div>
 
         <div id="graphs">
