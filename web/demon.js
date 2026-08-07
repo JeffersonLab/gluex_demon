@@ -335,6 +335,9 @@ async function build_page() {
 
     const mg_components = [];
 
+    let problemdiv = '';  // divname for any graph that loaded incorrectly
+    let problem_msg = '';
+    
     // eliminate any missing graphs from the list
     
     for (const fullgname of graphs_this_page) {
@@ -348,21 +351,76 @@ async function build_page() {
 	});
 
 	if (rootgraph == null) continue;
-
+	
 	let gname = fullgname.split('/')[1];		
 
 	rootgraphs.push(rootgraph);
 	gnames_present.push(gname);
 
-	if (gname.endsWith('status_all')) continue;   // this is a MG but its parts are not included
+	if (!gname.endsWith('status_all')) {//continue;   // Collect names of MG component graphs to be shown (status_all components aren't included)
+	    if (rootgraph._typename == 'TMultiGraph') {
+		for (const x of rootgraph.fGraphs.arr) {
+		    mg_components.push(x.fName + '_' + gname);
+		}	    
+	    }
+	}
+
+	// debug code in case a graph loads incorrectly
+	// fX should be integers stored as floats
+	
+	let problemgraph = '';  // only filled if there's trouble with a TMultiGraph graph
+	let problems_this_graph = false;
+	
+	//if (gname == 'CDC_status_all') rootgraph.fGraphs.arr[0].fX[3] = 13.14; // test bug
+	//if (gname == 'n_missing') rootgraph.fX[3] = 13.14; // test bug
+	
+	if (rootgraph._typename == 'TGraph') {
+	    for (const x of rootgraph.fX) {
+		if (Math.abs(x - Math.trunc(x)) > 0.001) {
+		    problems_this_graph = true;
+		}
+	    }
+	    if (problems_this_graph) console.error(gname + ' loaded incorrectly');
 	    
-	if (rootgraph._typename == 'TMultiGraph') {
-	    for (const x of rootgraph.fGraphs.arr) {
-		mg_components.push(x.fName + '_' + gname);
-	    }	    
-	}	
+	} else if (rootgraph._typename == 'TMultiGraph') {
+	    
+	    for (const g of rootgraph.fGraphs.arr) {
+		let newproblems = false;
+		
+		for (const x of g.fX) {
+		    if (Math.abs(x - Math.trunc(x)) > 0.001) {
+			newproblems = true;
+		    }
+		}
+
+		if (newproblems) console.error(g.fName + ' loaded incorrectly');
+		if (newproblems) problemgraph = g.fName;
+		if (newproblems) problems_this_graph = true;
+	    }
+	}
+
+	if (problems_this_graph) {
+
+	    problemdiv = gname.replace("_status_all","");
+	    
+	    let glink = document.URL.split("#")[0] + '#' + gname.replace("_status_all","");
+	    glink = '<a href=' + glink + '>' + gname.replace("_status_all","") + '</a>';
+
+	    let message = 'Graph ' + glink + ' loaded incorrectly! <br/>';
+	    problem_msg = '';
+	    if (problemgraph) problem_msg += "This is a MultiGraph; the problem is in its Graph named '" + problemgraph + "'.<br/>";	    
+	    problem_msg += 'Please right-click on the graph, choose Inspect, click json, and send the downloaded file (and the url) to Naomi';
+	
+	    show_problem(message + problem_msg);
+
+	    // Cannot write anything into the graph div as it does not exist yet
+	    
+	}
+
+	// end of debug code
     }
 
+    
     // show the MG components after the other graphs
     const gnames1 = [];
     const gnames2 = [];
@@ -387,7 +445,6 @@ async function build_page() {
     // make complete html page before filling the divs with graphs
 
     let divtext = '';
-//    let listoflinks = '';
 
     for (const gname of gnames) {
 
@@ -402,15 +459,14 @@ async function build_page() {
 	}
 
 	if (Detector != '' && gname == first_mg) {
-	    //listoflinks += '</ul><br/><br/>Graphs included in MultiGraphs:<ul>';
 	    divtext += '<div class="before_mg_constituents"></div>';		
         }
 
 	if (Detector == '' && gname != 'readiness') {
 
             let thisdetector = gname.replace('_status_all',''); 
-	    let linkfile = document.URL.split("?")[0] + `?RunPeriod=${RunPeriod}&Version=${Version}&Detector=${thisdetector}`;   // ignore #graphname
-            details = '    &nbsp;&nbsp;<a href=' + linkfile + '>Details</a>';
+	    let link = document.URL.split("?")[0] + `?RunPeriod=${RunPeriod}&Version=${Version}&Detector=${thisdetector}`;   // ignore #graphname
+            details = '    &nbsp;&nbsp;<a href=' + link + '>Details</a>';
 
 	}
 	
@@ -418,14 +474,11 @@ async function build_page() {
 
 	divtext = divtext + new_html;
 
-        //listoflinks += `<li><a href = "#${anchorname}">${anchorname}</a></li> `;	
-
     }
 
     
     document.getElementById("graphs").innerHTML = divtext;
-    //document.getElementById("links_graphs_this_page").innerHTML = 'Graphs on this page: ' + listoflinks;    
-
+    
     console.log('drawing graphs');
     
     for (const rootgraph of rootgraphs) {
@@ -433,7 +486,7 @@ async function build_page() {
 	Object.assign(rootgraph, {fMarkerSize: 0.5, fMarkerStyle: 8, fMarkerColor: 890, fEditable: 0});
 
 	const gname = rootgraph.fName;
-
+	
 	// set range of status graphs uniformly
         if (gname.includes('status')) {
             rootgraph.fHistogram.fMinimum = -1.5;
@@ -484,7 +537,15 @@ async function build_page() {
 	if (drawlegend) await draw(divname,legend);
 
 	//console.log('drawing graph finished');
-    }	
+    }
+
+    // debug code
+    if (problemdiv != '') {
+	const ele = document.getElementById(problemdiv);	
+	ele.innerHTML = 'The graph below was loaded incorrectly!<br/>' + problem_msg;
+	ele.style.color = "red";
+    }
+    
 }
 
 
