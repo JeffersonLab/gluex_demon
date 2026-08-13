@@ -248,8 +248,32 @@ async function getdetectornames() {
 async function get_list_of_graphs() {
 
     graphs_this_page = [];  // tells jsROOT which graphs to show
+
+    let thisdet = "";
+
+    if (Detector) {
+	if (Detector != "Overview") thisdet = Detector;
+    }
     
-    if (Detector != "") {  // detector page
+
+    if (thisdet == "") { 
+	let npages = det_list.length;  // NB it starts with "" for overview
+        
+        for (let i = 0; i < npages; i++) {
+    
+            let thisgraph = 'readiness';
+            let gdir = '';
+
+            if (i>0 ) {
+                gdir = graph_collection[i-1][0]; 
+                thisgraph = graph_collection[i-1][2];
+            }
+
+            graphs_this_page.push(gdir + '/' + thisgraph);  // copy graph name into array for this page
+
+	}
+
+    } else  {    // detector page
 	
         let j = det_list.indexOf(Detector) - 1;   // because det_list starts w overview
 
@@ -270,24 +294,6 @@ async function get_list_of_graphs() {
 	    graphs_this_page.push(gdir + '/' + thisgraph);	    
 	}
 
-	
-    } else  {    // overview page
-
-	let npages = det_list.length;  // NB it starts with "" for overview
-        
-        for (let i = 0; i < npages; i++) {
-    
-            let thisgraph = 'readiness';
-            let gdir = '';
-
-            if (i>0 ) {
-                gdir = graph_collection[i-1][0]; 
-                thisgraph = graph_collection[i-1][2];
-            }
-
-            graphs_this_page.push(gdir + '/' + thisgraph);  // copy graph name into array for this page
-
-	}	
     }
 }
 
@@ -793,14 +799,35 @@ select_det.addEventListener('change',function() {
 
 select_graph.addEventListener('change',function() {
 
-    Graph = select_graph.value;
+    const Graph = select_graph.value;
+    if (Graph == '') return;
+
+
+  const btn = document.getElementById("reload");
+  btn.style.display = "none";
+
+  const RP = select_rp.value;
+  const ver = select_ver.value;
+  const det = select_det.value;
+
+
     
+  // trim local bookmark #graphname
+    
+  let new_url = document.URL.split("#")[0];
+    new_url = new_url.split("?")[0] + `?RunPeriod=${RP}&Version=${ver}&Detector=${det}#${Graph}`;
+  
+
+  console.log(new_url);
+  window.location.assign(new_url);
+
+    /*
     console.log('graph menu changed');
 
     if (Graph != "") {
 	document.getElementById(Graph).scrollIntoView();
     }
-
+*/
 });
 
 
