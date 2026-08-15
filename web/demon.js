@@ -752,6 +752,9 @@ select_rp.addEventListener('change',function() {
   const sel = document.getElementById("select_det");
   sel.style.display = "none";
 
+  const sel2 = document.getElementById("select_graph");
+  sel2.style.display = "none";
+    
   const btn = document.getElementById("reload");
   btn.style.display = "inline";
 
@@ -765,6 +768,9 @@ select_ver.addEventListener('change',function() {
   const sel = document.getElementById("select_det");
   sel.style.display = "none";
 
+  const sel2 = document.getElementById("select_graph");
+  sel2.style.display = "none";
+    
   const btn = document.getElementById("reload");
   btn.style.display = "inline";
 
