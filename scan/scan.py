@@ -576,6 +576,7 @@ gr = make_graph('readiness','Run readiness',nruns,x,y)
 
 if gr != None :
     gr.GetXaxis().SetRangeUser(x[0],x[nruns-1])
+    gr.SetEditable(False);
     gr.Write()
 
 
@@ -748,6 +749,7 @@ for i in range(len(pagenames)):
             continue
 
         gr.GetXaxis().SetRangeUser(x[0],x[nruns-1])
+        gr.SetEditable(False);
         gr.Write()
         
         if thing in graphstomg:
@@ -793,6 +795,7 @@ for i in range(len(pagenames)):
             # generates a warning message, but it does set the axis range as specified.
 
             gr.GetXaxis().SetRangeUser(x[0],x[nruns-1])
+            gr.SetEditable(False);
             gr.Write()
 
         if gname in graphstomg:
@@ -828,7 +831,8 @@ for i in range(len(pagenames)):
             gr.SetMarkerStyle(mg_symbols[n_g % 4])
             gr.SetMarkerSize(0.5)
             gr.SetLineWidth(0)      # Hide the errorbars on tgrapherror multigraphs
-
+            gr.SetEditable(False);
+            
             # shorten the names of the graphs, to make the legend easier to read
             newname = ''
             
