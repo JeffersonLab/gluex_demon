@@ -25,7 +25,7 @@ var plotnames = "";  // file containing lists of plots
 var year_month = "";
 
 
-//import { openFile, draw, create, settings } from 'https://jsroot.gsi.de/dev/modules/main.mjs';
+//import { openFile, draw, create, settings } from 'https://jsroot.gsi.de/latest/modules/main.mjs';
 import { openFile, draw, create, settings } from 'https://root.cern/js/latest/modules/main.mjs';
 
 
