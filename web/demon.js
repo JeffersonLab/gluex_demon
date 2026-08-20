@@ -350,80 +350,88 @@ async function build_page() {
 	
 	//console.log('looking for',fullgname);
 
-	let rootgraph = null;  
-	rootgraph = await file.readObject(fullgname).catch((err) => {
-	    console.log(`Graph ${fullgname} not found in root file`);
-	    console.error(err);
-	});
+        let rootgraph = null;  
+        rootgraph = await file.readObject(fullgname).catch((err) => {
+            console.log(`Graph ${fullgname} not found in root file`);
+            console.error(err);
+        });
 
-	if (rootgraph == null) continue;
+        if (rootgraph == null) continue;
 	
-	let gname = fullgname.split('/')[1];		
+        let gname = fullgname.split('/')[1];		
 
-	rootgraphs.push(rootgraph);
-	gnames_present.push(gname);
+        rootgraphs.push(rootgraph);
+        gnames_present.push(gname);
 
-	if (!gname.endsWith('status_all')) {//continue;   // Collect names of MG component graphs to be shown (status_all components aren't included)
-	    if (rootgraph._typename == 'TMultiGraph') {
-		for (const x of rootgraph.fGraphs.arr) {
-		    mg_components.push(x.fName + '_' + gname);
-		}	    
-	    }
-	}
+        if (!gname.endsWith('status_all')) {//continue;   // Collect names of MG component graphs to be shown (status_all components aren't included)
+           if (rootgraph._typename == 'TMultiGraph') {
+                for (const x of rootgraph.fGraphs.arr) {
+                    mg_components.push(x.fName + '_' + gname);
+                }	    
+            }
+        }
 
-	// debug code in case a graph loads incorrectly
-	// fX should be integers stored as floats
+	/*
+        // debug code in case a graph loads incorrectly
+        // fX should be integers stored as floats
 	
-	let problemgraph = '';  // only filled if there's trouble with a TMultiGraph graph
-	let problems_this_graph = false;
+        let problemgraph = '';  // only filled if there's trouble with a TMultiGraph graph
+        let problems_this_graph = false;
 	
-	//if (gname == 'CDC_status_all') rootgraph.fGraphs.arr[0].fX[3] = 13.14; // test bug
-	//if (gname == 'n_missing') rootgraph.fX[3] = 13.14; // test bug
+        //if (gname == 'CDC_status_all') rootgraph.fGraphs.arr[0].fX[3] = 13.14; // test bug
+        //if (gname == 'n_missing') rootgraph.fX[3] = 13.14; // test bug
 	
-	if (rootgraph._typename == 'TGraph') {
-	    for (const x of rootgraph.fX) {
-		if (Math.abs(x - Math.trunc(x)) > 0.001) {
-		    problems_this_graph = true;
-		}
-	    }
-	    if (problems_this_graph) console.error(gname + ' loaded incorrectly');
+        if (rootgraph._typename == 'TGraph') {
+            for (const x of rootgraph.fX) {
+                if (Math.abs(x - Math.trunc(x)) > 0.001) {
+                    problems_this_graph = true;
+                }
+            }
+            if (problems_this_graph) console.error(gname + ' loaded incorrectly');
 	    
-	} else if (rootgraph._typename == 'TMultiGraph') {
+        } else if (rootgraph._typename == 'TMultiGraph') {
 	    
-	    for (const g of rootgraph.fGraphs.arr) {
-		let newproblems = false;
+            for (const g of rootgraph.fGraphs.arr) {
+                let newproblems = false;
 		
-		for (const x of g.fX) {
-		    if (Math.abs(x - Math.trunc(x)) > 0.001) {
-			newproblems = true;
-		    }
-		}
+                for (const x of g.fX) {
+                if (Math.abs(x - Math.trunc(x)) > 0.001) {
+                        newproblems = true;
+                    }
+                }
 
-		if (newproblems) console.error(g.fName + ' loaded incorrectly');
-		if (newproblems) problemgraph = g.fName;
-		if (newproblems) problems_this_graph = true;
-	    }
-	}
+                if (newproblems) console.error(g.fName + ' loaded incorrectly');
+                if (newproblems) problemgraph = g.fName;
+                if (newproblems) problems_this_graph = true;
+            }
+        }
 
-	if (problems_this_graph) {
+        if (problems_this_graph) {
 
-	    problemdiv = gname.replace("_status_all","");
+            problemdiv = gname.replace("_status_all","");
 	    
-	    let glink = document.URL.split("#")[0] + '#' + gname.replace("_status_all","");
-	    glink = '<a href=' + glink + '>' + gname.replace("_status_all","") + '</a>';
+            let glink = document.URL.split("#")[0] + '#' + gname.replace("_status_all","");
+            glink = '<a href=' + glink + '>' + gname.replace("_status_all","") + '</a>';
 
-	    let message = 'Graph ' + glink + ' loaded incorrectly! <br/>';
-	    problem_msg = '';
-	    if (problemgraph) problem_msg += "This is a MultiGraph; the problem is in its Graph named '" + problemgraph + "'.<br/>";	    
-	    problem_msg += 'Please right-click on the graph, choose Inspect, click json, and send the downloaded file (and the url) to Naomi';
+            let message = 'Graph ' + glink + ' loaded incorrectly! <br/>';
+            problem_msg = '';
+            if (problemgraph) problem_msg += "This is a MultiGraph; the problem is in its Graph named '" + problemgraph + "'.<br/>";	    
+            problem_msg += 'Please right-click on the graph, choose Inspect, click json, and send the downloaded file (and the url) to Naomi';
 	
-	    show_problem(message + problem_msg);
+            show_problem(message + problem_msg);
 
-	    // Cannot write anything into the graph div as it does not exist yet
+            // Cannot write anything into the graph div as it does not exist yet
 	    
-	}
+        }
+        
+        // end of debug code
+        */
+    }
 
-	// end of debug code
+    if (rootgraphs.length == 0) {
+        console.log('No graphs found');
+        show_problem('No graphs found');
+        return;
     }
 
     
