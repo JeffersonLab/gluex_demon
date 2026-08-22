@@ -29,8 +29,6 @@ var year_month = "";
 import { openFile, draw, create, settings } from 'https://root.cern/js/latest/modules/main.mjs';
 
 
-//$(document).ready(async function () {
-
 await get_url_args();
 
 RP_list = await readlist(RP_file, true);
@@ -87,10 +85,6 @@ pagenames = `./${RunPeriod}/${Version}/monitoring_pagenames_${year_month}_ver${V
 plotnames = `./${RunPeriod}/${Version}/monitoring_plotnames_${year_month}_ver${Version}.txt`;
 
 let compare_link = `https://halldweb.jlab.org/gluex_demon/compare.html?RunPeriod=${RunPeriod}&Version=${Version}`;
-
-console.log("started");
-
-
     
 await getdetectornames();	// this fills det_list and graph_collection
 console.log("collected detector names and graphs");
@@ -112,7 +106,6 @@ let link_3 = `<a href="${compare_link}">Compare graphs</a>`;
 
 if (Detector !== "") {
     subtitle = Detector;
-//    document.getElementById("return").innerHTML = `<a href="${document.URL.split("&Detector")[0]}">Return to overview page</a>`;
 }
 
 document.getElementById("Detector").innerHTML = subtitle;
@@ -121,29 +114,23 @@ document.getElementById("rootfile").innerHTML = link_1;
 document.getElementById("csv").innerHTML = link_2;
 document.getElementById("compare").innerHTML = link_3;
 
-document.getElementById("loading").innerHTML = "Loading...";
+console.log("getting the list of graphs");
 
-console.log("before getting the list");
-
-//  await make_csv_link();
-    
 await get_list_of_graphs();
-
-console.log('awaiting build_page');
-await build_page();
 
 let selected = Graph;
 if (selected == "") selected = "Overview";
 
-await fillmenu("select_graph",gr_list,Graph);
-//console.log('?');
+console.log('awaiting build_page');
 
-if (Graph != "") {
-    document.getElementById(Graph).scrollIntoView();
-}
+await build_page();
+
+await fillmenu("select_graph",gr_list,selected);
 
 console.log('page ready');
-//});
+
+
+//------------------------------------
 
 
 function get_url_args() {
@@ -234,10 +221,7 @@ async function getdetectornames() {
         graph_collection.push(lineArr[i].split(','));
         let name_without_spaces = graph_collection[i][0].replaceAll(" ","_");         
         det_list.push(name_without_spaces);
-            
-//        statusgraphs.push((graph_collection[i][2]));   // overall readiness is first
     }
-
 
     plot_collection = await fetchjson(plotnames);
 
@@ -323,7 +307,7 @@ async function make_csv_link()  {
 
 async function build_page() {
 
-    // graphs_this_page and gr_list are global
+    // graphs_this_page array is global
 
     let file = await openFile(graphs_filename);//'./RunPeriod-2023-01/v6/monitoring_graphs.root');
 
@@ -332,259 +316,195 @@ async function build_page() {
 
     console.log("opened root file");
 
-    let styletext = ' class="graphpanel"';
-    let styletext2 = ' class="statusgraphpanel"';
+    // make html containing empty divs before reading the root file
 
-    const rootgraphs = [];
-    const legends = [];
-    const gnames_present = [];
+    document.getElementById("graphs").innerHTML = '';    
+    console.log();
+    for (const fullgname of graphs_this_page) {	
+        let gname = fullgname.split("/")[1];
+	let html = make_graph_div(gname);
+        document.getElementById("graphs").innerHTML += html;
+	gr_list.push(gname.replace("_status_all",""));
+    }
 
-    const mg_components = [];
-
-    let problemdiv = '';  // divname for any graph that loaded incorrectly
-    let problem_msg = '';
-    
-    // eliminate any missing graphs from the list
+    const promises = [];
+    const mg_cpts = [];
+    const missing = [];
     
     for (const fullgname of graphs_this_page) {
-	
-	//console.log('looking for',fullgname);
 
-        let rootgraph = null;  
-        rootgraph = await file.readObject(fullgname).catch((err) => {
-            console.log(`Graph ${fullgname} not found in root file`);
+	console.log(fullgname);
+	//let gname = fullgname.split("/")[1]; same as rootgraph.fName
+	
+        const promise = file.readObject(fullgname).then(rootgraph => {
+	    
+	    const mg_cpt = draw_graph_and_legend(rootgraph);
+	    if (mg_cpt) mg_cpts.push(mg_cpt);
+	    
+        }).catch(err => {
+            console.log(`Graph ${fullgname} was not found in the root file`);
             console.error(err);
+
+	    let gname = fullgname.split("/")[1];
+	    let anchorname = get_anchor_name(gname);
+	    
+	    document.getElementById(gname + "_wrapper").innerHTML = '';
+	    missing.push(anchorname);
         });
-
-        if (rootgraph == null) continue;
 	
-        let gname = fullgname.split('/')[1];		
+        promises.push(promise);
+    }
 
-        rootgraphs.push(rootgraph);
-        gnames_present.push(gname);
+    await Promise.all(promises);
 
-        if (!gname.endsWith('status_all')) {//continue;   // Collect names of MG component graphs to be shown (status_all components aren't included)
-           if (rootgraph._typename == 'TMultiGraph') {
-                for (const x of rootgraph.fGraphs.arr) {
-                    mg_components.push(x.fName + '_' + gname);
-                }	    
+    if (missing.length > 0) {
+        console.log('Missing graphs:');
+	console.log(missing);
+ 
+        for (const x of missing) {
+            const index = gr_list.indexOf(x);
+
+            if (index > -1) { // only splice array when item is found
+                gr_list.splice(index, 1); // 2nd parameter means remove one item only
+                console.log('removing',x,'from gr_list');
             }
         }
+    }	
 
-	/*
-        // debug code in case a graph loads incorrectly
-        // fX should be integers stored as floats
-	
-        let problemgraph = '';  // only filled if there's trouble with a TMultiGraph graph
-        let problems_this_graph = false;
-	
-        //if (gname == 'CDC_status_all') rootgraph.fGraphs.arr[0].fX[3] = 13.14; // test bug
-        //if (gname == 'n_missing') rootgraph.fX[3] = 13.14; // test bug
-	
-        if (rootgraph._typename == 'TGraph') {
-            for (const x of rootgraph.fX) {
-                if (Math.abs(x - Math.trunc(x)) > 0.001) {
-                    problems_this_graph = true;
-                }
-            }
-            if (problems_this_graph) console.error(gname + ' loaded incorrectly');
-	    
-        } else if (rootgraph._typename == 'TMultiGraph') {
-	    
-            for (const g of rootgraph.fGraphs.arr) {
-                let newproblems = false;
-		
-                for (const x of g.fX) {
-                if (Math.abs(x - Math.trunc(x)) > 0.001) {
-                        newproblems = true;
-                    }
-                }
+    if (mg_cpts.length == 0) return;
 
-                if (newproblems) console.error(g.fName + ' loaded incorrectly');
-                if (newproblems) problemgraph = g.fName;
-                if (newproblems) problems_this_graph = true;
-            }
-        }
-
-        if (problems_this_graph) {
-
-            problemdiv = gname.replace("_status_all","");
-	    
-            let glink = document.URL.split("#")[0] + '#' + gname.replace("_status_all","");
-            glink = '<a href=' + glink + '>' + gname.replace("_status_all","") + '</a>';
-
-            let message = 'Graph ' + glink + ' loaded incorrectly! <br/>';
-            problem_msg = '';
-            if (problemgraph) problem_msg += "This is a MultiGraph; the problem is in its Graph named '" + problemgraph + "'.<br/>";	    
-            problem_msg += 'Please right-click on the graph, choose Inspect, click json, and send the downloaded file (and the url) to Naomi';
-	
-            show_problem(message + problem_msg);
-
-            // Cannot write anything into the graph div as it does not exist yet
-	    
-        }
-        
-        // end of debug code
-        */
-    }
-
-    if (rootgraphs.length == 0) {
-        console.log('No graphs found');
-        show_problem('No graphs found');
-        return;
-    }
-
+    //mg_cpts might not be ordered.
+    let found_first = false;
     
-    // show the MG components after the other graphs
-    const gnames1 = [];
-    const gnames2 = [];
-    
-    for (const gname of gnames_present) {
-	if (mg_components.includes(gname)) {
-	    gnames2.push(gname);
-	} else {
-	    gnames1.push(gname);
+    for (const x of gr_list) {
+	if (mg_cpts.includes(x)) {
+	    document.getElementById(x).innerHTML = '<div class="before_mg_constituents">MultiGraph components are shown below.</div>';           found_first = true;
+	    console.log('First mg component graph is ',x);
 	}
+	if (found_first) break;
     }
 
-    const gnames = gnames1.concat(gnames2);
-
-    gr_list = [];    
-    for (const gname of gnames) {
-	let itemname = gname.replace("_status_all","");
-	gr_list.push(itemname);
-    }
-    const first_mg = gnames2[0]
-    
-    // make complete html page before filling the divs with graphs
-
-    let divtext = '';
-
-    for (const gname of gnames) {
-
-	const clickelement = 'click_info_' + gname;
-	let anchorname = gname;
-        let style = styletext;
-	let details = '';
-
-	if (gname.endsWith("_status_all")) {
-	    anchorname = gname.substring(0,gname.length-11);
-	    style = styletext2;
-	}
-
-	if (Detector != '' && gname == first_mg) {
-	    divtext += '<div class="before_mg_constituents"></div>';		
-        }
-
-	if (Detector == '' && gname != 'readiness') {
-
-            let thisdetector = gname.replace('_status_all',''); 
-	    let link = document.URL.split("?")[0] + `?RunPeriod=${RunPeriod}&Version=${Version}&Detector=${thisdetector}`;   // ignore #graphname
-            details = '    &nbsp;&nbsp;<a href=' + link + '>Details</a>';
-
-	}
-	
-	const new_html = make_graph_div_html(gname, anchorname, clickelement, style, details);
-
-	divtext = divtext + new_html;
-
-    }
-
-    
-    document.getElementById("graphs").innerHTML = divtext;
-    
-    console.log('drawing graphs');
-    
-    for (const rootgraph of rootgraphs) {
-
-	Object.assign(rootgraph, {fMarkerSize: 0.5, fMarkerStyle: 8, fMarkerColor: 890, fEditable: 0});
-
-	const gname = rootgraph.fName;
-	
-	// set range of status graphs uniformly
-        if (gname.includes('status')) {
-            rootgraph.fHistogram.fMinimum = -1.5;
-            rootgraph.fHistogram.fMaximum = 1.5;
-	    rootgraph.fHistogram.fYaxis.fNdivisions = 103;
-	    rootgraph.fHistogram.fXaxis.fLabelSize = 0.047;
-	    rootgraph.fHistogram.fYaxis.fLabelSize = 0.047;
-        }
-    
-        let drawlegend = false;	
-	let legend = null;
-
-	// don't draw legend on the status composite multigraph made in JS bc it kills the graph	
-	if (rootgraph._typename == 'TMultiGraph') { // && !gname.includes('composite')) {
-	    if (rootgraph.fGraphs) {
-		if (rootgraph.fGraphs.arr) {
-		    if (rootgraph.fGraphs.arr.length>1 ) drawlegend = true;
-		}
-	    }
-	}
-	
-	if (drawlegend) {
-   	    legend = await create('TLegend');    		
-
-	    const garr = rootgraph.fGraphs.arr;
-	    let y1 = 0.9 - 0.1*garr.length;
-	    if (y1<0.18) y1=0.18;
-		
-            Object.assign(legend, { fX1NDC: 0.91, fY1NDC: y1, fX2NDC: 1.0, fY2NDC: 0.9, fColumnSeparation:0, fMargin:0.15 });
-
-	    for (const g of garr) {
-
-		let entry = await create('TLegendEntry');
-    		Object.assign(entry, {fObject: g, fLabel: g.fName, fOption: 'p'});			
-   		await legend.fPrimitives.Add(entry);
-
-	    }
-        }
-	
-        const divname = 'gdiv_' + gname;      
-	//console.log('drawing into',divname);
-
-        let painter = await draw(divname, rootgraph, 'ap;gridx;gridy;').then(painter => {     // draw the graph first, otherwise xmin gets reset to 0  !
-	    const clickelement = 'click_info_' + gname;
-	    painter.configureUserClickHandler(info => UserHandler(info, divname, clickelement));
-	});
-	    
-	if (drawlegend) await draw(divname,legend);
-
-	//console.log('drawing graph finished');
-    }
-
-    // debug code
-    if (problemdiv != '') {
-	const ele = document.getElementById(problemdiv);	
-	ele.innerHTML = 'The graph below was loaded incorrectly!<br/>' + problem_msg;
-	ele.style.color = "red";
-    }
-    
 }
 
 
-function make_graph_div_html(graphname, anchorname, clickelement, style, details='') {
-    
-    let divtext = '';
+function get_anchor_name(gname) {
 
-    divtext += `<div id="${anchorname}_wrapper" class="graph_wrapper">` + "\n";
-    
-    divtext += `  <div id="${anchorname}" class="graph_top"></div>` + "\n";
-    divtext += '  <div id="gdiv_' + graphname + '" ' + style + '></div>' + "\n";
+    let anchorname = gname;
 
-    divtext += `  <div class="graph_bottom">` + "\n";
+    if (gname.endsWith("_status_all")) anchorname = gname.substring(0,gname.length-11);
+
+    return anchorname;
+
+}
+
+
+function make_graph_div(gname) {
+
+
+    const styletext = ' class="graphpanel"';
+    const styletext2 = ' class="statusgraphpanel"';
+
+    let style = styletext;
+    if (gname.endsWith("_status_all")) style = styletext2;
+
+    let anchorname = get_anchor_name(gname);
+
+    //console.log('   ',anchorname);
+
+    let divtext = `<div id="${anchorname}_wrapper" class="graph_wrapper">\n`; 
+    
+    divtext += `  <div id="${anchorname}" class="graph_top"></div>\n`; 
+    divtext += '  <div id="gdiv_' + anchorname + '" ' + style + '></div>\n'; 
+    divtext += '  <div id="glinks_' + anchorname + '" class="graph_bottom"></div>\n'; 
+    divtext += '</div>\n';
+    
+    return divtext;
+        
+}
+
+
+function make_graph_links_html(anchorname) {
+
+    const clickelement = 'click_info_' + anchorname;
+
+    let details = '';
+
+    if (Detector == '' && anchorname != 'readiness') {
+        let link = document.URL.split("?")[0] + `?RunPeriod=${RunPeriod}&Version=${Version}&Detector=${anchorname}`;
+        details = '    &nbsp;&nbsp;<a href=' + link + '>Details</a>';
+    }
+        
+    let divtext = '\n';
+
     divtext += `    <button title="Copy the url for this plot" class="graph_url" id="btn_${anchorname}"><img src="link.png" alt="Copy url"></button>` + '\n';
     divtext += `    &nbsp;&nbsp;<a href="#${anchorname}">${anchorname}</a>`;
     divtext += '    &nbsp;&nbsp;<a href="#top">Top of page</a>';
-
     divtext += details;
-	    
     divtext += '    &nbsp;&nbsp;<span id="' + clickelement + '" class="click_info"></span>\n';
-    divtext += '  </div>';
-    divtext += '</div>\n\n';
-    
+
     return divtext;
+        
+}
+
+function draw_graph_and_legend(rootgraph) {
+
+    const aname = get_anchor_name(rootgraph.fName);
+
+    const div_links = 'glinks_' + aname;    
+    const divhtml = make_graph_links_html(aname);
 	    
+    document.getElementById(div_links).innerHTML = divhtml;
+	    
+    Object.assign(rootgraph, {fMarkerSize: 0.5, fMarkerStyle: 8, fMarkerColor: 890, fEditable: 0});
+
+    // set range of status graphs uniformly
+    if (rootgraph.fName.includes('status')) {
+        rootgraph.fHistogram.fMinimum = -1.5;
+        rootgraph.fHistogram.fMaximum = 1.5;
+        rootgraph.fHistogram.fYaxis.fNdivisions = 103;
+        rootgraph.fHistogram.fXaxis.fLabelSize = 0.047;
+        rootgraph.fHistogram.fYaxis.fLabelSize = 0.047;
+    }
+    
+    let drawlegend = false;	
+
+    // don't draw legend on the status composite multigraph made in JS bc it kills the graph	
+    if (rootgraph._typename == 'TMultiGraph') { // && !gname.includes('composite')) {
+        if (rootgraph.fGraphs) {
+            if (rootgraph.fGraphs.arr) {
+                if (rootgraph.fGraphs.arr.length > 1 ) drawlegend = true;
+	    }
+	}
+    }
+	    
+    const div_graph = 'gdiv_' + aname;
+
+    draw(div_graph, rootgraph, 'ap;gridx;gridy;').then(painter => {     // draw the graph first, otherwise xmin gets reset to 0  !
+        const clickelement = 'click_info_' + aname;
+        painter.configureUserClickHandler(info => UserHandler(info, div_graph, clickelement));
+    });
+
+    if (drawlegend) {
+        let legend = create('TLegend');
+        const garr = rootgraph.fGraphs.arr;
+        let y1 = 0.9 - 0.1*garr.length;
+        if (y1<0.18) y1=0.18;
+
+        Object.assign(legend, { fX1NDC: 0.91, fY1NDC: y1, fX2NDC: 1.0, fY2NDC: 0.9, fColumnSeparation:0, fMargin:0.15 });
+
+        for (const g of garr) {
+            let entry = create('TLegendEntry');
+            Object.assign(entry, {fObject: g, fLabel: g.fName, fOption: 'p'});            
+            legend.fPrimitives.Add(entry);
+        }
+        draw(div_graph,legend);
+    }
+
+    let first_mg_cpt = null;
+    if (Detector != "" && !rootgraph.fName.endsWith('status_all') && rootgraph._typename == 'TMultiGraph') {
+	first_mg_cpt = rootgraph.fGraphs.arr[0].fName + '_' + rootgraph.fName;
+    }
+    return first_mg_cpt;    
 }
 
 
@@ -605,9 +525,9 @@ async function readlist(listfile, reverse=false) {
 
         if (returntext[returntext.length-1] === '') returntext.pop();
 
-	if (reverse) {
-	    returntext.reverse();
-	}
+    if (reverse) {
+        returntext.reverse();
+    }
     }
 
     return returntext;
@@ -618,12 +538,10 @@ async function fillmenu(select_id,list,preselect) {
 
     let x = document.getElementById(select_id);
 
-    
     // remove existing list
     for (let i = x.options.length-1 ; i>=0; i-- ) {           
         x.options.remove(i);
     }
-
 
     for (let i=0; i<list.length; i++) {
 
@@ -634,16 +552,12 @@ async function fillmenu(select_id,list,preselect) {
              c.selected = true;
          } 
     }
-
 }
 
 
 function show_problem(message) {
     document.getElementById("problems").innerHTML = message;
 }
-
-
-
 
 
 function UserHandler(info, divname, clickelement) {
@@ -669,50 +583,50 @@ function UserHandler(info, divname, clickelement) {
     
     if (showplot) {
 
-	// single graphs:       divname gdiv_n_missing,          info.name n_missing  => graph n_missing
-	// single mg component: divname gdiv_eff0_hitefficiency, info.name eff0_hitefficiency => eff0_hitefficiency
-	
-	// mg :                 divname gdiv_hitefficiency,      info.name eff0 -> eff0_hitefficiency
-	// status mg :          divname gdiv_CDC_status_all,     info.name occ -> occ_status
-	
-	let gname = divname.slice(5); // remove gdiv_ from the front
-
-	if (gname != info.name) { // mg
-	    if (divname.endsWith('status_all')) {
-		gname = info.name + '_status';
-	    } else {
-		gname = info.name + '_' + gname;
-	    }
-	}
-	
-	console.log('graph name:',gname);
+    // single graphs:       divname gdiv_n_missing,          info.name n_missing  => graph n_missing
+    // single mg component: divname gdiv_eff0_hitefficiency, info.name eff0_hitefficiency => eff0_hitefficiency
     
-	let thisdetector = Detector;
+    // mg :                 divname gdiv_hitefficiency,      info.name eff0 -> eff0_hitefficiency
+    // status mg :          divname gdiv_CDC_status_all,     info.name occ -> occ_status
+    
+    let gname = divname.slice(5); // remove gdiv_ from the front
 
-	if (Detector == '') {
-	    thisdetector = divname.slice(5).replace('_status_all','');
-	}
+    if (gname != info.name) { // mg
+        if (divname.endsWith('status_all')) {
+        gname = info.name + '_status';
+        } else {
+        gname = info.name + '_' + gname;
+        }
+    }
+    
+    console.log('graph name:',gname);
+    
+    let thisdetector = Detector;
 
-	let run_6digits = `${run}`.padStart(6,"0");   // add leading 0 for early run numbers
-	let plotname = '';
-	
-	if (plot_collection[thisdetector][gname]) {
-	    plotname = plot_collection[thisdetector][gname];
-	    console.log('click: plotname: ' +plotname);
-	} else {
+    if (Detector == '') {
+        thisdetector = divname.slice(5).replace('_status_all','');
+    }
+
+    let run_6digits = `${run}`.padStart(6,"0");   // add leading 0 for early run numbers
+    let plotname = '';
+    
+    if (plot_collection[thisdetector][gname]) {
+        plotname = plot_collection[thisdetector][gname];
+        console.log('click: plotname: ' +plotname);
+    } else {
             console.log(`click: plot_collection[${thisdetector}][${gname}] not found`);
-	}
+    }
 
-	if (plotname) {
+    if (plotname) {
 
             let ploturl = `https://halldweb.jlab.org/work/halld2/data_monitoring/${RunPeriod}/mon_ver${Version}/Run${run_6digits}/${plotname}.png`;
             if (Version[0] == "R") {
-		let rest = Version[4];
-		ploturl = `https://halldweb.jlab.org/work/halld2/data_monitoring/${RunPeriod}/recon_ver0${rest}/Run${run_6digits}/${plotname}.png`;
-	    }
+        let rest = Version[4];
+        ploturl = `https://halldweb.jlab.org/work/halld2/data_monitoring/${RunPeriod}/recon_ver0${rest}/Run${run_6digits}/${plotname}.png`;
+        }
 
             linktext += `&nbsp;&nbsp;<a href=${ploturl}>Monitoring histogram (${run})</a>`;
-	}    
+    }    
     }
     
 
@@ -728,6 +642,7 @@ select_rp.addEventListener('change', async function () {
 
     Version = '';
     Detector = '';
+    Graph = '';
 
     let ver_list = await readlist(listfile);
     let most_recent = ver_list[ver_list.length-1];  // suggest as default
@@ -813,9 +728,8 @@ select_det.addEventListener('change',function() {
 
 select_graph.addEventListener('change',function() {
 
-    const Graph = select_graph.value;
-    if (Graph == '') return;
-
+  const Graph = select_graph.value;
+  if (Graph == '') return;
 
   const btn = document.getElementById("reload");
   btn.style.display = "none";
@@ -824,13 +738,10 @@ select_graph.addEventListener('change',function() {
   const ver = select_ver.value;
   const det = select_det.value;
 
-
-    
   // trim local bookmark #graphname
     
   let new_url = document.URL.split("#")[0];
-    new_url = new_url.split("?")[0] + `?RunPeriod=${RP}&Version=${ver}&Detector=${det}#${Graph}`;
-  
+  new_url = new_url.split("?")[0] + `?RunPeriod=${RP}&Version=${ver}&Detector=${det}#${Graph}`;
 
   console.log(new_url);
   window.location.assign(new_url);
@@ -839,35 +750,33 @@ select_graph.addEventListener('change',function() {
     console.log('graph menu changed');
 
     if (Graph != "") {
-	document.getElementById(Graph).scrollIntoView();
-    }
-*/
+    document.getElementById(Graph).scrollIntoView();
+    } */
+    
 });
 
 
-
 reload.addEventListener('click', function () {  
-console.log('reload');
-    const RP = select_rp.value;
-    const ver = select_ver.value;
-    const det = '';
+  console.log('reload');
+  const RP = select_rp.value;
+  const ver = select_ver.value;
     
-    let new_url = document.URL.split("#")[0];
-    new_url = new_url.split("?")[0] + `?RunPeriod=${RP}&Version=${ver}`;
+  let new_url = document.URL.split("#")[0];
+  new_url = new_url.split("?")[0] + `?RunPeriod=${RP}&Version=${ver}`;
 
-    //let new_url = document.URL.split("?")[0] + `?RunPeriod=${RP}&Version=${ver}`;
-
-    console.log(new_url);
-    window.location.assign(new_url);
+  console.log(new_url);
+  window.location.assign(new_url);
 
 });
 
 
 // copy-graph-url-to-clipboard code
-
 document.addEventListener('click', (event) => {
-  // Use .closest() to find the target element or its parent with a specific selector
-  const btn = event.target.closest('div.graph_names button.graph_url');
+    // Use .closest() to find the target element or its parent with a specific selector
+
+    console.log('clicked');
+    
+  const btn = event.target.closest('div.graph_bottom button.graph_url');
 
   if (btn) {
       console.log('Button clicked:', btn.id);
@@ -875,22 +784,20 @@ document.addEventListener('click', (event) => {
       if (btn.id) {
           let clicked_graph = btn.id.split("btn_")[1]
 
-	  if (clicked_graph) {
-	  
+      if (clicked_graph) {
+      
             const RP = select_rp.value;
             const ver = select_ver.value;
             const det = select_det.value;
 
-	    
-	  
-  	    let thisdet = "";
-	    if (det != "" && det != "Overview") {
-	        thisdet = `&Detector=${det}`;
-	    }
+          let thisdet = "";
+        if (det != "" && det != "Overview") {
+            thisdet = `&Detector=${det}`;
+        }
 
-	    let this_url = document.URL.split("#")[0];
+        let this_url = document.URL.split("#")[0];
             this_url = this_url.split("?")[0] + `?RunPeriod=${RP}&Version=${ver}${thisdet}#${clicked_graph}`;
-	      
+          
             console.log(clicked_graph);
             console.log(this_url);
 
@@ -901,18 +808,15 @@ document.addEventListener('click', (event) => {
             tempInput.setSelectionRange(0, 99999);
 
             try {
-     	      document.execCommand('copy');
-//    	      alert('URL copied to clipboard!');
+               document.execCommand('copy');
+//              alert('URL copied to clipboard!');
             } catch (err) {
-    	      alert('Could not copy URL, sorry.');
+              alert('Could not copy URL, sorry.');
             }
 
             document.body.removeChild(tempInput);
-	  }
       }
-
-      
-
+      }
   }
 }, {passive: true} );
 
