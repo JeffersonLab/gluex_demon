@@ -95,7 +95,7 @@ script = sys.argv.pop(0)
 nargs = len(sys.argv)
 
 if nargs<4 or nargs>7 or sys.argv[0] == "-h" or sys.argv[0] == "--h" or sys.argv[0] == "--help":
-    exit("\nThis script scans GlueX/Hall D detector monitoring histograms to create graphs.\n\nUsage: python scan.py -r Year-Month -v VersionNumber [-s CheckStatus] [path_to_monitoring_histogram_directory]\n    eg python scan.py -r 2022-05 -v 06 -s 1\n\nThe histogram directory is optional if it is the usual one. \n\nCheckStatus values act as follows:\n  -1: check all runs\n   0: check only runs with RCDB status >0 (this is the default)\n   1: check only runs with RCDB status=1")
+    exit("\nThis script scans GlueX/Hall D detector monitoring histograms to create graphs.\n\nUsage: python scan.py -r Year-Month -v VersionNumber [-s CheckStatus] [path_to_monitoring_histogram_directory]\n    eg python scan.py -r 2022-05 -v 06 -s 1\n\nThe histogram directory is optional if it is the usual one. \n\nCheckStatus values act as follows:\n  -1: check all runs\n   0: check only runs with RCDB status not 0 (this is the default)\n   1: check only runs with RCDB status=1")
 
 # monitoring modules
 
@@ -113,6 +113,7 @@ import rf
 import ps_e
 import photons
 import photons_cpp
+import photons26_3
 import photons26
 import rho
 import omega
@@ -130,13 +131,13 @@ import fdc_wire_resids
 modules_cpp = [photons_cpp, pi0_cpp, rf, timing_cpp, tracking_cpp, triggers, cdc_cpp, fdc, fdc_wire_resids, tof_1, fmwpc, ctof, evio] # modules for 2022-05
 modules_gx = [photons, rho, omega, pi0, rf, timing, tracking, triggers, cdc, fdc, fdc_wire_resids, sc, tof_1, evio] # before ecal
 modules_gx2 = [photons, rho, omega, pi02, rf, timing2, tracking2, triggers, cdc, fdc, fdc_wire_resids, sc, tof_1, evio]
-modules_gx26_3 = [photons26, omega, pi02, rf, timing2, tracking2, triggers26, cdc, fdc, fdc_wire_resids, sc, tof_1, evio]  # low energy, no rho
+modules_gx26_3 = [photons26_3, omega, pi02, rf, timing2, tracking2, triggers26, cdc, fdc, fdc_wire_resids, sc, tof_1, evio]  # low energy, no rho
 modules_gx26 = [photons26, rho, omega, pi02, rf, timing2, tracking2, triggers26, cdc, fdc, fdc_wire_resids, sc, tof_1, evio]  # with ecal
 
 
 testing = 0 # stop after <runlimit> files, print diagnostics
 runlimit = 1 # process this number of runs if testing=1
-checkstatus = 0  # process runs with RCDB status>0.  if =1, only process status=1 runs, if -1, process all runs
+checkstatus = 0  # process runs with RCDB status!=0.  if =1, only process status=1 runs, if -1, process all runs
 
 RunPeriod=""
 VersionNumber=""
@@ -161,7 +162,7 @@ if VersionNumber == "" :
 if histdir == "" : 
     histdir = '/work/halld/data_monitoring/RunPeriod-' + RunPeriod + '/mon_ver' + VersionNumber + '/rootfiles'
 if not (checkstatus == "-1" or checkstatus == "0" or checkstatus == "1" ) :
-    exit('CheckStatus is invalid, should be -1 (all runs), 0 (runs with status >0) or 1 (runs with status 1)')
+    exit('CheckStatus is invalid, should be -1 (all runs), 0 (runs with status !=0) or 1 (runs with status 1)')
 if RunPeriod == "2025-01" and VersionNumber == "01":
     checkstatus = 2025
     print('Starting from 131593, runs with at least 10M events, not checking RCDB status')
@@ -373,7 +374,7 @@ for filename in histofilelist:
                 
         elif checkstatus == 0 :
             condition = db.get_condition(run, "status")
-            if condition.value <= 0:
+            if condition.value == 0:
                 skiprun = 1
 
         elif checkstatus == 1 :
@@ -384,6 +385,8 @@ for filename in histofilelist:
         if RunPeriod == "2026-03" and run < 140302 :
             skiprun = 1
 
+        if RunPeriod == "2026-06" and run < 150097 :
+            skiprun = 1
         
         if skiprun:
             continue
@@ -805,7 +808,7 @@ for i in range(len(pagenames)):
             
    # now construct the multigraphs
         
-    mg_colours = [63, 887, 907, 807, 801]
+    mg_colours = [63, 907, 887, 807, 801]
     #mg_symbols = [107, 108, 109, 113]
     mg_symbols = [20, 21, 22, 23]
 

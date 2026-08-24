@@ -24,7 +24,7 @@ def rho_psigma_pse(rootfile) :
   #values = [-1, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None]
   values = default_values(names)
   png = ['HistMacro_p2pi','__PSPair_PSC_PS_PS_E','__PSPair_PSC_PS_PS_E','__PSPair_PSC_PS_PS_E','__PSPair_PSC_PS_PS_E','HistMacro_p2pi','HistMacro_p2pi','HistMacro_p2pi','HistMacro_p2pi','HistMacro_p2pi','HistMacro_p2pi','HistMacro_p2pi','HistMacro_p2pi','HistMacro_p2pi','HistMacro_p2pi','HistMacro_p2pi','HistMacro_p2pi','HistMacro_p2pi','HistMacro_p2pi']
-
+  
   if not rootfile :  # called by init function
     return [names, titles, values, png]
 
@@ -49,7 +49,7 @@ def rho_psigma_pse(rootfile) :
 #    hps = get_histo(rootfile, dirname, histoname, min_counts)
 
   
-  if not hps :
+  if (not (hpsit and hps)) :
     return values
 
   amo = test_for_amo(hps)
@@ -83,9 +83,6 @@ def rho_psigma_pse(rootfile) :
     
     if values[1] == None :
       status = -1
-
-  if not hpsit:
-    return values
 
   # --- p2pi hists psi histo ---
 
@@ -176,16 +173,15 @@ def test_for_amo(hps) :
   # diamond coh peak is about 1 GeV wide
   
   # See if counts exceed half max at 0.2 GeV below maximum
-
+  
   psmaxbin = hps.GetMaximumBin()
   psmaxe = hps.GetBinCenter(psmaxbin)
 
   halfmaxcounts = 0.5*hps.GetMaximum()
   
-  counts_before = hps.GetBinContent(hps.FindBin(psmaxe - 1.0))
-  counts_after = hps.GetBinContent(hps.FindBin(psmaxe + 0.5))   
-  #print(halfmaxcounts, counts_before, counts_after)
-
+  counts_before = hps.GetBinContent(hps.FindBin(psmaxe - 0.15))
+  counts_after = hps.GetBinContent(hps.FindBin(psmaxe + 0.1))   
+  
   amo = False
 
   if counts_before > halfmaxcounts and counts_after > halfmaxcounts :
@@ -197,53 +193,58 @@ def test_for_amo(hps) :
 def find_edge(h):
   
   # rebin the histo to find out where the coherent edge is
+
+  rebinfactor = 4
+  
   h2 = h.Clone("h2")
-  h2.Rebin(5) # h has 255 bins
+
+  h2.Rebin(rebinfactor)
+
+  #h2.SaveAs("test.C")
   
   h2maxbin = h2.GetMaximumBin()
+
+  h2_edge_end = h2maxbin+15
   
-  edge_start = h2maxbin*5
+#  for i in range(h2maxbin, h2maxbin + int(4*15/float(rebinfactor))) :     # edge width usually about 15 bins before rebinning
+#    print(i, h2.GetBinContent(i), h2.GetBinContent(i+1))
+#    if h2.GetBinContent(i+1) > h2.GetBinContent(i) :
+#      h2_edge_end = i
+#      break
 
-  for i in range(h2maxbin*5, (h2maxbin-2)*5, -1):
-    edge_start = i    # bin content(i) >= bincontent(i-1)
-    #print(i, h.GetBinContent(i), h.GetBinContent(i-1))
-    if h.GetBinContent(i) < h.GetBinContent(i-1) :
-      break
-
-
+#  print(h2_edge_end)
     
-  edge_end = (h2maxbin+1)*5  
-  for i in range((h2maxbin+1)*5, (h2maxbin+5)*5):   #start at maxbin+1 to avoid dips on top. width ~ 15 bins
-    if h.GetBinContent(i) > h.GetBinContent(i-1) :
-      break
+  if h2_edge_end == 0 :
+    return [None, None]
 
-    edge_end = i
+  if h2_edge_end == h2maxbin:
+    h2_edge_end += 1
+  
+  edge_start = 1 * (h2maxbin-1)
+  edge_end = 1 * h2_edge_end
 
   edge_width = edge_end - edge_start
 
   # find the derivative of the original histo for the edge region, fit to find the max    
+
+  hdiff = TH1I('hdiff','hdiff',  edge_width, h2.GetBinCenter(edge_start), h2.GetBinCenter(edge_end))
+
   
-  hdiff = TH1I('hdiff','hdiff',  edge_width, h.GetXaxis().GetBinUpEdge(edge_start), h.GetXaxis().GetBinUpEdge(edge_end))
+  for i in range(1, edge_width) :
+    hdiff.SetBinContent(i, h2.GetBinContent(edge_start-1+i) - h2.GetBinContent(edge_start+i))
+
+  g = TF1('g','gaus',h2.GetBinCenter(edge_start),h2.GetBinCenter(edge_end))
+
   
-  for i in range(0, edge_width) :
-    hdiff.SetBinContent(1+i, h.GetBinContent(edge_start+i) - h.GetBinContent(edge_start+i+1))    
-    #print(i+1, i+edge_start, hdiff.GetBinContent(i+1))
-
-    
-  g = TF1('g','gaus(0)',h.GetBinCenter(edge_start),h.GetBinCenter(edge_end))
-
-  g.SetParameter(1, hdiff.GetBinCenter(3))  # mean  
-  g.SetParameter(2, 2*hdiff.GetBinWidth(1)) # sigma
-
-  fitstat = hdiff.Fit(g,"WRSQ0")
+  g.SetParameter(2,h2.GetBinWidth(edge_start))
+  fitstat = hdiff.Fit(g,"WSQ0")
 
   #hdiff.SaveAs("diff.C")
   
   # The histo is shifted down by 0.5 bins, it contains diff between previous bin and present bin
   
   if fitstat.IsValid() :
-    #edge = 0.5*hdiff.GetBinWidth(1) + fitstat.Parameter(1)
-    edge = fitstat.Parameter(1)
+    edge = 0.5*h2.GetBinWidth(1) + fitstat.Parameter(1)
     edge_err = fitstat.GetErrors()[1]
 
     return_edge = float('%.4f'%(edge))
@@ -382,11 +383,11 @@ def accidentals(rootfile) :
 
     min_counts = 1000 # minimum counts required, default 100    
 
-    emin_L = 700      # integration window
-    emax_L = 750
+    emin_L = 920      # integration window for the low energy run
+    emax_L = 950
     
-    emin_R = 1180
-    emax_R = 1400
+    emin_R = 1027
+    emax_R = 1048
 
     histoname = 'PStagmEnergyInTime'
     PStagmEnergyInTime = get_histo(rootfile, dirname, histoname, min_counts)
@@ -430,8 +431,8 @@ def accidentals(rootfile) :
     emin_L = 700
     emax_L = 750
     
-    emin_R = 1180
-    emax_R = 1400
+    emin_R = 800
+    emax_R = 850
 
     
     if PStaghEnergyInTime and PStaghEnergyOutOfTime :
@@ -492,8 +493,8 @@ def accidentals(rootfile) :
 import os
 from ROOT import TFile
 from glob import glob
-histofilelist = sorted(glob('hists/*.root'))
+histofilelist = sorted(glob('hists26/*.root'))
 #
 for histofile in histofilelist:
   rootfile = TFile(histofile)
-  rho_psigma_pse(rootfile)
+  accidentals(rootfile)
