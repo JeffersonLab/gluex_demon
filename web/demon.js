@@ -22,9 +22,6 @@ var csv_filename = "";
 var pagenames = "";  // file containing lists of graphs
 var plotnames = "";  // file containing lists of plots
 
-var year_month = "";
-
-
 //import { openFile, draw, create, settings } from 'https://jsroot.gsi.de/latest/modules/main.mjs';
 import { openFile, draw, create, settings } from 'https://root.cern/js/latest/modules/main.mjs';
 
@@ -42,8 +39,9 @@ if ( RunPeriod === "" ) {
     
 } else if (! RP_list.includes(RunPeriod) ) {
 
-    show_problem(`${RunPeriod} is not known!`);
-
+    const url = document.URL.split("?")[0];
+    show_problem(`${RunPeriod} is not known! <a href="${url}">Start again</a>`);
+    
     RunPeriod = RP_list[0];
     Version = "";
     Detector = "";
@@ -65,9 +63,12 @@ if (Version === "") {
 
 } else if (! ver_list.includes(Version) ) {
 
-    show_problem(`${RunPeriod} version ${Version} is not known!`);
+    const url = document.URL.split("?")[0];
+    show_problem(`Version ${Version} is not known! <a href="${url}?RunPeriod=${RunPeriod}">Start again</a>`);
+
     Version = ver_list[0];                
     Detector = "";
+
 }
 
 await fillmenu("select_ver",ver_list,Version);
@@ -77,7 +78,7 @@ document.getElementById("RunPeriod").innerHTML = RunPeriod;
 document.getElementById("Version").innerHTML = 'Version ' + Version;
 
 
-year_month = RunPeriod.substring(10,17);
+const year_month = RunPeriod.substring(10,17);
 
 graphs_filename = `./${RunPeriod}/${Version}/monitoring_graphs_${year_month}_ver${Version}.root`;
 csv_filename = `./${RunPeriod}/${Version}/monitoring_data_${year_month}_ver${Version}.csv`;
@@ -99,16 +100,16 @@ await fillmenu("select_det",det_list,Detector);
 
 console.log('filled detector menu');
 
-let subtitle = "Overview";
+//let subtitle = "Overview";
 let link_1 = `<a href="${graphs_filename}">ROOT file</a>`;
 let link_2 = `<a href="${csv_filename}">CSV file</a>`;
 let link_3 = `<a href="${compare_link}">Compare graphs</a>`;    
 
-if (Detector !== "") {
-    subtitle = Detector;
-}
+//if (Detector !== "") {
+//    subtitle = Detector;
+//}
 
-document.getElementById("Detector").innerHTML = subtitle;
+//document.getElementById("Detector").innerHTML = subtitle;
 
 document.getElementById("rootfile").innerHTML = link_1;
 document.getElementById("csv").innerHTML = link_2;
@@ -121,11 +122,20 @@ await get_list_of_graphs();
 let selected = Graph;
 if (selected == "") selected = "Overview";
 
+await fillmenu("select_graph",gr_list,selected);
+
 console.log('awaiting build_page');
 
-await build_page();
+await build_page(); 
 
-await fillmenu("select_graph",gr_list,selected);
+console.log('Graph:',Graph);
+if (Graph) document.getElementById(Graph).scrollIntoView();
+
+
+// fill the menu again as nonexistent graphs are removed in build_page
+fillmenu("select_graph",gr_list,selected);
+
+
 
 console.log('page ready');
 
@@ -254,7 +264,8 @@ async function get_list_of_graphs() {
             }
 
             graphs_this_page.push(gdir + '/' + thisgraph);  // copy graph name into array for this page
-
+            gr_list.push(thisgraph.replace("_status_all",""));
+	    
 	}
 
     } else  {    // detector page
@@ -268,6 +279,8 @@ async function get_list_of_graphs() {
 	
 	graphs_this_page.push(gdir + '/' + status_composite);
 
+	gr_list.push(Detector);
+
 	// mg names appear before constituents
 	for (let i=1; i < ngraphs ; i++) {
 
@@ -276,10 +289,11 @@ async function get_list_of_graphs() {
 	    if (thisgraph.endsWith("_status")) continue;
 
 	    graphs_this_page.push(gdir + '/' + thisgraph);	    
+	    gr_list.push(thisgraph.replace("_status_all",""));
 	}
-
     }
 }
+
 
 async function make_csv_link()  {
 
@@ -324,7 +338,6 @@ async function build_page() {
         let gname = fullgname.split("/")[1];
 	let html = make_graph_div(gname);
         document.getElementById("graphs").innerHTML += html;
-	gr_list.push(gname.replace("_status_all",""));
     }
 
     const promises = [];
@@ -401,23 +414,19 @@ function get_anchor_name(gname) {
 function make_graph_div(gname) {
 
 
-    const styletext = ' class="graphpanel"';
-    const styletext2 = ' class="statusgraphpanel"';
-
-    let style = styletext;
-    if (gname.endsWith("_status_all")) style = styletext2;
+    let gstyle = "graphpanel";
+    if (gname.endsWith("_status_all")) gstyle = "statusgraphpanel";    
 
     let anchorname = get_anchor_name(gname);
 
-    //console.log('   ',anchorname);
-
     let divtext = `<div id="${anchorname}_wrapper" class="graph_wrapper">\n`; 
-    
+
     divtext += `  <div id="${anchorname}" class="graph_top"></div>\n`; 
-    divtext += '  <div id="gdiv_' + anchorname + '" ' + style + '></div>\n'; 
+    divtext += `  <div id="gdiv_${anchorname}" class="${gstyle}"></div>\n`; 
+        
     divtext += '  <div id="glinks_' + anchorname + '" class="graph_bottom"></div>\n'; 
     divtext += '</div>\n';
-    
+
     return divtext;
         
 }
@@ -429,22 +438,21 @@ function make_graph_links_html(anchorname) {
 
     let details = '';
 
-    if (Detector == '' && anchorname != 'readiness') {
+    if ((Detector == '' || Detector == "Overview") && anchorname != 'readiness') {
         let link = document.URL.split("?")[0] + `?RunPeriod=${RunPeriod}&Version=${Version}&Detector=${anchorname}`;
         details = '    &nbsp;&nbsp;<a href=' + link + '>Details</a>';
     }
         
-    let divtext = '\n';
+    let divtext = `    ${anchorname}`;    
+    divtext += `    &nbsp;&nbsp;<button title="Copy the url for this plot" class="graph_url" id="btn_${anchorname}"><img src="link.png" alt="Copy url"></button>` + '\n';
 
-    divtext += `    <button title="Copy the url for this plot" class="graph_url" id="btn_${anchorname}"><img src="link.png" alt="Copy url"></button>` + '\n';
-    divtext += `    &nbsp;&nbsp;<a href="#${anchorname}">${anchorname}</a>`;
-    divtext += '    &nbsp;&nbsp;<a href="#top">Top of page</a>';
     divtext += details;
     divtext += '    &nbsp;&nbsp;<span id="' + clickelement + '" class="click_info"></span>\n';
 
     return divtext;
         
 }
+
 
 function draw_graph_and_legend(rootgraph) {
 
@@ -572,64 +580,70 @@ function UserHandler(info, divname, clickelement) {
 
     // for overall status, show rcdb link only
 
-    let run = Math.trunc(info.obj.fX[info.bin]);  // fX contains floats
-    let rcdburl = `https://halldweb.jlab.org/rcdb/runs/info/${run}`;    
+    const run = Math.trunc(info.obj.fX[info.bin]);  // fX contains floats
+    const rcdburl = `https://halldweb.jlab.org/rcdb/runs/info/${run}`;
+    
     let linktext = `<a href=${rcdburl}><img src="rcdb.png" alt="RCDB" height="16" width="16"/></a>`;
+        
+    if (info.name != 'readiness') {
 
-    let ploturl = '';
-    let showplot = true;
+        // single graphs:       divname gdiv_n_missing,          info.name n_missing  => graph n_missing
+        // single mg component: divname gdiv_eff0_hitefficiency, info.name eff0_hitefficiency => eff0_hitefficiency
     
-    if (info.name == 'readiness') showplot = false;
-    
-    if (showplot) {
+        // mg :                 divname gdiv_hitefficiency,      info.name eff0 -> eff0_hitefficiency
+        // status mg :          divname gdiv_CDC,                info.name occ -> occ_status
 
-    // single graphs:       divname gdiv_n_missing,          info.name n_missing  => graph n_missing
-    // single mg component: divname gdiv_eff0_hitefficiency, info.name eff0_hitefficiency => eff0_hitefficiency
-    
-    // mg :                 divname gdiv_hitefficiency,      info.name eff0 -> eff0_hitefficiency
-    // status mg :          divname gdiv_CDC_status_all,     info.name occ -> occ_status
-    
-    let gname = divname.slice(5); // remove gdiv_ from the front
+        let gname = divname.slice(5); // remove gdiv_ from the front
+        console.log('Detector',Detector);
+	console.log('div:',divname);
+	console.log('temp gname:',gname);
+	console.log('info.name',info.name);
+        let thisdetector = Detector; // use as the plot_collection array index
+	
+        if (Detector == '' || Detector == "Overview") {
 
-    if (gname != info.name) { // mg
-        if (divname.endsWith('status_all')) {
-        gname = info.name + '_status';
+	    thisdetector = gname;	    
+	    gname = info.name + "_status";
+	    
         } else {
-        gname = info.name + '_' + gname;
-        }
-    }
-    
-    console.log('graph name:',gname);
-    
-    let thisdetector = Detector;
 
-    if (Detector == '') {
-        thisdetector = divname.slice(5).replace('_status_all','');
-    }
-
-    let run_6digits = `${run}`.padStart(6,"0");   // add leading 0 for early run numbers
-    let plotname = '';
+	    if (gname == thisdetector) { // status graph on detector page
+		gname = info.name + "_status";
+		
+	    } else if (gname != info.name) { // mg
+                gname = info.name + '_' + gname;                
+            }
+	}
+	
+        console.log('gname:',gname);
     
-    if (plot_collection[thisdetector][gname]) {
-        plotname = plot_collection[thisdetector][gname];
-        console.log('click: plotname: ' +plotname);
-    } else {
+
+        let run_6digits = `${run}`.padStart(6,"0");   // add leading 0 for early run numbers
+        let plotname = '';
+    
+        if (plot_collection[thisdetector][gname]) {
+            plotname = plot_collection[thisdetector][gname];
+            console.log(`click: plot_collection[${thisdetector}][${gname}]`);
+            console.log('click: plotname: ' +plotname);
+        } else {
             console.log(`click: plot_collection[${thisdetector}][${gname}] not found`);
-    }
-
-    if (plotname) {
-
-            let ploturl = `https://halldweb.jlab.org/work/halld2/data_monitoring/${RunPeriod}/mon_ver${Version}/Run${run_6digits}/${plotname}.png`;
-            if (Version[0] == "R") {
-        let rest = Version[4];
-        ploturl = `https://halldweb.jlab.org/work/halld2/data_monitoring/${RunPeriod}/recon_ver0${rest}/Run${run_6digits}/${plotname}.png`;
         }
 
+        if (plotname) {
+
+	    let ver = `mon_ver${Version}`;
+
+            if (Version[0] == "R") {
+                const rest = Version[4];
+		ver = `recon_ver0${rest}`;
+            }
+
+	    const ploturl = `https://halldweb.jlab.org/work/halld2/data_monitoring/${RunPeriod}/${ver}/Run${run_6digits}/${plotname}.png`;
+		
             linktext += `&nbsp;&nbsp;<a href=${ploturl}>Monitoring histogram (${run})</a>`;
-    }    
+        }    
     }
     
-
     document.getElementById(clickelement).innerHTML = linktext;
     
     return true; // means event is handled and can be ignored
@@ -728,46 +742,44 @@ select_det.addEventListener('change',function() {
 
 select_graph.addEventListener('change',function() {
 
-  const Graph = select_graph.value;
-  if (Graph == '') return;
+    const Graph = select_graph.value;
+    if (Graph == '') return;
 
-  const btn = document.getElementById("reload");
-  btn.style.display = "none";
+    const btn = document.getElementById("reload");
+    btn.style.display = "none";
 
-  const RP = select_rp.value;
-  const ver = select_ver.value;
-  const det = select_det.value;
+    const RP = select_rp.value;
+    const ver = select_ver.value;
+    const det = select_det.value;
 
-  // trim local bookmark #graphname
+    // trim local bookmark #graphname
     
-  let new_url = document.URL.split("#")[0];
-  new_url = new_url.split("?")[0] + `?RunPeriod=${RP}&Version=${ver}&Detector=${det}#${Graph}`;
+    let new_url = document.URL.split("#")[0];
+    new_url = new_url.split("?")[0] + `?RunPeriod=${RP}&Version=${ver}&Detector=${det}#${Graph}`;
 
-  console.log(new_url);
-  window.location.assign(new_url);
+    window.location.assign(new_url);
 
-    /*
     console.log('graph menu changed');
-
-    if (Graph != "") {
-    document.getElementById(Graph).scrollIntoView();
-    } */
     
 });
 
 
+//Go button loads new version
 reload.addEventListener('click', function () {  
-  console.log('reload');
-  const RP = select_rp.value;
-  const ver = select_ver.value;
+      console.log('reload');
+      const RP = select_rp.value;
+      const ver = select_ver.value;
     
-  let new_url = document.URL.split("#")[0];
-  new_url = new_url.split("?")[0] + `?RunPeriod=${RP}&Version=${ver}`;
+      let new_url = document.URL.split("#")[0];
+      new_url = new_url.split("?")[0] + `?RunPeriod=${RP}&Version=${ver}`;
 
-  console.log(new_url);
-  window.location.assign(new_url);
+      console.log(new_url);
+      window.location.assign(new_url);
 
 });
+
+
+
 
 
 // copy-graph-url-to-clipboard code
@@ -776,48 +788,50 @@ document.addEventListener('click', (event) => {
 
     console.log('clicked');
     
-  const btn = event.target.closest('div.graph_bottom button.graph_url');
+    const btn = event.target.closest('div.graph_bottom button.graph_url');
 
-  if (btn) {
-      console.log('Button clicked:', btn.id);
+    if (btn) {
+        console.log('Button clicked:', btn.id);
 
-      if (btn.id) {
-          let clicked_graph = btn.id.split("btn_")[1]
+        if (btn.id) {
+            let clicked_graph = btn.id.split("btn_")[1]
 
-      if (clicked_graph) {
+            if (clicked_graph) {
       
-            const RP = select_rp.value;
-            const ver = select_ver.value;
-            const det = select_det.value;
+                const RP = select_rp.value;
+                const ver = select_ver.value;
+                const det = select_det.value;
 
-          let thisdet = "";
-        if (det != "" && det != "Overview") {
-            thisdet = `&Detector=${det}`;
-        }
+                let thisdet = "";
+                if (det != "" && det != "Overview") {
+                    thisdet = `&Detector=${det}`;
+                }
 
-        let this_url = document.URL.split("#")[0];
-            this_url = this_url.split("?")[0] + `?RunPeriod=${RP}&Version=${ver}${thisdet}#${clicked_graph}`;
+                let this_url = document.URL.split("#")[0];
+                this_url = this_url.split("?")[0] + `?RunPeriod=${RP}&Version=${ver}${thisdet}#${clicked_graph}`;
           
-            console.log(clicked_graph);
-            console.log(this_url);
+                console.log(clicked_graph);
+                console.log(this_url);
 
-            const tempInput = document.createElement('textarea');
-            tempInput.value = this_url;
-            document.body.appendChild(tempInput);
-            tempInput.select();
-            tempInput.setSelectionRange(0, 99999);
+                const tempInput = document.createElement('textarea');
+                tempInput.value = this_url;
+                document.body.appendChild(tempInput);
+                tempInput.select();
+                tempInput.setSelectionRange(0, 99999);
 
-            try {
-               document.execCommand('copy');
-//              alert('URL copied to clipboard!');
-            } catch (err) {
-              alert('Could not copy URL, sorry.');
+                try {
+                   document.execCommand('copy');
+                   //alert('URL copied to clipboard!');
+                } catch (err) {
+                    alert('Could not copy URL, sorry.');
+                }
+
+                document.body.removeChild(tempInput);
             }
+        }
+    }
 
-            document.body.removeChild(tempInput);
-      }
-      }
-  }
+    
 }, {passive: true} );
 
 
