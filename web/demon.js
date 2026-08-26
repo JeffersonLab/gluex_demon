@@ -4,138 +4,119 @@ const RP_file = './runperiods.txt';
 
 var RP_list = [];  // list of available run periods  in runperiods.txt
 var ver_list = []; // list of available versions     in versions.txt inside RP's subdir
-var det_list = []; // list of available detectors/modules   in pagenames 
-var gr_list = [];
+var page_list = []; // list of available detectors/modules, in pagenames 
+var gr_list = [];  // list of graph names, used for the menu
 
 var graph_collection = [];  // vast 2D list of graphs             in pagenames
 var graphs_this_page = [];   // list of graphs on the current page loaded from the file (may include nonexistent graphs)
 
-var plot_collection = '';
+var plot_collection = '';  // list of plot names, from json file of plotnames
 
-var RunPeriod = "";
+var RunPeriod = "";  // selected RP
 var Version = "";
-var Detector = "";
+var Page = "";
 var Graph = "";
-
-var graphs_filename = "";  // root file
-var csv_filename = "";
-var pagenames = "";  // file containing lists of graphs
-var plotnames = "";  // file containing lists of plots
 
 //import { openFile, draw, create, settings } from 'https://jsroot.gsi.de/latest/modules/main.mjs';
 import { openFile, draw, create, settings } from 'https://root.cern/js/latest/modules/main.mjs';
 
-
 await get_url_args();
+
+const RP_supplied = RunPeriod;
+const ver_supplied = Version;
+const page_supplied = Page;
+
 
 RP_list = await readlist(RP_file, true);
 
-if ( RunPeriod === "" ) {
-
+if ( RunPeriod == "" ) {
     RunPeriod = RP_list[0];
     Version = "";
-    Detector = "";
-    Graph = "";
-    
-} else if (! RP_list.includes(RunPeriod) ) {
+} else {
+    const RP_valid = RP_list.includes(RunPeriod);
 
-    const url = document.URL.split("?")[0];
-    show_problem(`${RunPeriod} is not known! <a href="${url}">Start again</a>`);
-    
-    RunPeriod = RP_list[0];
-    Version = "";
-    Detector = "";
-    Graph = "";
-    
-} 
-    
+    if (!RP_valid) {
+        console.log('Invalid run period');
+        const url = document.URL.split("?")[0];
+        show_problem(`${RunPeriod} not found! <a href="${url}">Start again</a>`);
+	throw new Error('Invalid run period supplied');
+    }
+}    
+
 await fillmenu("select_rp",RP_list,RunPeriod);
-
-ver_list = [];
-gr_list = [];
 
 ver_list = await readlist(`${RunPeriod}/versions.txt`, true);
 
-if (Version === "") { 
+if (Version == "") {
+    Version = ver_list[0];
+} else {
+    const Ver_valid = ver_list.includes(Version);
 
-    Version = ver_list[0];                
-    Detector = "";
+    if (!Ver_valid) {
+        console.log('Invalid version');
+        const url = document.URL.split("?")[0];
+        show_problem(`Version ${Version} not found! <a href="${url}">Start again</a>`);
+	throw new Error('Invalid version supplied');
+    }
+}
 
-} else if (! ver_list.includes(Version) ) {
+// if the page was called without arguments, force a reload
 
-    const url = document.URL.split("?")[0];
-    show_problem(`Version ${Version} is not known! <a href="${url}?RunPeriod=${RunPeriod}">Start again</a>`);
-
-    Version = ver_list[0];                
-    Detector = "";
-
+if (RP_supplied == "" || ver_supplied == "") {
+    let new_url = document.URL.split("#")[0];
+    new_url = new_url.split("?")[0] + `?RunPeriod=${RunPeriod}&Version=${Version}&Page=Overview`;
+    window.location.assign(new_url);
 }
 
 await fillmenu("select_ver",ver_list,Version);
 
+const year_month = RunPeriod.substring(10,17);
+
+const pagenames = `./${RunPeriod}/${Version}/monitoring_pagenames_${year_month}_ver${Version}.txt`;
+const plotnames = `./${RunPeriod}/${Version}/monitoring_plotnames_${year_month}_ver${Version}.txt`;
+
+await getpagenames();	// this fills page_list and graph_collection and plot_collection
+console.log("collected page names and graphs");
+
+if (page_supplied == "" || !page_list.includes(Page)) {
+    let new_url = document.URL.split("#")[0];
+    new_url = new_url.split("?")[0] + `?RunPeriod=${RunPeriod}&Version=${Version}&Page=Overview`;
+    window.location.assign(new_url);
+}
+
+// at this point, RP, version and page are all good, and in the url.
 
 document.getElementById("RunPeriod").innerHTML = RunPeriod;
 document.getElementById("Version").innerHTML = 'Version ' + Version;
 
+await fillmenu("select_page",page_list,Page);
 
-const year_month = RunPeriod.substring(10,17);
+const graphs_filename = `./${RunPeriod}/${Version}/monitoring_graphs_${year_month}_ver${Version}.root`;
+document.getElementById("rootfile").innerHTML = `<a href="${graphs_filename}">ROOT file</a>`;
 
-graphs_filename = `./${RunPeriod}/${Version}/monitoring_graphs_${year_month}_ver${Version}.root`;
-csv_filename = `./${RunPeriod}/${Version}/monitoring_data_${year_month}_ver${Version}.csv`;
-pagenames = `./${RunPeriod}/${Version}/monitoring_pagenames_${year_month}_ver${Version}.txt`;
-plotnames = `./${RunPeriod}/${Version}/monitoring_plotnames_${year_month}_ver${Version}.txt`;
+document.getElementById("csv").innerHTML = make_csv_link();
 
-let compare_link = `https://halldweb.jlab.org/gluex_demon/compare.html?RunPeriod=${RunPeriod}&Version=${Version}`;
-    
-await getdetectornames();	// this fills det_list and graph_collection
-console.log("collected detector names and graphs");
-
-if (Detector != "" && ! det_list.includes(Detector) ) {   //det_list[0] is "Overview"
-    show_problem(`${RunPeriod} version ${Version} does not include ${Detector}!`);
-    Detector = "";
-}
-
-await fillmenu("select_det",det_list,Detector);
-
-
-console.log('filled detector menu');
-
-//let subtitle = "Overview";
-let link_1 = `<a href="${graphs_filename}">ROOT file</a>`;
-let link_2 = `<a href="${csv_filename}">CSV file</a>`;
-let link_3 = `<a href="${compare_link}">Compare graphs</a>`;    
-
-//if (Detector !== "") {
-//    subtitle = Detector;
-//}
-
-//document.getElementById("Detector").innerHTML = subtitle;
-
-document.getElementById("rootfile").innerHTML = link_1;
-document.getElementById("csv").innerHTML = link_2;
-document.getElementById("compare").innerHTML = link_3;
+const compare_link = `https://halldweb.jlab.org/gluex_demon/compare.html?RunPeriod=${RunPeriod}&Version=${Version}`;
+document.getElementById("compare").innerHTML = `<a href="${compare_link}">Compare graphs</a>`;
 
 console.log("getting the list of graphs");
 
 await get_list_of_graphs();
 
-let selected = Graph;
-if (selected == "") selected = "Overview";
+if (Graph == "" || !gr_list.includes(Graph)) {
+    Graph = gr_list[0];
+}
 
-await fillmenu("select_graph",gr_list,selected);
+await fillmenu("select_graph",gr_list,Graph);
 
 console.log('awaiting build_page');
 
 await build_page(); 
 
-console.log('Graph:',Graph);
 if (Graph) document.getElementById(Graph).scrollIntoView();
 
-
 // fill the menu again as nonexistent graphs are removed in build_page
-fillmenu("select_graph",gr_list,selected);
-
-
+fillmenu("select_graph",gr_list,Graph);
 
 console.log('page ready');
 
@@ -147,7 +128,7 @@ function get_url_args() {
 
     /* read in the url, split it into arguments */
 
-    let par_from_url = { RunPeriod: "", Version: "", Detector: ""};
+    let par_from_url = { RunPeriod: "", Version: "", Page: ""};
     let currentURL_split = "";
 
     if (document.URL.includes("#")) {
@@ -168,11 +149,9 @@ function get_url_args() {
 
     RunPeriod = par_from_url['RunPeriod'];
     Version = par_from_url['Version'];
-    Detector = par_from_url['Detector'];  // actually the python module title
+    Page = par_from_url['Page'];  // actually the python module title
     
 }
-
-
 
 
 async function fetchfiledata(filename, quiet=true) {
@@ -192,8 +171,8 @@ async function fetchfiledata(filename, quiet=true) {
     }
 
     return text;
-
 }
+
 
 async function fetchjson(filename, quiet=true) {
 
@@ -206,31 +185,26 @@ async function fetchjson(filename, quiet=true) {
     }
     
     let data = await response.json();
-
     return data;
-
 }
 
 
-async function getdetectornames() {
+async function getpagenames() {
 
-    // fills global arrays det_list and graph_collection
-
-    graphs_this_page = [];  // tells jsROOT which graphs to show
+    // fills global arrays page_list and graph_collection and plot_collection
 
     let text = await fetchfiledata(pagenames);
 
-    let lineArr = text.split('\r\n'); 
-             // eg CDC - CPP,4,cdc_status,cdc_occ,cdc_missing,cdc_eff
+    let lineArr = text.split('\r\n');  // eg CDC - CPP,4,cdc_status,cdc_occ,cdc_missing,cdc_eff
 
     let npages = lineArr.length - 1;  // ignore the empty last line
 
-    det_list = ["Overview"];
+    page_list = ["Overview"];
 
     for (let i=0; i<npages; i++) {
         graph_collection.push(lineArr[i].split(','));
         let name_without_spaces = graph_collection[i][0].replaceAll(" ","_");         
-        det_list.push(name_without_spaces);
+        page_list.push(name_without_spaces);
     }
 
     plot_collection = await fetchjson(plotnames);
@@ -238,39 +212,28 @@ async function getdetectornames() {
 }
 
 
-
 async function get_list_of_graphs() {
 
-    graphs_this_page = [];  // tells jsROOT which graphs to show
-
-    let thisdet = "";
-
-    if (Detector) {
-	if (Detector != "Overview") thisdet = Detector;
-    }
-    
-
-    if (thisdet == "") { 
-	let npages = det_list.length;  // NB it starts with "" for overview
+    if (Page == "Overview") { 
         
-        for (let i = 0; i < npages; i++) {
+        graphs_this_page.push('/readiness');  // copy graph name into array for this page
+	gr_list.push('readiness');
+
+	const npages = page_list.length;  // NB it starts with "" for overview
+	
+	for (let i = 0; i < npages-1; i++) {
     
-            let thisgraph = 'readiness';
-            let gdir = '';
+            const gdir = graph_collection[i][0]; 
+            const thisgraph = graph_collection[i][2];
 
-            if (i>0 ) {
-                gdir = graph_collection[i-1][0]; 
-                thisgraph = graph_collection[i-1][2];
-            }
-
-            graphs_this_page.push(gdir + '/' + thisgraph);  // copy graph name into array for this page
+            graphs_this_page.push(gdir + '/' + thisgraph); 
             gr_list.push(thisgraph.replace("_status_all",""));
 	    
 	}
 
-    } else  {    // detector page
+    } else  {
 	
-        let j = det_list.indexOf(Detector) - 1;   // because det_list starts w overview
+        const j = page_list.indexOf(Page) - 1;   // because page_list starts w overview
 
 	const graphs = graph_collection[j];
         const gdir = graphs[0]; 
@@ -279,7 +242,7 @@ async function get_list_of_graphs() {
 	
 	graphs_this_page.push(gdir + '/' + status_composite);
 
-	gr_list.push(Detector);
+	gr_list.push(Page);
 
 	// mg names appear before constituents
 	for (let i=1; i < ngraphs ; i++) {
@@ -295,27 +258,18 @@ async function get_list_of_graphs() {
 }
 
 
-async function make_csv_link()  {
+function make_csv_link()  {
 
-    let page_csv_filename = csv_filename; //global, link for big csv file from overview page
-    let link_text = 'CSV file';
+    let csv_filename = '';
 
-    if (Detector != "") {  // detector page
-        page_csv_filename = `./${RunPeriod}/${Version}/monitoring_data_${Detector}_${year_month}_ver${Version}.csv`;
-        link_text = 'CSV file for this page';
+    if (Page == "Overview") { 
+        csv_filename = `./${RunPeriod}/${Version}/monitoring_data_${year_month}_ver${Version}.csv`;
+    } else {	
+        csv_filename = `./${RunPeriod}/${Version}/monitoring_data_${Page}_${year_month}_ver${Version}.csv`;        
     }
     
-    const file_exists = await fetchfiledata(page_csv_filename,true);
-    let csv_link = '';
-    
-    if (file_exists) {
-	csv_link = `<a href="${page_csv_filename}">${link_text}</a>`;
-    } else {
-	csv_link = `CSV file not found: ${page_csv_filename}`;
-    }
-
-    document.getElementById("csv").innerHTML = csv_link;
-	
+    const csv_link = `<a href="${csv_filename}">CSV file</a>`;
+    return csv_link;    	
 }    
 
 
@@ -333,7 +287,7 @@ async function build_page() {
     // make html containing empty divs before reading the root file
 
     document.getElementById("graphs").innerHTML = '';    
-    console.log();
+
     for (const fullgname of graphs_this_page) {	
         let gname = fullgname.split("/")[1];
 	let html = make_graph_div(gname);
@@ -346,7 +300,6 @@ async function build_page() {
     
     for (const fullgname of graphs_this_page) {
 
-	console.log(fullgname);
 	//let gname = fullgname.split("/")[1]; same as rootgraph.fName
 	
         const promise = file.readObject(fullgname).then(rootgraph => {
@@ -358,8 +311,8 @@ async function build_page() {
             console.log(`Graph ${fullgname} was not found in the root file`);
             console.error(err);
 
-	    let gname = fullgname.split("/")[1];
-	    let anchorname = get_anchor_name(gname);
+	    const gname = fullgname.split("/")[1];
+	    const anchorname = get_anchor_name(gname);
 	    
 	    document.getElementById(gname + "_wrapper").innerHTML = '';
 	    missing.push(anchorname);
@@ -391,8 +344,8 @@ async function build_page() {
     
     for (const x of gr_list) {
 	if (mg_cpts.includes(x)) {
-	    document.getElementById(x).innerHTML = '<div class="before_mg_constituents">MultiGraph components are shown below.</div>';           found_first = true;
-	    console.log('First mg component graph is ',x);
+	    document.getElementById(x).innerHTML = '<div class="before_mg_constituents">MultiGraph components are shown below.</div>';
+	    found_first = true;
 	}
 	if (found_first) break;
     }
@@ -417,7 +370,7 @@ function make_graph_div(gname) {
     let gstyle = "graphpanel";
     if (gname.endsWith("_status_all")) gstyle = "statusgraphpanel";    
 
-    let anchorname = get_anchor_name(gname);
+    const anchorname = get_anchor_name(gname);
 
     let divtext = `<div id="${anchorname}_wrapper" class="graph_wrapper">\n`; 
 
@@ -438,8 +391,8 @@ function make_graph_links_html(anchorname) {
 
     let details = '';
 
-    if ((Detector == '' || Detector == "Overview") && anchorname != 'readiness') {
-        let link = document.URL.split("?")[0] + `?RunPeriod=${RunPeriod}&Version=${Version}&Detector=${anchorname}`;
+    if ((Page == '' || Page == "Overview") && anchorname != 'readiness') {
+        let link = document.URL.split("?")[0] + `?RunPeriod=${RunPeriod}&Version=${Version}&Page=${anchorname}`;
         details = '    &nbsp;&nbsp;<a href=' + link + '>Details</a>';
     }
         
@@ -493,7 +446,7 @@ function draw_graph_and_legend(rootgraph) {
     });
 
     if (drawlegend) {
-        let legend = create('TLegend');
+        const legend = create('TLegend');
         const garr = rootgraph.fGraphs.arr;
         let y1 = 0.9 - 0.1*garr.length;
         if (y1<0.18) y1=0.18;
@@ -509,7 +462,7 @@ function draw_graph_and_legend(rootgraph) {
     }
 
     let first_mg_cpt = null;
-    if (Detector != "" && !rootgraph.fName.endsWith('status_all') && rootgraph._typename == 'TMultiGraph') {
+    if (Page != "" && !rootgraph.fName.endsWith('status_all') && rootgraph._typename == 'TMultiGraph') {
 	first_mg_cpt = rootgraph.fGraphs.arr[0].fName + '_' + rootgraph.fName;
     }
     return first_mg_cpt;    
@@ -533,9 +486,8 @@ async function readlist(listfile, reverse=false) {
 
         if (returntext[returntext.length-1] === '') returntext.pop();
 
-    if (reverse) {
-        returntext.reverse();
-    }
+        if (reverse) returntext.reverse();
+    
     }
 
     return returntext;
@@ -570,13 +522,9 @@ function show_problem(message) {
 
 function UserHandler(info, divname, clickelement) {
 
-    console.log('click: divname: '+divname);
-
     if (!info) {
         return true;
     }
-
-    console.log('click: info:', info);
 
     // for overall status, show rcdb link only
 
@@ -594,20 +542,17 @@ function UserHandler(info, divname, clickelement) {
         // status mg :          divname gdiv_CDC,                info.name occ -> occ_status
 
         let gname = divname.slice(5); // remove gdiv_ from the front
-        console.log('Detector',Detector);
-	console.log('div:',divname);
-	console.log('temp gname:',gname);
-	console.log('info.name',info.name);
-        let thisdetector = Detector; // use as the plot_collection array index
-	
-        if (Detector == '' || Detector == "Overview") {
 
-	    thisdetector = gname;	    
+        let thispage = Page; // use as the plot_collection array index
+	
+        if (Page == "Overview") {
+
+	    thispage = gname;	    
 	    gname = info.name + "_status";
 	    
         } else {
 
-	    if (gname == thisdetector) { // status graph on detector page
+	    if (gname == thispage) { // status graph
 		gname = info.name + "_status";
 		
 	    } else if (gname != info.name) { // mg
@@ -615,18 +560,13 @@ function UserHandler(info, divname, clickelement) {
             }
 	}
 	
-        console.log('gname:',gname);
-    
-
-        let run_6digits = `${run}`.padStart(6,"0");   // add leading 0 for early run numbers
+        const run_6digits = `${run}`.padStart(6,"0");   // add leading 0 for early run numbers
         let plotname = '';
     
-        if (plot_collection[thisdetector][gname]) {
-            plotname = plot_collection[thisdetector][gname];
-            console.log(`click: plot_collection[${thisdetector}][${gname}]`);
-            console.log('click: plotname: ' +plotname);
+        if (plot_collection[thispage][gname]) {
+            plotname = plot_collection[thispage][gname];
         } else {
-            console.log(`click: plot_collection[${thisdetector}][${gname}] not found`);
+            console.log(`click: plot_collection[${thispage}][${gname}] not found`);
         }
 
         if (plotname) {
@@ -649,44 +589,40 @@ function UserHandler(info, divname, clickelement) {
     return true; // means event is handled and can be ignored
 }
 
-
-select_rp.addEventListener('change', async function () {
-    const selectedRP = select_rp.value;
-    let listfile = `${selectedRP}/versions.txt`;
-
-    Version = '';
-    Detector = '';
-    Graph = '';
-
-    let ver_list = await readlist(listfile);
-    let most_recent = ver_list[ver_list.length-1];  // suggest as default
-
-    Version = most_recent;
-
-    await fillmenu("select_ver",ver_list,most_recent);
-
-});
-
-
 // when the RP or ver changes:
 //      show the go/reload button 
-//      hide the detector dropdown
+//      hide the Page dropdown
 //
 // after reloading the page, 
 //      hide the go/reload
-//      show the detector dropdown
+//      show the Page dropdown
 //
-// after the detector changes
+// after the Page changes
 //      reload the page
 //
 
+
+select_rp.addEventListener('change', async function () {
+
+    RunPeriod = select_rp.value;
+    Version = '';
+    Page = '';
+    Graph = '';
+
+    const listfile = `${RunPeriod}/versions.txt`;    
+    const ver_list = await readlist(listfile);
+    Version = ver_list[ver_list.length-1];  // suggest as default
+
+    await fillmenu("select_ver",ver_list,Version);
+
+});
 
 
 select_rp.addEventListener('change',function() {
 
   console.log('rp menu changed');
 
-  const sel = document.getElementById("select_det");
+  const sel = document.getElementById("select_page");
   sel.style.display = "none";
 
   const sel2 = document.getElementById("select_graph");
@@ -702,7 +638,7 @@ select_ver.addEventListener('change',function() {
 
   console.log('ver menu changed');
 
-  const sel = document.getElementById("select_det");
+  const sel = document.getElementById("select_page");
   sel.style.display = "none";
 
   const sel2 = document.getElementById("select_graph");
@@ -714,27 +650,16 @@ select_ver.addEventListener('change',function() {
 });
 
 
-select_det.addEventListener('change',function() {
+select_page.addEventListener('change',function() {
 
-  console.log('det menu changed');
+  console.log('page menu changed');
 
   const btn = document.getElementById("reload");
   btn.style.display = "none";
 
-  const RP = select_rp.value;
-  const ver = select_ver.value;
-  const det = select_det.value;
+  Page = select_page.value;
 
-  // trim local bookmark #graphname
-    
-  let new_url = document.URL.split("#")[0];
-  new_url = new_url.split("?")[0] + `?RunPeriod=${RP}&Version=${ver}`;
-
-  if ( det != "" && det != "Overview" ) {
-    new_url = new_url + `&Detector=${det}`;
-  }
-
-  console.log(new_url);
+  const new_url = make_url_without_graph();
   window.location.assign(new_url);
 
 });
@@ -745,72 +670,54 @@ select_graph.addEventListener('change',function() {
     const Graph = select_graph.value;
     if (Graph == '') return;
 
-    const btn = document.getElementById("reload");
-    btn.style.display = "none";
-
-    const RP = select_rp.value;
-    const ver = select_ver.value;
-    const det = select_det.value;
-
-    // trim local bookmark #graphname
+    const plain_url = make_url_without_graph();
     
-    let new_url = document.URL.split("#")[0];
-    new_url = new_url.split("?")[0] + `?RunPeriod=${RP}&Version=${ver}&Detector=${det}#${Graph}`;
+    let new_url = plain_url + `#${Graph}`;
 
     window.location.assign(new_url);
-
-    console.log('graph menu changed');
     
 });
 
 
 //Go button loads new version
 reload.addEventListener('click', function () {  
-      console.log('reload');
-      const RP = select_rp.value;
-      const ver = select_ver.value;
-    
-      let new_url = document.URL.split("#")[0];
-      new_url = new_url.split("?")[0] + `?RunPeriod=${RP}&Version=${ver}`;
+    console.log('reload');
 
-      console.log(new_url);
-      window.location.assign(new_url);
+    RunPeriod = select_rp.value;
+    Version = select_ver.value;
+    Page = "Overview";
+    
+    const new_url = make_url_without_graph();    
+    
+    window.location.assign(new_url);
 
 });
 
 
+function make_url_without_graph(){
 
+    let new_url = document.URL.split("#")[0];
+
+    new_url = new_url.split("?")[0] + `?RunPeriod=${RunPeriod}&Version=${Version}&Page=${Page}`;
+
+    return new_url;
+}
 
 
 // copy-graph-url-to-clipboard code
 document.addEventListener('click', (event) => {
-    // Use .closest() to find the target element or its parent with a specific selector
 
-    console.log('clicked');
-    
     const btn = event.target.closest('div.graph_bottom button.graph_url');
 
     if (btn) {
-        console.log('Button clicked:', btn.id);
-
         if (btn.id) {
-            let clicked_graph = btn.id.split("btn_")[1]
+            const clicked_graph = btn.id.split("btn_")[1]
 
             if (clicked_graph) {
       
-                const RP = select_rp.value;
-                const ver = select_ver.value;
-                const det = select_det.value;
+                const plain_url = make_url_without_graph();
+                let this_url = plain_url + `#${clicked_graph}`;
 
-                let thisdet = "";
-                if (det != "" && det != "Overview") {
-                    thisdet = `&Detector=${det}`;
-                }
-
-                let this_url = document.URL.split("#")[0];
-                this_url = this_url.split("?")[0] + `?RunPeriod=${RP}&Version=${ver}${thisdet}#${clicked_graph}`;
-          
-                console.log(clicked_graph);
                 console.log(this_url);
 
                 const tempInput = document.createElement('textarea');
