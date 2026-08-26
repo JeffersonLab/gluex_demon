@@ -3,37 +3,36 @@
  
 <head>
     <title>GlueX detector calibration monitoring</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="canonical" href="https://getbootstrap.com/docs/5.3/examples/sidebars/">
     <link rel="icon" type="image/x-icon" href="favicon.ico">  
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <script src="https://code.jquery.com/ui/1.13.1/jquery-ui.min.js"
-        integrity="sha256-eTyxS0rkjpLEo16uXTS0uVCS4815lc40K2iVpWDvdSY=" crossorigin="anonymous"></script>
-    <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
-    <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
-
     <script src="demon.js" type="module"></script>    
     
-    <style>
-        body {margin:0em 2em 1em 2em;}
-        #header { position: sticky; top: 0; padding-top: 1em; width: 1200px; background-color:white; z-index: 1000; }
-        #links span {margin-right: 0.5em;}
-        #selectors,#titles {margin-top: 1em; margin-bottom: 1em;}
-        #problems {margin-top: 0em; margin-bottom: 0em; font-size:1.5em; color:#ff3131;}
-        .red {color:#ff3131;}
-        .graphpanel {width:1200px; height:420px; margin-top: 50px;}
-        .statusgraphpanel {width:1200px; height:320px; margin-top: 50px;}
-        .graph_info {width:1200px; height:50px; margin-top: 10px;}	
-        .graph_top {margin-top:2.5em; scroll-margin-top: 270px;}
-        .graph_bottom {height:30px; padding-left:4px;}
-        .before_mg_constituents {margin-top: 30px; height:30px; width:100%; padding:5px; background-color:#eff3f8;}
-	.graph_bottom, .before_mg_constituents {font-style: italic; font-size: 80%; color: darkslategrey;}
-        button.graph_url {width:25px; cursor:pointer; padding:0;}
-        button.graph_url img {height: 10px; width: 22px;}
-        button.graph_url:hover img {height:14px; width:24px;}
-        button.graph_url {background-color:transparent; border:none;}
-	//div.statusgraphpanel svg g.primitives_layer g >text {font-size: 18px;}
+    <style>      
+    body {margin:0 2rem 1rem 2rem;font-family:-apple-system,Roboto,"Helvetica Neue",Arial,sans-serif; font-size:1rem;font-weight:400;line-height:1.5;color:#212529;text-align:left;background-color:white}
+    #page_top img {margin: 0 5px 10px 0; vertical-align:middle;}
+    #header { position: sticky; top: 0; padding-top: 1rem; width: 1200px; background-color:white; z-index: 1000; }
+    #links span {margin-right: 0.5rem;}
+    #selectors,#titles {margin-top: 1rem; margin-bottom: 1rem;}	
+    #problems {margin-top: 0; margin-bottom: 0; font-size:1.5rem; color:#ff3131;}
+      
+    .graphpanel {width:1200px; height:420px; margin-top: 50px;}
+    .statusgraphpanel {width:1200px; height:320px; margin-top: 50px;}
+    .graph_top {margin-top:2.5rem; scroll-margin-top: 270px;}
+    .graph_bottom {height:30px; padding-left:4px;}
+    .before_mg_constituents {margin-top: 30px; height:30px; width:100%; padding:5px; background-color:#eff3f8;}
+    .graph_bottom, .before_mg_constituents {font-style: italic; font-size: 80%; color:darkslategrey;}
+
+    button, select { text-transform:none; margin: 0; font-family: inherit; font-size: inherit; line-height: inherit;}
+    button.graph_url {width:25px; cursor:pointer; padding:0;}
+    button.graph_url img {height: 10px; width: 22px; margin-bottom:2px;}
+    button.graph_url {background-color:transparent; border:none;}
+    
+    .red {color:#ff3131;}    
+    a {color: #007bff; text-decoration: none;}
+    h2 {font-size: 2rem; font-weight:500; line-height: 1.2; margin:0;}
+    hr {margin:0; border:0; border-top: 1px solid lightgrey;}
+    img {vertical-align:text-bottom;}
+	
     </style>
 </head>
 
@@ -41,15 +40,15 @@
 <body>
 
   <div id="header">
-    <div id="page_top" class="red"><img src="demon.png" alt="demon" width="32" height="32" style="margin: 0 5px 10px 0">GlueX Demon is watching Hall D monitoring data. Contact Naomi Jarvis (njarvis) with any questions.
+    <div id="page_top" class="red"><img src="demon.png" alt="demon" width="32" height="32">GlueX Demon is watching Hall D monitoring data. Contact Naomi Jarvis (njarvis) with any questions.
     </div>
     <div id = "statuscodes"> Status codes are 1 (good), 0 (bad) or -1 (unknown).
     </div>
     <div id="links">
         <span id="github"><a href="https://github.com/JeffersonLab/gluex_demon">Github repo</a></span>
-        <span id="rootfile"></span>
-        <span id="csv"></span>
-        <span id="compare"></span>
+        <span id="rootfile"><a id="link_root" href="">ROOT file</a></span>
+        <span id="csv"><a id="link_csv" href="">CSV file</a></span>
+        <span id="compare"><a id="link_compare" href="">Compare graphs</a></span>
     </div>
 
 

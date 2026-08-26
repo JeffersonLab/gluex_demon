@@ -92,12 +92,9 @@ document.getElementById("Version").innerHTML = 'Version ' + Version;
 await fillmenu("select_page",page_list,Page);
 
 const graphs_filename = `./${RunPeriod}/${Version}/monitoring_graphs_${year_month}_ver${Version}.root`;
-document.getElementById("rootfile").innerHTML = `<a href="${graphs_filename}">ROOT file</a>`;
-
-document.getElementById("csv").innerHTML = make_csv_link();
-
-const compare_link = `https://halldweb.jlab.org/gluex_demon/compare.html?RunPeriod=${RunPeriod}&Version=${Version}`;
-document.getElementById("compare").innerHTML = `<a href="${compare_link}">Compare graphs</a>`;
+document.getElementById("link_root").href = `${graphs_filename}`;
+document.getElementById("link_csv").href = csv_filename();
+document.getElementById("link_compare").href = `./compare.html?RunPeriod=${RunPeriod}&Version=${Version}`;
 
 console.log("getting the list of graphs");
 
@@ -258,7 +255,7 @@ async function get_list_of_graphs() {
 }
 
 
-function make_csv_link()  {
+function csv_filename()  {
 
     let csv_filename = '';
 
@@ -268,8 +265,7 @@ function make_csv_link()  {
         csv_filename = `./${RunPeriod}/${Version}/monitoring_data_${Page}_${year_month}_ver${Version}.csv`;        
     }
     
-    const csv_link = `<a href="${csv_filename}">CSV file</a>`;
-    return csv_link;    	
+    return csv_filename;    	
 }    
 
 
