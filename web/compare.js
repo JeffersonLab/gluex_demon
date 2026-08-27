@@ -80,6 +80,7 @@ if (Version1 && Version2) {
     
     console.log('awaiting get list of graphs');
     if (PageGraph) await drawGraphs();
+    const drawn_PG = PageGraph;
 
     Page = (PageGraph) ? PageGraph.split('/')[0] : "";
     Graph = (PageGraph) ? PageGraph.split('/')[1] : "";
@@ -93,7 +94,7 @@ if (Version1 && Version2) {
     await fillmenu("select_gr", graph_list, Graph);
 
     PageGraph = `${Page}/${Graph}`;
-    await drawGraphs();
+    if (PageGraph != drawn_PG) await drawGraphs();
 
 }
 
