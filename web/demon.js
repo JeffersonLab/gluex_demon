@@ -1,10 +1,12 @@
 // functions for gluex detector calibration monitoring page
+//import { openFile, draw, create, settings } from 'https://jsroot.gsi.de/latest/modules/main.mjs';
+import { openFile, draw, create } from 'https://root.cern/js/latest/modules/main.mjs';
 
 const RP_file = './runperiods.txt';
 
 var RP_list = [];  // list of available run periods  in runperiods.txt
 var ver_list = []; // list of available versions     in versions.txt inside RP's subdir
-var page_list = []; // list of available detectors/modules, in pagenames 
+var page_list = []; // list of available pages, in pagenames 
 var gr_list = [];  // list of graph names, used for the menu
 
 var graph_collection = [];  // vast 2D list of graphs             in pagenames
@@ -17,30 +19,21 @@ var Version = "";
 var Page = "";
 var Graph = "";
 
-//import { openFile, draw, create, settings } from 'https://jsroot.gsi.de/latest/modules/main.mjs';
-import { openFile, draw, create, settings } from 'https://root.cern/js/latest/modules/main.mjs';
-
 await get_url_args();
 
 const RP_supplied = RunPeriod;
 const ver_supplied = Version;
 const page_supplied = Page;
 
-
 RP_list = await readlist(RP_file, true);
 
-if ( RunPeriod == "" ) {
+if (RunPeriod == "") {
     RunPeriod = RP_list[0];
     Version = "";
-} else {
-    const RP_valid = RP_list.includes(RunPeriod);
-
-    if (!RP_valid) {
-        console.log('Invalid run period');
-        const url = document.URL.split("?")[0];
-        show_problem(`${RunPeriod} not found! <a href="${url}">Start again</a>`);
-	throw new Error('Invalid run period supplied');
-    }
+} else if (!RP_list.includes(RunPeriod)) {
+    const url = document.URL.split("?")[0];
+    show_problem(`${RunPeriod} not found! <a href="${url}">Start again</a>`);
+    throw new Error('Invalid run period supplied');
 }    
 
 await fillmenu("select_rp",RP_list,RunPeriod);
@@ -49,19 +42,13 @@ ver_list = await readlist(`${RunPeriod}/versions.txt`, true);
 
 if (Version == "") {
     Version = ver_list[0];
-} else {
-    const Ver_valid = ver_list.includes(Version);
-
-    if (!Ver_valid) {
-        console.log('Invalid version');
-        const url = document.URL.split("?")[0];
-        show_problem(`Version ${Version} not found! <a href="${url}">Start again</a>`);
-	throw new Error('Invalid version supplied');
-    }
+} else if (!ver_list.includes(Version)) {
+    const url = document.URL.split("?")[0];
+    show_problem(`Version ${Version} not found! <a href="${url}">Start again</a>`);
+    throw new Error('Invalid version supplied');
 }
 
-// if the page was called without arguments, force a reload
-
+// if the page was called without arguments, reload
 if (RP_supplied == "" || ver_supplied == "") {
     let new_url = document.URL.split("#")[0];
     new_url = new_url.split("?")[0] + `?RunPeriod=${RunPeriod}&Version=${Version}&Page=Overview`;
@@ -71,12 +58,10 @@ if (RP_supplied == "" || ver_supplied == "") {
 await fillmenu("select_ver",ver_list,Version);
 
 const year_month = RunPeriod.substring(10,17);
-
 const pagenames = `./${RunPeriod}/${Version}/monitoring_pagenames_${year_month}_ver${Version}.txt`;
 const plotnames = `./${RunPeriod}/${Version}/monitoring_plotnames_${year_month}_ver${Version}.txt`;
 
 await getpagenames();	// this fills page_list and graph_collection and plot_collection
-console.log("collected page names and graphs");
 
 if (page_supplied == "" || !page_list.includes(Page)) {
     let new_url = document.URL.split("#")[0];
@@ -108,33 +93,30 @@ await fillmenu("select_graph",gr_list,Graph);
 
 console.log('awaiting build_page');
 
+const ngr = gr_list.length;
+
 await build_page(); 
 
 if (Graph) document.getElementById(Graph).scrollIntoView();
 
-// fill the menu again as nonexistent graphs are removed in build_page
-fillmenu("select_graph",gr_list,Graph);
+// fill the menu again if nonexistent graphs were removed in build_page
+if (gr_list.length != ngr) fillmenu("select_graph",gr_list,Graph);
 
 console.log('page ready');
 
-
 //------------------------------------
-
 
 function get_url_args() {
 
     /* read in the url, split it into arguments */
 
     let par_from_url = { RunPeriod: "", Version: "", Page: ""};
-    let currentURL_split = "";
 
-    if (document.URL.includes("#")) {
-        Graph = document.URL.split("#")[1];
-        currentURL_split = document.URL.split("#")[0].split("?");
-    } else {
-        Graph = "";
-        currentURL_split = document.URL.split("?");
-    }
+    const currentURL_split = document.URL.split("#")[0].split("?");
+    
+    let maybe = document.URL.split("#")[1];
+
+    Graph = maybe ? maybe : "";
 
     if (currentURL_split.length === 2) {
         let URL_AND_split = currentURL_split[1].split("&");
@@ -146,8 +128,7 @@ function get_url_args() {
 
     RunPeriod = par_from_url['RunPeriod'];
     Version = par_from_url['Version'];
-    Page = par_from_url['Page'];  // actually the python module title
-    
+    Page = par_from_url['Page']; 
 }
 
 
@@ -350,34 +331,22 @@ async function build_page() {
 
 
 function get_anchor_name(gname) {
-
-    let anchorname = gname;
-
-    if (gname.endsWith("_status_all")) anchorname = gname.substring(0,gname.length-11);
-
-    return anchorname;
-
+    return gname.split("_status_all")[0];
 }
 
 
 function make_graph_div(gname) {
 
-
-    let gstyle = "graphpanel";
-    if (gname.endsWith("_status_all")) gstyle = "statusgraphpanel";    
-
+    const gstyle = gname.endsWith("_status_all") ? "statusgraphpanel" : "graphpanel";    
     const anchorname = get_anchor_name(gname);
 
     let divtext = `<div id="${anchorname}_wrapper" class="graph_wrapper">\n`; 
-
     divtext += `  <div id="${anchorname}" class="graph_top"></div>\n`; 
-    divtext += `  <div id="gdiv_${anchorname}" class="${gstyle}"></div>\n`; 
-        
+    divtext += `  <div id="gdiv_${anchorname}" class="${gstyle}"></div>\n`;         
     divtext += '  <div id="glinks_' + anchorname + '" class="graph_bottom"></div>\n'; 
     divtext += '</div>\n';
 
     return divtext;
-        
 }
 
 
@@ -387,14 +356,13 @@ function make_graph_links_html(anchorname) {
 
     let details = '';
 
-    if ((Page == '' || Page == "Overview") && anchorname != 'readiness') {
+    if (Page == "Overview" && anchorname != 'readiness') {
         let link = document.URL.split("?")[0] + `?RunPeriod=${RunPeriod}&Version=${Version}&Page=${anchorname}`;
         details = '    &nbsp;&nbsp;<a href=' + link + '>Details</a>';
     }
         
     let divtext = `    ${anchorname}`;    
     divtext += `    &nbsp;&nbsp;<button title="Copy the url for this plot" class="graph_url" id="btn_${anchorname}"><img src="link.png" alt="Copy url"></button>` + '\n';
-
     divtext += details;
     divtext += '    &nbsp;&nbsp;<span id="' + clickelement + '" class="click_info"></span>\n';
 
@@ -406,7 +374,6 @@ function make_graph_links_html(anchorname) {
 function draw_graph_and_legend(rootgraph) {
 
     const aname = get_anchor_name(rootgraph.fName);
-
     const div_links = 'glinks_' + aname;    
     const divhtml = make_graph_links_html(aname);
 	    
@@ -468,22 +435,15 @@ function draw_graph_and_legend(rootgraph) {
 async function readlist(listfile, reverse=false) {
 
     const text = await fetchfiledata(listfile);
-    
     let returntext = '';
 
     if (!text) {  // file not found
-
         console.log('Error (readlist) - could not read the file '+listfile);
         returntext = false;
-
     } else {
-
         returntext = text.split('\n');    // array of lines,  with '' in last place
-
         if (returntext[returntext.length-1] === '') returntext.pop();
-
         if (reverse) returntext.reverse();
-    
     }
 
     return returntext;
@@ -492,15 +452,11 @@ async function readlist(listfile, reverse=false) {
 
 async function fillmenu(select_id,list,preselect) {
 
-    let x = document.getElementById(select_id);
-
-    // remove existing list
-    for (let i = x.options.length-1 ; i>=0; i-- ) {           
-        x.options.remove(i);
-    }
+    const x = document.getElementById(select_id);
+    
+    x.options.length = 0;  // clear list
 
     for (let i=0; i<list.length; i++) {
-
          let c = document.createElement("option");
          c.text = list[i];
          x.options.add(c);
@@ -566,16 +522,9 @@ function UserHandler(info, divname, clickelement) {
         }
 
         if (plotname) {
-
-	    let ver = `mon_ver${Version}`;
-
-            if (Version[0] == "R") {
-                const rest = Version[4];
-		ver = `recon_ver0${rest}`;
-            }
-
-	    const ploturl = `https://halldweb.jlab.org/work/halld2/data_monitoring/${RunPeriod}/${ver}/Run${run_6digits}/${plotname}.png`;
-		
+	    
+	    const ver = Version[0] == "R" ? `recon_ver0${Version[4]}` : `mon_ver${Version}`;	    
+	    const ploturl = `https://halldweb.jlab.org/work/halld2/data_monitoring/${RunPeriod}/${ver}/Run${run_6digits}/${plotname}.png`;	
             linktext += `&nbsp;&nbsp;<a href=${ploturl}>Monitoring histogram (${run})</a>`;
         }    
     }
@@ -693,9 +642,7 @@ reload.addEventListener('click', function () {
 function make_url_without_graph(){
 
     let new_url = document.URL.split("#")[0];
-
     new_url = new_url.split("?")[0] + `?RunPeriod=${RunPeriod}&Version=${Version}&Page=${Page}`;
-
     return new_url;
 }
 
@@ -711,8 +658,7 @@ document.addEventListener('click', (event) => {
 
             if (clicked_graph) {
       
-                const plain_url = make_url_without_graph();
-                let this_url = plain_url + `#${clicked_graph}`;
+                const this_url = make_url_without_graph() + `#${clicked_graph}`;
 
                 console.log(this_url);
 

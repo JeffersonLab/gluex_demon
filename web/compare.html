@@ -3,60 +3,55 @@
  
 <head>
     <title>GlueX detector calibration monitoring</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <script src="compare.js" type="module"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="canonical" href="https://getbootstrap.com/docs/5.3/examples/sidebars/">
     <link rel="icon" type="image/x-icon" href="favicon.ico">  
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <script src="https://code.jquery.com/ui/1.13.1/jquery-ui.min.js"
-        integrity="sha256-eTyxS0rkjpLEo16uXTS0uVCS4815lc40K2iVpWDvdSY=" crossorigin="anonymous"></script>
-    <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
-    <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
-    <script src="https://root.cern/js/latest/build/jsroot.js"></script>
-    <script src="https://root.cern/js/latest/scripts/JSRoot.core.js"></script>
-    <script src="https://root.cern/js/latest/scripts/JSRoot.core.min.js"></script>
     <style>
-        body {margin:1em 5em 1em 5em;}  
-        h1 {font-size: 150%;}
-        #selectors {margin-top: 1em; margin-bottom: 1em;}
-        #titles {}
-        #titles2 {margin-top: 1em; margin-bottom: 2em;}
-        #links span {margin-right: 0.5em;}
-        #under-dev {margin-top:10px;}
-        #under-dev hr {border: 2px solid #505050;}
-        .red {color:red;}
-        .graphpanel {width:1200px; height:400px; margin-top: 10px;}
-        .legendpanel {width:1200px; height:800px; margin-top: 20px; }
+    body {margin:0 2rem 1rem 2rem;font-family:-apple-system,Roboto,"Helvetica Neue",Arial,sans-serif; font-size:1rem;font-weight:400;line-height:1.5;color:#212529;text-align:left;background-color:white}
 
-        .xxxxroot_canvas {padding-top: 400px; preserveAspectRatio="true";}
+    #page_top img {margin: 0 5px 10px 0; vertical-align:middle;}
+    #page_info {font-size:0.9rem; margin-bottom:10px;}
+    #problems {margin-top: 0; margin-bottom: 0; font-size:1.5rem; color:#ff3131;}
+    #links span {margin-right: 0.5rem;}
+    #csv1 a, #github a {margin-right:1rem;}
+    #selectors,#titles {margin-top: 1rem; margin-bottom: 1rem;}	
+
+
+    .graphpanel {width:1200px; height:400px; margin-top: 10px;}
+    .red {color:#ff3131;}    
+    a {color: #007bff; text-decoration: none;}
+
+    h1 {font-size: 2rem; font-weight:500; line-height: 1.2; margin:0;}
+    hr {margin:0; border:0; border-top: 1px solid lightgrey;}
     </style>
+
 </head>
 
 
 <body>
 
-	<div id="top" class="red"><img src="demon.png" alt="demon" width="32px" height="32px" style="margin: 0 5px 10px 0">GlueX Demon is watching Hall D monitoring data. Contact Naomi Jarvis (njarvis) with any questions.
+	<div id="page_top" class="red"><img src="demon.png" alt="demon" width="32px" height="32px" style="margin: 0 5px 10px 0"><a href="./demon.html">GlueX Demon</a> is watching Hall D monitoring data. Contact Naomi Jarvis (njarvis) with any questions.
 	</div>
-	<div>
-	  The purpose of this page is to compare different versions of the same graph. It cannot compare MultiGraphs.
+	<div id="page_info">
+	  This page compares versions of the same graph produced by different monitoring launches.<br>Use the JSROOT menu beneath the plot (grey square, bottom left) to make snapshots.
         </div>
         <div id="links">
             <span id="github"><a href="https://github.com/JeffersonLab/gluex_demon">Github repo</a></span>
-            <span id="rootfile"></span>
-            <span id="csv"></span>
+            <span id="rootfile1"></span>
+            <span id="csv1"></span>
+            <span id="rootfile2"></span>
+            <span id="csv2"></span>
         </div>
 
         <div id ="selectors">
             <hr/>
-            <select name="select_rp" id="select_rp">Loading
-            </select>
-            <select name="select_ver" id="select_ver">
-            </select>
-            <select name="select_ver2" id="select_ver2">
-            </select>
-            <button type="button" id="reload" style="display:none">Go</button>&nbsp;&nbsp;
-            <select name="select_gr" id="select_gr">
-            </select>
+            <select name="select_rp" id="select_rp">Loading data</select>
+            <select name="select_ver" id="select_ver"></select>
+            <select name="select_ver2" id="select_ver2"> </select>
+            <button type="button" id="reload" style="display:none">Go</button>
+	    <select name="select_page" id="select_page"></select>
+            <select name="select_gr" id="select_gr"></select>
+            <button type="button" id="copy_url" style="display:none">Copy the link</button>
             <hr/>
         </div>
 
@@ -72,11 +67,6 @@
             <!--h1 id="loading" style="margin-left:10em;"></h1-->
         </div>
 
-        <div id="legend" class="legendpanel">
-        </div>
-
-
-    <script src="compare.js" type="module"></script>
 
 </body>
 
