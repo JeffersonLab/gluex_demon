@@ -7,9 +7,7 @@ var RP_list = [];  // list of available run periods  in runperiods.txt
 var ver_list = []; // list of available versions     in versions.txt inside RP's subdir
 var ver2_list = []; // list of available versions     in versions.txt inside RP's subdir
 var page_list = []; // list of available pages, in pagenames 
-
-var pagegraph_list = [];  // list of graphs in the root file  /CDC/thing
-var graph_dict = {};
+var graph_list = [];
 
 var graphs_filename = "";
 var graphs_filename2 = "";
@@ -33,8 +31,7 @@ if (RunPeriod == "") {
     RunPeriod = RP_list[0];
     Version = "";
     Version2 = "";
-    Page = "";
-    Graph = "";
+    PageGraph = "";
 } else if (!RP_list.includes(RunPeriod)) {
     const url = document.URL.split("?")[0];
     show_problem(`${RunPeriod} not found! <a href="${url}">Start again</a>`);
@@ -82,27 +79,22 @@ if (Version1 && Version2) {
     show_pagegraph_menus();
     
     console.log('awaiting get list of graphs');
-    await getlistofgraphs(filename, graphs_filename);  // fills pagegraph_list, graph_dict, pagelist 
-
-    // remove bad PageGraph
-    if (PageGraph && !pagegraph_list.includes(PageGraph)) {
-        PageGraph = "";
-    }
+    if (PageGraph) await drawGraphs();
 
     Page = (PageGraph) ? PageGraph.split('/')[0] : "";
     Graph = (PageGraph) ? PageGraph.split('/')[1] : "";
-    
-    if (!Page) Page = page_list[0];
-    
-    await fillmenu("select_page", page_list, Page);
 
-    if (!Graph) Graph = graph_dict[Page][0];
-    
-    await fillmenu("select_gr", graph_dict[Page], Graph);
+    await getlistofpages(graphs_filename);    
+    if (!page_list.includes(Page)) Page = page_list[0];
+    await fillmenu("select_page", page_list, Page);    
+
+    await getlistofgraphs(graphs_filename);  
+    if (!graph_list.includes(Graph)) Graph = graph_list[0];
+    await fillmenu("select_gr", graph_list, Graph);
 
     PageGraph = `${Page}/${Graph}`;
     await drawGraphs();
-    
+
 }
 
 
@@ -147,42 +139,41 @@ async function fetchfiledata(filename) {
 }
 
 
-async function getlistofgraphs(pagenamesfile, graphs_filename) {
+async function getlistofpages(graphs_filename) {
 
     let file = await openFile(graphs_filename);//'./RunPeriod-2023-01/v6/monitoring_graphs.root');
     if (!file) {
-        show_problem(`File not found!`);
+        show_problem(`Could not open `, graphs_filename);
+	return;
     }
 
-    let text = await fetchfiledata(pagenamesfile); // fills global array graph_list
-
-    let lineArr = text.split('\r\n'); // eg CDC - CPP,4,cdc_status,cdc_occ,cdc_missing,cdc_eff
-
-    let npages = lineArr.length-1;  // do not ignore the empty last line
-
-    for (let i=0; i<npages; i++) {
-
-        let thisline = lineArr[i].split(',');
-        let dir = thisline[0];
-	let lastitem = Number(thisline[1]) + 1;
-
-	graph_dict[dir] = [];
-	
-        for (let j = 2; j<=lastitem; j++) {
-            let fullname = dir.concat("/",thisline[j]);
-            try {
-	        const thisg = await file.readObject(fullname);
-                if (thisg._typename == 'TGraph' || thisg._typename == 'TGraphErrors') {
-		    graph_dict[dir].push(thisline[j]);
-                    pagegraph_list.push(fullname);
-		}
-            } catch (error) {
-                console.error(error.message);
-            }	    
-        }
-
-	if (graph_dict[dir].length > 0) page_list.push(dir);
+    page_list = [];
+    for (const x of file.fKeys) {
+        if (x.fClassName == 'TDirectory') page_list.push(x.fName);
     }
+
+}
+
+
+async function getlistofgraphs(graphs_filename) {
+
+    let file = await openFile(graphs_filename);//'./RunPeriod-2023-01/v6/monitoring_graphs.root');
+    if (!file) {
+        show_problem('Could not open ', graphs_filename);
+	return;
+    }
+
+    const dir = await file.readObject(Page);
+    if (!dir) {
+        show_problem('Could not open directory', Page);
+	return;
+    }
+
+    graph_list = [];
+    for (const x of dir.fKeys) {
+        if (x.fClassName == 'TGraph' || x.fClassName == 'TGraphErrors') graph_list.push(x.fName);
+    }
+
 }
 
 
@@ -290,6 +281,7 @@ async function drawGraphs() {
         Object.assign(leg, { fX1NDC: 0.91, fY1NDC: 0.7, fX2NDC: 1.0, fY2NDC: 0.9, fColumnSeparation:0, fMargin:0.15 });
     
         let mg = createTMultiGraph(g1, g2);
+	mg.fTitle = PageGraph;
 
         await draw(divname,mg,'ap:gridx:gridy');
         await draw(divname,leg);
@@ -388,17 +380,18 @@ select_ver2.addEventListener('change',function() {
 select_page.addEventListener('change',async function() {
 
   Page = select_page.value;
+  
+  await getlistofgraphs(graphs_filename);  
+  if (!graph_list.includes(Graph)) Graph = graph_list[0];
+  await fillmenu("select_gr", graph_list, Graph);
 
-  if (!graph_dict[Page].includes(Graph)) Graph = graph_dict[Page][0];
   PageGraph = `${Page}/${Graph}`;  
-
-  await fillmenu("select_gr",graph_dict[Page],Graph);
-
+  await drawGraphs();
 });
 
 
 select_gr.addEventListener('change',async function() {
-
+    
   Graph = select_gr.value;
   PageGraph = `${Page}/${Graph}`;
 
