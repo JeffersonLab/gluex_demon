@@ -126,53 +126,49 @@ def fdc_dedxneg(rootfile) :
 
 def fdc_efficiency(rootfile) :
 
-  titles = ['FDC efficiency status', 'FDC wire efficiency [0.04mm]', 'FDC wire efficiency error [0.04mm]', 'FDC wire efficiency [2mm]', 'FDC wire efficiency error [2mm]', 'FDC wire efficiency [4mm]', 'FDC wire efficiency error [4mm]', 'FDC wire efficiency [5mm]', 'FDC wire efficiency error [5mm]']
-  names = ['eff_status', 'eff0_efficiency_mg', 'eff0_efficiency_mg_err', 'eff2_efficiency_mg', 'eff2_efficiency_mg_err', 'eff4_efficiency_mg', 'eff4_efficiency_mg_err', 'eff5_efficiency_mg', 'eff5_efficiency_mg_err']
-  values = [-1, None, None, None, None, None, None, None, None]
-  png = ['FDC_eff']  
+  titles = ['Average wire efficiency status']
+  names = ['eff_status'] #, 'eff0_efficiency_mg', 'eff0_efficiency_mg_err', 'eff2_efficiency_mg', 'eff2_efficiency_mg_err', 'eff4_efficiency_mg', 'eff4_efficiency_mg_err', 'eff5_efficiency_mg', 'eff5_efficiency_mg_err']
+  values = [-1]
+  png = ['']  
+
+  for x in range(1,25):
+    titles.append('Average wire efficiency [Plane ' + str(x) + ']')
+    names.append('plane_' + str(x) + '_eff_mg')
+    values.append(None)
+    png.append('')
 
   if not rootfile :  # called by init function
     return [names, titles, values, png]
-
-  e0min=0.97
-  e2min=0.96
-  e4min=0.89
-  e5min = 0.85  
-
-  dirname = '/FDC_Efficiency/Offline'
-  histoname1 = 'Expected Hits Vs DOCA'
-  histoname2 = 'Measured Hits Vs DOCA'
-
-  min_counts = 100
-
-  h1 = get_histo(rootfile, dirname, histoname1, min_counts)
-  h2 = get_histo(rootfile, dirname, histoname2, min_counts)
-
-  if (not h1 or not h2) :
-    return values
-
-  else :
-
-    h2.Divide(h1)
-
-    e0 = h2.GetBinContent(1) # // 0.04 mm 
-    e2 = h2.GetBinContent(40) # // 2 mm 
-    e4 = h2.GetBinContent(80) # // 4 mm
-    e5 = h2.GetBinContent(90) # // 5 mm    
     
-    e0err = h2.GetBinError(1)
-    e2err = h2.GetBinError(40)
-    e4err = h2.GetBinError(80)
-    e5err = h2.GetBinError(90)
-    
-    status = 1
+  dirname = '/FDC_Efficiency/FDC_View'
 
-    if e0 < e0min or e2 < e2min or e4 < e4min or e5 < e5min:
+  status = 1
+
+  min_counts = 0
+  
+  for x in range(1,25):
+    
+    histoname1 = 'fdc_wire_expected_cell[' + str(x) + ']'
+    histoname2 = 'fdc_wire_measured_cell[' + str(x) + ']'
+
+    h1 = get_histo(rootfile, dirname, histoname1, min_counts)
+    h2 = get_histo(rootfile, dirname, histoname2, min_counts)    
+    
+    if (not h1 or not h2) :   
+        continue
+
+    h2.Divide(h1)  
+
+    eff = h2.Integral()/h2.GetNbinsX()
+
+    values[x] = float('%.3f'%(eff))
+    
+    if eff < 0.8:
       status = 0
 
-    values = [status, float('%.2f'%(e0)), float('%.3f'%(e0err)),float('%.2f'%(e2)), float('%.3f'%(e2err)), float('%.2f'%(e4)), float('%.3f'%(e4err)), float('%.2f'%(e5)), float('%.3f'%(e5err))]
-
-    return values
+  values[0] = status    
+      
+  return values
 
 
 
