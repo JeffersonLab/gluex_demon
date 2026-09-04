@@ -76,20 +76,22 @@ def pi0_mass(rootfile, llim=130, ulim=140) :
 def fitmasshisto(h) :
 
   h.GetXaxis().SetRangeUser(0.08, 0.18)
-  max = h.GetMaximum()
-
+  height = h.GetMaximum()
+  mean = h.GetBinCenter(h.GetMaximumBin())
+  rms = h.GetRMS()
+  
   fitfunc = TF1("fitfunc", "gaus(0)+expo(3)", 0.09, 0.17)
 
   histoname = h.GetName()
   
   if "ECAL_ECAL" in histoname:
-    fitfunc.SetParameters(max, 0.125, 0.004, 2, -10, 0)
+    fitfunc.SetParameters(height, mean, rms, 2, -10, 0)
     
   elif "FCAL_FCAL" in histoname:
-    fitfunc.SetParameters(max, 0.135, 0.008, 2, -10, 0)
+    fitfunc.SetParameters(height, mean, rms, 2, -10, 0)
     
   else: #BCAL combos
-    fitfunc.SetParameters(max, 0.135, 0.01, 2, -10, 0)
+    fitfunc.SetParameters(height, mean, rms, 2, -10, 0)
 
 
   fitresult = h.Fit(fitfunc,"SQ0");
