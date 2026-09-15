@@ -77,9 +77,9 @@ def pi0_mass(rootfile, llim=130, ulim=140) :
 def fitmasshisto(h) :
 
   h.GetXaxis().SetRangeUser(0.08, 0.18)
+  
   height = h.GetMaximum()
   mean = h.GetBinCenter(h.GetMaximumBin())
-  rms = h.GetRMS()
   
   fitfunc = TF1("fitfunc", "gaus(0)+expo(3)", 0.09, 0.17)
 
@@ -93,12 +93,6 @@ def fitmasshisto(h) :
     
   else: #BCAL combos
     fitfunc.SetParameters(height, mean, 8e-3, 2, 2, 5)
-
-
-  fitfunc.SetParLimits(0, 1e-3, height*10)
-  fitfunc.SetParLimits(1, 0.08, 0.18)  
-  fitfunc.SetParLimits(2, 0.002, 0.12)
-
   
   fitresult = h.Fit(fitfunc,"RSQ0")
 
