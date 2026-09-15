@@ -39,7 +39,7 @@ def pi0_mass(rootfile, llim=130, ulim=140) :
 
   dirname = '/FCAL2_invmass/'          # directory containing that histogram
 
-  min_counts = 1000
+  min_counts = 300
 
   histonames = ['h_2gamma_ECAL_ECAL', 'h_2gamma_FCAL_FCAL', 'h_2gamma_BCAL_BCAL']
 
@@ -50,6 +50,7 @@ def pi0_mass(rootfile, llim=130, ulim=140) :
     
     histoname = histonames[i]
     h = get_histo(rootfile, dirname, histoname, min_counts)
+    
     j = 3*i  + 1
     
     if h:
@@ -85,20 +86,25 @@ def fitmasshisto(h) :
   histoname = h.GetName()
   
   if "ECAL_ECAL" in histoname:
-    fitfunc.SetParameters(height, mean, rms, 2, -10, 0)
+    fitfunc.SetParameters(height, mean, 4e-3, 2, 5, -20)
     
   elif "FCAL_FCAL" in histoname:
-    fitfunc.SetParameters(height, mean, rms, 2, -10, 0)
+    fitfunc.SetParameters(height, mean, 6e-3, 2, 2, -5)
     
   else: #BCAL combos
-    fitfunc.SetParameters(height, mean, rms, 2, -10, 0)
+    fitfunc.SetParameters(height, mean, 8e-3, 2, 2, 5)
 
 
-  fitresult = h.Fit(fitfunc,"SQ0");
+  fitfunc.SetParLimits(0, 1e-3, height*10)
+  fitfunc.SetParLimits(1, 0.08, 0.18)  
+  fitfunc.SetParLimits(2, 0.002, 0.12)
+
   
+  fitresult = h.Fit(fitfunc,"RSQ0")
+
   if int(fitresult) == 0 :
     mean = 1000 * fitresult.Parameter(1)
-    width = 1000 * fitresult.Parameter(2)
+    width = 1000 * abs(fitresult.Parameter(2))
     widthovermean = 100 * width/mean
 
     mean = float('%.1f'%mean)    
@@ -113,7 +119,6 @@ def fitmasshisto(h) :
 
 
 
-
 '''
 # code to test the module standalone
 import os
@@ -125,3 +130,4 @@ for histofile in histofilelist:
   values = pi0_mass(rootfile)
   print(values)
 '''
+
