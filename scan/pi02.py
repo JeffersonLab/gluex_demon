@@ -19,9 +19,9 @@ def declare_functions() :
 
 def pi0_mass(rootfile, llim=130, ulim=140) :
 
-  names = ['pi0_status', 'ECAL status', 'ECAL', 'ECAL_err', 'ECAL_sigmaoverM']
-  names.extend(['FCAL status', 'FCAL', 'FCAL_err', 'FCAL_sigmaoverM'])
-  names.extend(['BCAL status', 'BCAL', 'BCAL_err', 'BCAL_sigmaoverM'])
+  names = ['pi0_status', 'ECAL_status', 'ECAL', 'ECAL_err', 'ECAL_sigmaoverM']
+  names.extend(['FCAL_status', 'FCAL', 'FCAL_err', 'FCAL_sigmaoverM'])
+  names.extend(['BCAL_status', 'BCAL', 'BCAL_err', 'BCAL_sigmaoverM'])
 
   
   titles = ['diphoton mass status', 'ECAL status', 'ECAL diphoton mass (MeV)', 'ECAL diphoton width', 'ECAL diphoton #sigma/M (%)']
