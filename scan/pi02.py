@@ -19,14 +19,14 @@ def declare_functions() :
 
 def pi0_mass(rootfile, llim=130, ulim=140) :
 
-  names = ['pi0_status', 'ECAL', 'ECAL_err', 'ECAL_sigmaoverM']
-  names.extend(['FCAL', 'FCAL_err', 'FCAL_sigmaoverM'])
-  names.extend(['BCAL', 'BCAL_err', 'BCAL_sigmaoverM'])
+  names = ['pi0_status', 'ECAL status', 'ECAL', 'ECAL_err', 'ECAL_sigmaoverM']
+  names.extend(['FCAL status', 'FCAL', 'FCAL_err', 'FCAL_sigmaoverM'])
+  names.extend(['BCAL status', 'BCAL', 'BCAL_err', 'BCAL_sigmaoverM'])
 
   
-  titles = ['diphoton mass status', 'ECAL diphoton mass (MeV)', 'ECAL diphoton width', 'ECAL diphoton #sigma/M (%)']
-  titles.extend(['FCAL diphoton mass (MeV)', 'FCAL diphoton width', 'FCAL diphoton #sigma/M (%)'])
-  titles.extend(['BCAL diphoton mass (MeV)', 'BCAL diphoton width', 'BCAL diphoton #sigma/M (%)'])
+  titles = ['diphoton mass status', 'ECAL status', 'ECAL diphoton mass (MeV)', 'ECAL diphoton width', 'ECAL diphoton #sigma/M (%)']
+  titles.extend(['FCAL status', 'FCAL diphoton mass (MeV)', 'FCAL diphoton width', 'FCAL diphoton #sigma/M (%)'])
+  titles.extend(['BCAL status', 'BCAL diphoton mass (MeV)', 'BCAL diphoton width', 'BCAL diphoton #sigma/M (%)'])
 
   values = default_values(names)
   png = []
@@ -51,19 +51,25 @@ def pi0_mass(rootfile, llim=130, ulim=140) :
     histoname = histonames[i]
     h = get_histo(rootfile, dirname, histoname, min_counts)
     
-    j = 3*i  + 1
+    j = 4*i  + 1
     
     if h:
-      values[j],values[j+1],values[j+2] = fitmasshisto(h)
+      values[j+1],values[j+2],values[j+3] = fitmasshisto(h)
 
-      if values[j] == None:
-        if status == 1:
+      values[j] = 1   # status for this calorimeter
+      
+      if values[j+1] == None:
+        values[j] = -1
+        
+        if status == 1:   # overall status
           status = -1
+
       elif values[j] < llim or values[j] > ulim :
         status = 0
+        values[j] = 0
       
     else :
-      values[j],values[j+1],values[j+2] = [None, None, None]
+      values[j],values[j+1],values[j+2], values[j+3] = [None, None, None, None]
 
       if status == 1:
         status = -1
